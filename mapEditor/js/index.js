@@ -14,7 +14,7 @@ grid.create();
 const dlButton = document.getElementById('dlMapBtn');
 
 dlButton.addEventListener('click', () => {
-    let rndmName = Date.now() + Math.random();
+    let rndmName = 'map_' + Date.now() + Math.random();
     let map = grid.getMap();
 
     mapDownloader.downloadMap(map, rndmName);

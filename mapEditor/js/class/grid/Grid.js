@@ -105,8 +105,8 @@ export class Grid {
     }
 
     getMap() {
-        let nMap = this.normalize();
-        let debugBlocks = this.debugBlocks(nMap);
+        const nMap = this.normalize();
+        const debugBlocks = this.debugBlocks(nMap);
 
         return { width: this.gridWidth, height: this.gridHeight, coords: nMap, debugColliders: debugBlocks };
     }
@@ -222,7 +222,6 @@ export class Grid {
         }
 
         // adds map limits;
-
         stacked.push(
             { x: 0, y: 0, w: 1, h: this.canvas.width }, //bottom
             { x: 0, y: this.canvas.height, w: this.canvas.width, h: 1 }, //top
@@ -230,6 +229,7 @@ export class Grid {
             { x: this.canvas.width, y: 0, w: 1, h: this.canvas.height } //left
         )
 
+        // removes duplicate because the algo sucks;
         const uniq = new Set(stacked.map(e => JSON.stringify(e)));
         const res = Array.from(uniq).map(e => JSON.parse(e));
 

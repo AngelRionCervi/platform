@@ -65,7 +65,7 @@ Promise.all([spritesFetch, fpsProfile]).then((promiseObjs) => { //waits for all 
     });
 
     gameCanvas.addEventListener('mousedown', () => {
-       
+
     });
 
     document.addEventListener('keydown', (evt) => {
@@ -85,11 +85,12 @@ Promise.all([spritesFetch, fpsProfile]).then((promiseObjs) => { //waits for all 
             jump = keyboard.getSpaceBar();
         }
     });
-    
+
     function render() {
-        mapManager.renderMap(map, 0, 0);
-        
         player.update(direction, jump);
+        const playerPos = { x: player.x, y: player.y, width: player.width, height: player.height, jumping: player.jumping, vx: player.vx, vy: player.vy };
+        mapManager.renderMap(playerPos, map, 0, 0);
+        player.draw(mapManager.playerLinc, mapManager.playerRinc);
     }
 
     setInterval(() => {

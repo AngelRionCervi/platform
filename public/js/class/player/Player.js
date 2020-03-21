@@ -4,8 +4,8 @@ export class Player {
         this.collision = collision;
         this.width = 24;
         this.height = 24;
-        this.x = 200;
-        this.y = 200;
+        this.x = 256;
+        this.y = 0;
         this.xAccel = 0.3;
         this.yAccel = 0.3;
         this.speed = 1;
@@ -49,22 +49,28 @@ export class Player {
         }
 
         this.vy += this.gravity;
-
         this.x += this.vx;
         this.y += this.vy;
         this.vx *= this.friction;
         this.vy *= this.friction;
 
-        this.mapCollHandler(isColl);
 
-        this.drawingTools.rect(this.x, this.y, this.width, this.height, 0, 0, 0, 0, 0, "red");
+        this.mapCollHandler(isColl);
+    }
+
+
+    draw(lInc, rInc) {
+        let inc = 0;
+        if (lInc) inc = lInc;
+        if (rInc) inc = rInc;
+        this.drawingTools.rect(256 + inc, 600-64-this.width, this.width, this.height, 0, 0, 0, 0, 0, "red");
+        
     }
 
 
     mapCollHandler(isColl) {
         isColl.forEach((coll) => {
             if (coll.type === 'left') {
-                console.log((coll.amount + this.vx))
                 this.x -= (coll.amount + this.vx);
             } 
             else if (coll.type === 'right') {
