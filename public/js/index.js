@@ -88,8 +88,8 @@ Promise.all([spritesFetch, fpsProfile]).then((promiseObjs) => { //waits for all 
 
     function render() {
         player.update(direction, jump);
-        const playerPos = { x: player.x, y: player.y, width: player.width, height: player.height, jumping: player.jumping, vx: player.vx, vy: player.vy };
-        mapManager.renderMap(playerPos, map, 0, 0);
+        const playerPos = { x: player.x, y: player.y, width: player.width, height: player.height, jumping: player.jumping, vx: player.vx, vy: player.vy ,xOffset: player.xOffset, direction: direction};
+        mapManager.renderMap(playerPos, map, 0, 0, player.xOffset);
         player.draw(mapManager.playerLinc, mapManager.playerRinc);
     }
 

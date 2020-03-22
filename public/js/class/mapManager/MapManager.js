@@ -16,7 +16,7 @@ export class MapManager {
         this.rYstart = 0;
         this.playerRinc = 0;
         this.playerLinc = 0;
-        this.map = {"width":2624,"height":768,"coords":[{"x":0,"y":384,"w":64,"h":320},{"x":2560,"y":384,"w":64,"h":320},{"x":0,"y":704,"w":2624,"h":64},{"x":0,"y":0,"w":1,"h":2624},{"x":0,"y":768,"w":2624,"h":1},{"x":0,"y":0,"w":2624,"h":1},{"x":2624,"y":0,"w":1,"h":768}],"debugColliders":[]};
+        this.map = {"width":1664,"height":768,"coords":[{"x":0,"y":384,"w":64,"h":320},{"x":768,"y":576,"w":64,"h":128},{"x":1600,"y":384,"w":64,"h":320},{"x":0,"y":704,"w":1664,"h":64},{"x":1280,"y":576,"w":64,"h":64},{"x":256,"y":640,"w":64,"h":64},{"x":512,"y":640,"w":64,"h":64},{"x":1216,"y":640,"w":128,"h":64},{"x":0,"y":0,"w":1,"h":1664},{"x":0,"y":768,"w":1664,"h":1},{"x":0,"y":0,"w":1664,"h":1},{"x":1664,"y":0,"w":1,"h":768}],"debugColliders":[]};
         this.groundTilesNbr = [];
         this.rCamToggle = false;
         this.leftStartOffset = 4;
@@ -26,11 +26,10 @@ export class MapManager {
                 this.groundTilesNbr.push(this.rndmInteger(1, this.totalGroundType));
             }
         }
-
         this.groundTilesNbr.push(this.rndmInteger(1, this.totalGroundType)) // we actually need 1 more;
     }
 
-    renderMap(player, map, shakeX, shakeY) {
+    renderMap(player, map, shakeX, shakeY, xOffset) {
         let width = 800;
         let height = 600;
         let blockCoords = map.coords;
@@ -40,11 +39,11 @@ export class MapManager {
 
         this.ctx.imageSmoothingEnabled = false;
 
-        let endSceneX = (player.x - 256 + width - this.spriteSize) - this.map.width;
-        let endSceneY = (player.y + height - this.spriteSize) - this.map.height;
+        let endSceneX = (player.x - xOffset + width) - this.map.width;
+        //let endSceneY = (player.y + height - this.spriteSize) - this.map.height;
 
         if (endSceneX < 0) {
-            this.rXstart = player.x - 256;
+            this.rXstart = player.x - xOffset;
         } else {
             this.playerLinc = 0;
             this.playerRinc = endSceneX;
@@ -55,14 +54,8 @@ export class MapManager {
             this.playerLinc = this.rXstart;
             this.rXstart = 0;
         } 
-
         
-
-        if (endSceneY < 0 ) {
-            this.rYstart = player.y;
-        } else {
-            
-        }
+        this.rYstart = player.y - (height - player.height - this.spriteSize);
 
        
         let gIndex = 0;
@@ -76,7 +69,7 @@ export class MapManager {
         blockCoords.forEach(v => {
             if (v.w > 1 && v.h > 1) {
                 for (let i = v.x - this.rXstart; i < v.x - this.rXstart + v.w; i += this.spriteSize) {
-                    for (let j = v.y - this.rYstart + this.spriteSize ; j < v.y - this.rYstart + this.spriteSize + v.h; j += this.spriteSize) {
+                    for (let j = v.y - this.rYstart; j < v.y - this.rYstart + v.h; j += this.spriteSize) {
                         this.drawingTools.drawSprite('wall', i + shakeX, j + shakeY);
                     }
                 }
