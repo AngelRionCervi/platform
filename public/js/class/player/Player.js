@@ -1,5 +1,5 @@
 export class Player {
-    constructor(drawingTools, collision) {
+    constructor(drawingTools, collision, viewport) {
         this.drawingTools = drawingTools;
         this.collision = collision;
         this.width = 24;
@@ -16,12 +16,17 @@ export class Player {
         this.jumping = false;
         this.gravity = 0.2;
         this.inAir = false;
-        this.jumpVel = 50;
-        this.xBaseOffset = 800 * 33 / 100;
-        this.xMaxOffset = 800 * 66 / 100;
-        this.offsetShiftAmount = 2;
-        this.xOffset = 256;
+        this.jumpVel = 40;
         this.lastXdir;
+        this.viewportWidth = viewport.w;
+        this.viewportHeight = viewport.h;
+        this.xOffset = this.viewportWidth * 33 / 100;
+        this.xBaseOffset = this.viewportWidth * 33 / 100;
+        this.xMaxOffset = this.viewportWidth * 66 / 100;
+        this.yOffset = this.viewportHeight * 33 / 100;
+        this.yBaseOffset = this.viewportHeight * 33 / 100;
+        this.yMaxOffset = this.viewportHeight * 80 / 100;
+        this.offsetShiftAmount = 2; // in px
         this.centerX = () => this.x + this.width / 2;
         this.centerY = () => this.y + this.height / 2;
     }
@@ -59,7 +64,7 @@ export class Player {
             }
         }
 
-        console.log(this.xOffset);
+        //console.log(this.xOffset);
         this.vy += this.gravity;
         this.x += this.vx;
         this.y += this.vy;
@@ -72,11 +77,11 @@ export class Player {
     }
 
 
-    draw(lInc, rInc) {
+    draw(lInc, rInc, yInc) {
         let inc = 0;
         if (lInc) inc = lInc;
         if (rInc) inc = rInc;
-        this.drawingTools.rect(this.xOffset + inc, 600 - 64 - this.width, this.width, this.height, 0, 0, 0, 0, 0, "red");
+        this.drawingTools.rect(this.xOffset + inc, this.viewportHeight - this.yOffset - this.height + yInc, this.width, this.height, 0, 0, 0, 0, 0, "red");
 
     }
 

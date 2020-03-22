@@ -1,7 +1,8 @@
 const gameCanvas = document.getElementById('gameCanvas');
 const ctx = gameCanvas.getContext('2d');
-const posPingRate = 1000 / 10;
-const showFPS = true;
+const framerate = 1000 / 144;
+const viewport = { w: 1000, h: 600 };
+
 
 
 import { DrawingTools } from "/public/js/class/drawingTools/DrawingTools.js";
@@ -13,9 +14,8 @@ import { CollisionDetector } from "/public/js/class/collision/CollisionDetector.
 
 
 let sprites;
-let perfProfile;
 
-const fpsProfile = getFPS();
+
 const spritesFetch = new Promise((resolve, reject) => {
     fetch("/public/assets/sprites.json")
         .then(response => response.json())
@@ -29,39 +29,26 @@ const spritesFetch = new Promise((resolve, reject) => {
         });
 })
 
-Promise.all([spritesFetch, fpsProfile]).then((promiseObjs) => { //waits for all async fetch
+Promise.all([spritesFetch]).then((promiseObjs) => { //waits for all async fetch
 
-    promiseObjs.forEach((obj) => {
-        if (obj.hasOwnProperty("fps")) {
-            perfProfile = obj.fps > 100 ? "high" : "normal";
-        }
-    })
 
     let drawingTools = new DrawingTools(gameCanvas, ctx, sprites);
-    let mapManager = new MapManager(gameCanvas, ctx, drawingTools, rndmInteger);
+    let mapManager = new MapManager(gameCanvas, ctx, drawingTools, viewport);
     let map = mapManager.getMap();
     let collisionDetector = new CollisionDetector(map)
-    let player = new Player(drawingTools, collisionDetector);
+    let player = new Player(drawingTools, collisionDetector, viewport);
     let mouse = new Mouse(gameCanvas);
     let keyboard = new Keyboard(gameCanvas);
-    let curPos = null;
 
-
-
-    let ghostPlayers = [];
 
     let direction = {};
-    let playerShots = [];
-    let explosions = [];
-    let lastRun;
-    let playerAngle;
     let screenShake = false;
 
     let lastKey = { type: "", key: "" };
     let jump = false;
 
     gameCanvas.addEventListener('mousemove', (evt) => {
-        curPos = mouse.getMousePos(evt);
+        //curPos = mouse.getMousePos(evt);
     });
 
     gameCanvas.addEventListener('mousedown', () => {
@@ -87,14 +74,16 @@ Promise.all([spritesFetch, fpsProfile]).then((promiseObjs) => { //waits for all 
     });
 
     function render() {
+        ctx.fillRect(0, 0, viewport.w, viewport.h)
         player.update(direction, jump);
         const playerPos = { x: player.x, y: player.y, width: player.width, height: player.height, jumping: player.jumping, vx: player.vx, vy: player.vy ,xOffset: player.xOffset, direction: direction};
-        mapManager.renderMap(playerPos, map, 0, 0, player.xOffset);
-        player.draw(mapManager.playerLinc, mapManager.playerRinc);
+        
+        mapManager.renderMap(playerPos, map, 0, 0, player.xOffset, player.yOffset);
+        player.draw(mapManager.playerLinc, mapManager.playerRinc, mapManager.playerYinc);
     }
 
     setInterval(() => {
         render();
-    }, 1000 / 144)
+    }, framerate)
 
 })
