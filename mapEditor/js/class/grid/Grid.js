@@ -4,7 +4,7 @@ export class Grid {
         this.ctx = ctx;
         this.gridWidth = 1280;
         this.gridHeight = 768;
-        this.blockSize = 64;
+        this.blockSize = 32;
         this.gridCoords;
         this.lineWidth = 1;
         this.colliderW = 3;
@@ -69,19 +69,20 @@ export class Grid {
         return { cell: targetCell, x: roundX, y: roundY };
     }
 
-    fillCellByCursor(cursorPos) {
+    addCellByCursor(cursorPos) {
         let obj = this.getCellByCursor(cursorPos);
-        
-        obj.cell.block = true;
-
-        this.fillCell(obj.x, obj.y);
+        if (!obj.cell.block) {
+            obj.cell.block = true;
+            this.fillCell(obj.x, obj.y);
+        }
     }
 
     removeCellByCursor(cursorPos) {
         let obj = this.getCellByCursor(cursorPos);
-        
-        obj.cell.block = false;
-        this.create(this.gridCoords);
+        if (obj.cell.block) {
+            obj.cell.block = false;
+            this.create(this.gridCoords);
+        }
     }
 
     fillCell(x, y) {
@@ -101,6 +102,18 @@ export class Grid {
     addRow() {
         const prevCoords = JSON.parse(JSON.stringify(this.gridCoords));
         this.gridHeight += this.blockSize;
+        this.create(prevCoords);
+    }
+
+    removeCol() {
+        const prevCoords = JSON.parse(JSON.stringify(this.gridCoords));
+        this.gridWidth -= this.blockSize;
+        this.create(prevCoords);
+    }
+
+    removeRow() {
+        const prevCoords = JSON.parse(JSON.stringify(this.gridCoords));
+        this.gridHeight -= this.blockSize;
         this.create(prevCoords);
     }
 
