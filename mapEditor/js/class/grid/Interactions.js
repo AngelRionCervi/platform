@@ -9,21 +9,34 @@ export class Interactions {
         this.isErasing = false;
         this.emitter = new Emitter();
 
-        this.elButtons = {
-            addCol: document.getElementById('add_col'),
-            addCol: document.getElementById('add_row'),
-            addCol: document.getElementById('remove_col'),
-            addCol: document.getElementById('remove_row'),
-            dlMap: document.getElementById('dlMapBtn')
-        }
+        this.elButtons = [
+            { name: 'addCol', el: document.getElementById('add_col_btn'), ev: "add_col" },
+            { name: 'addRow', el: document.getElementById('add_row_btn'), ev: "add_row" },
+            { name: 'removeCol', el: document.getElementById('remove_col_btn'), ev: "remove_col" },
+            { name: 'removeRow', el: document.getElementById('remove_row_btn'), ev: "remove_row" },
+            { name: 'dlButton', el: document.getElementById('dl_map_btn'), ev: "dl_map" },
+        ]
 
-        this.canvasListen();
+        this.canvasListeners();
+        this.buttonListeners();
     }
 
-    canvasListen() {
+    buttonListeners() {
+
+        this.elButtons.forEach((btn) => {
+            btn.el.addEventListener('click', (evt) => {
+                evt.preventDefault();
+                const cursorPos = mouse.getCursorPos(evt);
+                this.emitter.emit(btn.ev, cursorPos);
+            })
+        })
+    }
+
+    canvasListeners() {
+
         canvas.addEventListener('mousedown', (evt) => {
             evt.preventDefault();
-            let cursorPos = mouse.getCursorPos(evt);
+            const cursorPos = mouse.getCursorPos(evt);
             
             switch(evt.button) {
                 case 0:

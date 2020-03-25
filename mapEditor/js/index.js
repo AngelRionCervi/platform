@@ -8,8 +8,8 @@ import { MapDownloader } from "/js/class/download/MapDownloader.js";
 
 const interactions = new Interactions();
 
-let grid = new Grid(canvas, ctx);
-let mapDownloader = new MapDownloader(canvas);
+const grid = new Grid(canvas, ctx);
+const mapDownloader = new MapDownloader(canvas);
 
 grid.create();
 
@@ -21,34 +21,30 @@ interactions.emitter.on('remove_cell_by_cursor', (data) => {
     grid.removeCellByCursor(data.detail);
 })
 
-
-
-
-
-// add to Interactions
-const dlButton = document.getElementById('dlMapBtn');
-
-dlButton.addEventListener('click', () => {
-    let rndmName = 'map_' + Date.now() + Math.random();
-    let map = grid.getMap();
-    mapDownloader.downloadMap(map, rndmName);
-})
-
-add_row.addEventListener('click', () => {
+interactions.emitter.on('add_row', () => {
     grid.addRow();
 })
 
-add_col.addEventListener('click', () => {
-    grid.addCol();
-})
-
-remove_row.addEventListener('click', () => {
+interactions.emitter.on('remove_row', () => {
     grid.removeRow();
 })
 
-remove_col.addEventListener('click', () => {
+interactions.emitter.on('add_col', () => {
+    grid.addCol();
+})
+
+interactions.emitter.on('remove_col', () => {
     grid.removeCol();
 })
+
+interactions.emitter.on('dl_map', () => {
+    const rndmName = 'map_' + Date.now() + Math.random();
+    const map = grid.getMap();
+    mapDownloader.downloadMap(map, rndmName);
+})
+
+
+
 
 
 
