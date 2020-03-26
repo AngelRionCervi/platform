@@ -23,9 +23,7 @@ export class Player {
         this.xOffset = this.viewportWidth * 33 / 100;
         this.xBaseOffset = this.viewportWidth * 33 / 100;
         this.xMaxOffset = this.viewportWidth * 66 / 100;
-        this.yOffset = this.viewportHeight * 33 / 100;
-        this.yBaseOffset = this.viewportHeight * 33 / 100;
-        this.yMaxOffset = this.viewportHeight * 80 / 100;
+        this.yOffset = this.viewportHeight * 40 / 100;
         this.offsetShiftAmount = 2; // in px
         this.centerX = () => this.x + this.width / 2;
         this.centerY = () => this.y + this.height / 2;
@@ -78,11 +76,13 @@ export class Player {
 
 
     draw(lInc, rInc, yInc) {
-        let inc = 0;
-        if (lInc) inc = lInc;
-        if (rInc) inc = rInc;
-        this.drawingTools.rect(this.xOffset + inc, this.viewportHeight - this.yOffset - this.height + yInc, this.width, this.height, 0, 0, 0, 0, 0, "red");
+        let xInc = 0;
+        if (lInc) xInc = lInc;
+        if (rInc) xInc = rInc;
 
+        const playerX = this.xOffset + xInc;
+        const playerY = this.viewportHeight - this.yOffset - this.height + yInc;
+        this.drawingTools.rect(playerX, playerY, this.width, this.height, 0, 0, 0, 0, 0, "red");
     }
 
 

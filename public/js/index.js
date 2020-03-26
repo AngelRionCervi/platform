@@ -1,8 +1,7 @@
 const gameCanvas = document.getElementById('gameCanvas');
 const ctx = gameCanvas.getContext('2d');
 const framerate = 1000 / 144;
-const viewport = { w: 1000, h: 600 };
-
+const viewport = { w: 1200, h: 760 };
 
 
 import { DrawingTools } from "/public/js/class/drawingTools/DrawingTools.js";
