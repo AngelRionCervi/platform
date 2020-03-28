@@ -17,19 +17,30 @@ export class Cell {
         this.blockType = type;
     }
 
-    fillCell() {
-        console.log(this.blockType)
-        if (this.blockType === "wall") {
-            this.cellFillStyle = "black"
-        }
-        if (this.blockType === "air") {
-            this.cellFillStyle = "white"
-        }
+    fillCell(asset = null) {
         this.ctx.imageSmoothingEnabled = false;
-        this.ctx.beginPath();
-        this.ctx.rect(this.x + 1, this.y + 1, this.blockSize - 1, this.blockSize - 1);
-        this.ctx.fillStyle = this.cellFillStyle;
-        this.ctx.fill();
-        this.ctx.closePath();
+        if (!asset) {
+            if (this.blockType === "wall") {
+                this.cellFillStyle = "black"
+            }
+            if (this.blockType === "air") {
+                this.cellFillStyle = "white"
+            }
+            this.ctx.beginPath();
+            this.ctx.rect(this.x + 1, this.y + 1, this.blockSize - 1, this.blockSize - 1);
+            this.ctx.fillStyle = this.cellFillStyle;
+            this.ctx.fill();
+            this.ctx.closePath();
+        }
+        else {
+            const image = new Image();
+            image.src = asset.path;
+            image.onload = () => {
+                this.ctx.beginPath();
+                this.ctx.drawImage(image, this.x + 1, this.y + 1);
+                this.ctx.closePath();
+            }
+            
+        }
     }
 }

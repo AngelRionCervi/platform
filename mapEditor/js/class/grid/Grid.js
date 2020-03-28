@@ -1,5 +1,6 @@
 import { Cell } from './Cell.js';
 import { GridNormalization } from './GridNormalization.js';
+import * as plshelp from '../../lib/helpers.js';
 
 const gridNormal = new GridNormalization();
 
@@ -14,8 +15,6 @@ export class Grid {
         this.colliderW = 3;
         this.gridCoords;
         this.cellFillStyle = "black";
-
-        this.roundToPrevMult = (n) => Math.ceil((n - this.blockSize) / this.blockSize) * this.blockSize;
     }
 
     create(prevCoords = []) {
@@ -68,8 +67,8 @@ export class Grid {
     }
 
     getCellByCursor(cursorPos) {
-        let roundX = this.roundToPrevMult(cursorPos.x);
-        let roundY = this.roundToPrevMult(cursorPos.y);
+        let roundX = plshelp.roundToPrevMult(cursorPos.x, this.blockSize);
+        let roundY = plshelp.roundToPrevMult(cursorPos.y, this.blockSize);
 
         let flatCoord = this.gridCoords.flat();
 
@@ -77,10 +76,10 @@ export class Grid {
         return targetCell;
     }
 
-    addCellByCursor(cursorPos) {
+    addCellByCursor(cursorPos, asset) {
         let cell = this.getCellByCursor(cursorPos);
         cell.setBlockType('wall');
-        cell.fillCell();
+        cell.fillCell(asset);
     }
 
     removeCellByCursor(cursorPos) {

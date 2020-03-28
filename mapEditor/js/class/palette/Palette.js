@@ -1,6 +1,5 @@
-import * as _ from '../../lib/helpers.js';
+import * as plshelp from '../../lib/helpers.js';
 import { DomBuilder } from '../../lib/DomBuilder.js';
-import { PaletteInteraction } from './PaletteInteraction.js'
 const dob = new DomBuilder();
 
 export class Palette {
@@ -14,17 +13,12 @@ export class Palette {
         const files = new FormData();
 
         filesObj.detail.forEach((fobj) => {
-            console.log(fobj)
+
             if (!fobj.name.includes('.jpg') && !fobj.name.includes('.png')) {
                 throw new Error('files must be either .png or .jpg');
             }
 
-            const filteredObj = Object.keys(fobj)
-                .filter(key => key !== 'fileObject')
-                .reduce((obj, key) => {
-                    obj[key] = fobj[key];
-                    return obj;
-                }, {});
+            const filteredObj = plshelp.propsRemover(fobj, 'fileObject');
 
             files.append('filesRaw', fobj.fileObject);
             files.append('infos', JSON.stringify(filteredObj));
@@ -43,7 +37,7 @@ export class Palette {
         assets.res.forEach((asset) => {
             const imageNode = dob.createNode('img', 'palette-img');
             imageNode.src = asset.path;
-            const listener = { type: 'click', callback: this.interaction.handlePaletteClick, args: [] }
+            const listener = { type: 'click', callback: this.interaction.handlePaletteClick, args: [this.interaction, asset] }
             const paletteCell = dob.createNode('div', 'palette-cell', null, imageNode, listener);
             paletteContainer.appendChild(paletteCell)
         })

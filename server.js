@@ -3,6 +3,7 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const fileUpload = require('express-fileupload');
 const app = express();
+const shortid = require('shortid');
 
 // enable files upload
 app.use(fileUpload({
@@ -46,11 +47,14 @@ app.post('/assetsUpload', (req, res) => {
         if (upperFoldAndName.charAt(0) !== '/') {
             upperFoldAndName = '/' + upperFoldAndName;
         }
+        
         const serverPath = './userData/me/project1/assets' + upperFoldAndName;
         const getPath = 'http://localhost:5000/userData/me/project1/assets' + upperFoldAndName;
         file.mv(serverPath);
-        assetInfo.path = getPath;
+
+        assetInfo.id = shortid.generate();
         assetInfo.name = file.name;
+        assetInfo.path = getPath;
         assets.push(assetInfo);
     });
 

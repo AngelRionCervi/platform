@@ -5,6 +5,7 @@ export class PaletteInteraction {
     constructor() {
         this.emitter = new Emitter();
         this.dropZone = document.getElementById('palette_drop');
+        this.currentPaletteCell = { id: '' };
     }
 
     watchDrop() {
@@ -22,7 +23,15 @@ export class PaletteInteraction {
         })
     }
 
-    handlePaletteClick(e) {
-        console.log(e)
+    handlePaletteClick(e, _this, asset) {
+        if (asset.id !== _this.currentPaletteCell.id) {
+             _this.currentPaletteCell = asset;
+             _this.emitter.emit('palette_asset_change', asset);
+        }
     }
+
+    getCurrentPaletteCell() {
+        return this.currentPaletteCell;
+    }
+
 }

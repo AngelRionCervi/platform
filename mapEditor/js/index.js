@@ -20,7 +20,9 @@ grid.create();
 paletteInteraction.watchDrop();
 
 gridInteraction.emitter.on('add_cell_by_cursor', (data) => {
-    grid.addCellByCursor(data.detail);
+    const asset = paletteInteraction.getCurrentPaletteCell();
+    console.log(data.detail, asset)
+    grid.addCellByCursor(data.detail, asset);
 })
 
 gridInteraction.emitter.on('remove_cell_by_cursor', (data) => {
@@ -55,6 +57,10 @@ paletteInteraction.emitter.on('palette_assets_received', async (files) => {
     const assets = await palette.loadAssets(files);
     palette.build(assets);
 })
+
+paletteInteraction.emitter.on('palette_asset_change', (asset) => {
+    console.log(asset);
+});
 
 /*
 document.addEventListener('drop', function(e) {
