@@ -1,9 +1,5 @@
 export class MapManager {
     constructor(canvas, ctx, drawingTools, viewport) {
-        this.et = new EventTarget();
-        this.events = {
-            rCamBlock: new CustomEvent('rCamBlock', { detail: { x: 'lol' } }),
-        };
         this.canvas = canvas;
         this.ctx = ctx;
         this.drawingTools = drawingTools;
@@ -74,9 +70,9 @@ export class MapManager {
 
         map.coords.forEach(v => {
             if (v.w > 1 && v.h > 1) {
-                for (let i = v.x - scDrawXstart; i < v.x - scDrawXstart + v.w; i += this.spriteSize) {
-                    for (let j = v.y - scDrawYstart; j < v.y - scDrawYstart + v.h; j += this.spriteSize) {
-                        this.drawingTools.drawSprite('wall', i + shakeX, j + shakeY);
+                for (let i = v.x; i < v.x + v.w; i += this.spriteSize) {
+                    for (let j = v.y; j < v.y + v.h; j += this.spriteSize) {
+                        this.drawingTools.drawSprite('wall', i - scDrawXstart + shakeX, j - scDrawYstart + shakeY);
                     }
                 }
             }

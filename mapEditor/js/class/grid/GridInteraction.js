@@ -1,9 +1,9 @@
-import { Emitter } from "/js/lib/Emitter.js";
-import { Mouse } from "/js/class/mouseHandling/Mouse.js";
+import { Emitter } from "/mapEditor/js/lib/Emitter.js";
+import { Mouse } from "/mapEditor/js/class/mouseHandling/Mouse.js";
 const canvas = document.getElementById('mapEditorCanvas');
 const mouse = new Mouse(canvas);
 
-export class Interactions {
+export class GridInteraction {
     constructor() {
         this.isDrawing = false;
         this.isErasing = false;

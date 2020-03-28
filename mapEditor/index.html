@@ -1,7 +1,28 @@
-<canvas id="mapEditorCanvas" style="border: 1px solid black; border-top: none"></canvas>
-<script type="module" src="js/index.js"></script>
-<button id="dl_map_btn">download json</button>
-<button id="add_row_btn">add row</button>
-<button id="add_col_btn">add col</button>
-<button id="remove_row_btn">remove row</button>
-<button id="remove_col_btn">remove col</button>
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title></title>
+    <link href="/mapEditor/css/main.css" type="text/css" rel="stylesheet">
+    <script defer type="module" src="js/index.js"></script>
+</head>
+
+<body>
+
+    <div class="main-container">
+        <div id="palette_container" class="palette-container">
+            <div id="palette_drop" class="palette-drop">drop assets here</div>
+        </div>
+        <div id="scene_container" class="scene-container">
+            <canvas id="mapEditorCanvas" style="border: 1px solid black; border-top: none"></canvas>
+            <button id="dl_map_btn">download json</button>
+            <button id="add_row_btn">add row</button>
+            <button id="add_col_btn">add col</button>
+            <button id="remove_row_btn">remove row</button>
+            <button id="remove_col_btn">remove col</button>
+        </div>
+    </div>
+
+</body>
+
+</html>
