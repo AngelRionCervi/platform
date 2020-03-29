@@ -4,6 +4,15 @@ const bodyParser = require('body-parser');
 const fileUpload = require('express-fileupload');
 const app = express();
 const shortid = require('shortid');
+const fs = require('fs');
+const { promisify } = require('util')
+
+const readFileAsync = promisify(fs.readFile);
+const readdirAsync = promisify(fs.readdir);
+const writeFileAsync = promisify(fs.writeFile);
+const statAsync = promisify(fs.stat);
+
+const plshelp = require('./backstuff/lib/tools.js');
 
 // enable files upload
 app.use(fileUpload({
@@ -43,11 +52,8 @@ app.post('/assetsUpload', (req, res) => {
     files.forEach((file) => {
         const assetInfo = { path: '', name: '' };
         const fullClientPath = data.find(el => el.name === file.name).fullPath;
-        let upperFoldAndName = fullClientPath.split('/').slice(-2).join('/');
-        if (upperFoldAndName.charAt(0) !== '/') {
-            upperFoldAndName = '/' + upperFoldAndName;
-        }
-        
+        const upperFoldAndName = plshelp.getUpperDirAndName(fullClientPath);
+
         const serverPath = './userData/me/project1/assets' + upperFoldAndName;
         const getPath = 'http://localhost:5000/userData/me/project1/assets' + upperFoldAndName;
         file.mv(serverPath);
@@ -59,6 +65,66 @@ app.post('/assetsUpload', (req, res) => {
     });
 
     res.status(200).send(JSON.stringify({ res: assets }));
+})
+app.get('/getAssets', async (req, res) => {
+
+    try {
+        const filesObj = [];
+
+        const files = await readdirAsync('./userData/me/project1/assets');
+
+        await Promise.all(files.map(async (file) => {
+            const fullPath = './userData/me/project1/assets/' + file;
+            const stat = await statAsync(fullPath);
+
+            if (stat.isDirectory()) {
+                const subFiles = await readdirAsync(fullPath);
+
+                for (const subFile of subFiles) {
+                    const subFullPath = './userData/me/project1/assets/' + file + '/' + subFile;
+                    const subFileStat = await statAsync(subFullPath);
+                    if (subFileStat.isFile()) {
+                        filesObj.push({ id: shortid.generate(), name: file, path: plshelp.getUpperDirAndName(subFullPath) })
+                    }
+                }
+            }
+            else {
+                filesObj.push({ id: shortid.generate(), name: file, path: plshelp.getUpperDirAndName(fullPath) })
+            }
+        }))
+        
+        res.status(200).send(JSON.stringify({ res: filesObj }));
+
+    } catch (err) {
+        res.send(400);
+        throw err;
+    }
+    /*
+    const filesObj = [];
+    fs.readdir('./userData/me/project1/assets', (err, files) => {
+        files.forEach((file) => {
+            const fullPath = './userData/me/project1/assets/' + file;
+            const stat = fs.statSync(fullPath);
+            
+            if (stat.isDirectory()) {
+                fs.readdir(fullPath, (err, subFiles) => {
+                    subFiles.forEach((subFile) => {
+                        const subFullPath = './userData/me/project1/assets/' + file + '/' + subFile;
+                        const subFileStat = fs.statSync(subFullPath);
+                        if (subFileStat.isFile()) {
+                            filesObj.push({ id: shortid.generate(), name: file, path: plshelp.getUpperDirAndName(fullPath) })
+                        }
+                    })
+                })
+            } 
+            else {
+                filesObj.push({ id: shortid.generate(), name: file, path: plshelp.getUpperDirAndName(fullPath) });
+            }
+        })
+        console.log(filesObj);
+    })*/
+
+
 })
 app.listen(5000, () => {
     console.log('Starting server on port 5000');

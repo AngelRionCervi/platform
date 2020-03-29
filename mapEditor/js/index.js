@@ -62,6 +62,14 @@ paletteInteraction.emitter.on('palette_asset_change', (asset) => {
     console.log(asset);
 });
 
+
+fetch('http://localhost:5000/getAssets')
+.then((res) => {
+    return res.json();
+})
+.then((obj) => {
+    console.log(obj);
+})
 /*
 document.addEventListener('drop', function(e) {
     e.stopPropagation()
