@@ -67,8 +67,9 @@ fetch('http://localhost:5000/getAssets')
 .then((res) => {
     return res.json();
 })
-.then((obj) => {
-    console.log(obj);
+.then((assets) => {
+    console.log(assets)
+    palette.build(assets);
 })
 /*
 document.addEventListener('drop', function(e) {

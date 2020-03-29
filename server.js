@@ -52,14 +52,16 @@ app.post('/assetsUpload', (req, res) => {
     files.forEach((file) => {
         const assetInfo = { path: '', name: '' };
         const fullClientPath = data.find(el => el.name === file.name).fullPath;
-        const upperFoldAndName = plshelp.getUpperDirAndName(fullClientPath);
+        const upperFold = plshelp.getUpperDir(fullClientPath);
+        console.log(upperFold, fullClientPath)
 
-        const serverPath = './userData/me/project1/assets' + upperFoldAndName;
-        const getPath = 'http://localhost:5000/userData/me/project1/assets' + upperFoldAndName;
+        const serverPath = './userData/me/project1/assets' + upperFold + '/' + file.name;
+        const getPath = serverPath.substring(1); // remove the '.'
         file.mv(serverPath);
 
         assetInfo.id = shortid.generate();
         assetInfo.name = file.name;
+        assetInfo.folder = upperFold;
         assetInfo.path = getPath;
         assets.push(assetInfo);
     });
@@ -81,15 +83,17 @@ app.get('/getAssets', async (req, res) => {
                 const subFiles = await readdirAsync(fullPath);
 
                 for (const subFile of subFiles) {
-                    const subFullPath = './userData/me/project1/assets/' + file + '/' + subFile;
-                    const subFileStat = await statAsync(subFullPath);
+                    const subFullPath = '/userData/me/project1/assets/' + file + '/' + subFile;
+                    const subFileStat = await statAsync('.' + subFullPath);
                     if (subFileStat.isFile()) {
-                        filesObj.push({ id: shortid.generate(), name: file, path: plshelp.getUpperDirAndName(subFullPath) })
+                        const assetObj = { id: shortid.generate(), name: subFile, folder: plshelp.getUpperDir(subFullPath), path: subFullPath };
+                        filesObj.push(assetObj);
                     }
                 }
             }
             else {
-                filesObj.push({ id: shortid.generate(), name: file, path: plshelp.getUpperDirAndName(fullPath) })
+                const assetObj = { id: shortid.generate(), name: file, folder: plshelp.getUpperDir(fullPath), path: fullPath }
+                filesObj.push(assetObj);
             }
         }))
         
@@ -99,31 +103,6 @@ app.get('/getAssets', async (req, res) => {
         res.send(400);
         throw err;
     }
-    /*
-    const filesObj = [];
-    fs.readdir('./userData/me/project1/assets', (err, files) => {
-        files.forEach((file) => {
-            const fullPath = './userData/me/project1/assets/' + file;
-            const stat = fs.statSync(fullPath);
-            
-            if (stat.isDirectory()) {
-                fs.readdir(fullPath, (err, subFiles) => {
-                    subFiles.forEach((subFile) => {
-                        const subFullPath = './userData/me/project1/assets/' + file + '/' + subFile;
-                        const subFileStat = fs.statSync(subFullPath);
-                        if (subFileStat.isFile()) {
-                            filesObj.push({ id: shortid.generate(), name: file, path: plshelp.getUpperDirAndName(fullPath) })
-                        }
-                    })
-                })
-            } 
-            else {
-                filesObj.push({ id: shortid.generate(), name: file, path: plshelp.getUpperDirAndName(fullPath) });
-            }
-        })
-        console.log(filesObj);
-    })*/
-
 
 })
 app.listen(5000, () => {
