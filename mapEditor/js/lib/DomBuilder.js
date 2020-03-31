@@ -35,7 +35,12 @@ export class DomBuilder {
         if (listener) {
             el.addEventListener(listener.type, (e) => {
                 e.preventDefault();
-                listener.callback(e, ...listener.args);
+                if (listener.hasOwnProperty('event') && !listener.event) {
+                    listener.callback(...listener.args);
+                }
+                else {
+                    listener.callback(e, ...listener.args);
+                }
             })
         }
     

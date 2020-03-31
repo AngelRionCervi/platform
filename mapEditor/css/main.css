@@ -40,3 +40,10 @@
     width: 60%;
 }
 
+.palette-folder {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: blue;
+}
+

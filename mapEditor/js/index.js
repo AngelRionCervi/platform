@@ -55,7 +55,7 @@ gridInteraction.emitter.on('dl_map', () => {
 
 paletteInteraction.emitter.on('palette_assets_received', async (files) => {
     const assets = await palette.loadAssets(files);
-    palette.build(assets);
+    palette.buildFrom(assets, 'assets/');
 })
 
 paletteInteraction.emitter.on('palette_asset_change', (asset) => {
@@ -69,7 +69,7 @@ fetch('http://localhost:5000/getAssets')
 })
 .then((assets) => {
     console.log(assets)
-    palette.build(assets);
+    palette.buildFrom(assets.res, assets.rootDir, assets.fullPath);
 })
 /*
 document.addEventListener('drop', function(e) {

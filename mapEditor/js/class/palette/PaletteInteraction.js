@@ -30,6 +30,10 @@ export class PaletteInteraction {
         }
     }
 
+    handleDirectoryClick(e, _this, directory) {
+        console.log('click on directory ', directory)
+    }
+
     getCurrentPaletteCell() {
         return this.currentPaletteCell;
     }

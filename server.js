@@ -5,14 +5,15 @@ const fileUpload = require('express-fileupload');
 const app = express();
 const shortid = require('shortid');
 const fs = require('fs');
-const { promisify } = require('util')
+const { promisify } = require('util');
 
 const readFileAsync = promisify(fs.readFile);
 const readdirAsync = promisify(fs.readdir);
 const writeFileAsync = promisify(fs.writeFile);
 const statAsync = promisify(fs.stat);
+const tools = require('./backend/lib/tools.js');
 
-const plshelp = require('./backstuff/lib/tools.js');
+const plshelp = require('./backend/lib/tools.js');
 
 // enable files upload
 app.use(fileUpload({
@@ -66,44 +67,13 @@ app.post('/assetsUpload', (req, res) => {
         assets.push(assetInfo);
     });
 
-    res.status(200).send(JSON.stringify({ res: assets }));
+    res.status(200).send(JSON.stringify({ res: assets, rootDir: 'assets/' }));
 })
 app.get('/getAssets', async (req, res) => {
+    const fullPath = './userData/me/project1/assets';
+    const assets = await tools.getDirContent(fullPath);
 
-    try {
-        const filesObj = [];
-
-        const files = await readdirAsync('./userData/me/project1/assets');
-
-        await Promise.all(files.map(async (file) => {
-            const fullPath = './userData/me/project1/assets/' + file;
-            const stat = await statAsync(fullPath);
-
-            if (stat.isDirectory()) {
-                const subFiles = await readdirAsync(fullPath);
-
-                for (const subFile of subFiles) {
-                    const subFullPath = '/userData/me/project1/assets/' + file + '/' + subFile;
-                    const subFileStat = await statAsync('.' + subFullPath);
-                    if (subFileStat.isFile()) {
-                        const assetObj = { id: shortid.generate(), name: subFile, folder: plshelp.getUpperDir(subFullPath), path: subFullPath };
-                        filesObj.push(assetObj);
-                    }
-                }
-            }
-            else {
-                const assetObj = { id: shortid.generate(), name: file, folder: plshelp.getUpperDir(fullPath), path: fullPath }
-                filesObj.push(assetObj);
-            }
-        }))
-        
-        res.status(200).send(JSON.stringify({ res: filesObj }));
-
-    } catch (err) {
-        res.send(400);
-        throw err;
-    }
-
+    res.status(200).send(JSON.stringify({ res: assets, rootDir: 'assets/', fullPath: fullPath }));
 })
 app.listen(5000, () => {
     console.log('Starting server on port 5000');

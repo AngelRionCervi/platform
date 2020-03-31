@@ -10,6 +10,28 @@ Object.filter = function (obj, predicate) {
     return result;
 };
 
+Array.prototype.removeAt = function (index, to) {
+    this.splice(index, to);
+    return this;
+}
+
+String.prototype.indexesOf = function (str) {
+
+    const result = [];
+   
+    if (!str) {
+        return this.split('').map((_, i) => i);
+    }
+ 
+    for (let i = 0; i < this.length; ++i) {
+        if (this.substring(i, i + str.length) == str) {
+            result.push(i);
+        }
+    }
+    
+    return result;
+}
+
 export function propsRemover(object, props = []) {
     return Object.keys(object)
         .filter(key => !props.includes(key))

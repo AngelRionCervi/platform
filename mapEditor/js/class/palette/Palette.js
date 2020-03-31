@@ -5,6 +5,10 @@ const dob = new DomBuilder();
 export class Palette {
     constructor(interaction) {
         this.interaction = interaction;
+        this.currentDir = '/';
+        this.directories = [];
+        this.dirDepth = 0;
+        this.authorizedExensions = ['png', 'jpg'];
     }
 
 
@@ -30,16 +34,38 @@ export class Palette {
     }
 
 
-    build(assets) {
-        const paletteContainer = document.getElementById('palette_container');
-        document.getElementById('palette_drop').style.display = "none";
+    buildFrom(assets, rootDir, fullPath, _this = null) {
 
-        assets.res.forEach((asset) => {
-            const imageNode = dob.createNode('img', 'palette-img');
-            imageNode.src = asset.path;
-            const listener = { type: 'click', callback: this.interaction.handlePaletteClick, args: [this.interaction, asset] }
-            const paletteCell = dob.createNode('div', 'palette-cell', null, imageNode, listener);
-            paletteContainer.appendChild(paletteCell)
+        if (!_this) _this = this;
+
+        const paletteContainer = document.getElementById('palette_container');
+
+        while (paletteContainer.firstElementChild) {
+            paletteContainer.firstElementChild.remove();
+        }
+
+        assets.forEach((asset) => {
+     
+            const relPath = asset.path.slice(asset.path.indexOf(rootDir), asset.path.length).split('/').removeAt(0, 1).join('/');
+            console.log(fullPath + '/' + rootDir + '/' + relPath);
+            
+            if (relPath.includes('/')) {
+                const dirName = relPath.split('/').shift();
+
+                if (!_this.directories.includes(dirName)) {
+                    _this.directories.push(dirName);
+                    const listener = { type: 'click', callback: _this.buildFrom, args: [assets, dirName + '/', fullPath, _this], event: false };
+                    const folder = dob.createNode('div', 'palette-folder', null, null, listener);
+                    paletteContainer.appendChild(folder);
+                }
+            }
+            else if (_this.authorizedExensions.includes(relPath.split('.').pop())) {
+                const imageNode = dob.createNode('img', 'palette-img');
+                imageNode.src = asset.path;
+                const listener = { type: 'click', callback: _this.interaction.handlePaletteClick, args: [_this.interaction, asset] };
+                const paletteCell = dob.createNode('div', 'palette-cell', null, imageNode, listener);
+                paletteContainer.appendChild(paletteCell);
+            }
         })
     }
 
