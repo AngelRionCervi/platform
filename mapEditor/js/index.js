@@ -18,6 +18,7 @@ const mapDownloader = new MapDownloader(canvas);
 
 grid.create();
 paletteInteraction.watchDrop();
+paletteInteraction.watchDirectoryBack();
 
 gridInteraction.emitter.on('add_cell_by_cursor', (data) => {
     const asset = paletteInteraction.getCurrentPaletteCell();
@@ -60,6 +61,12 @@ paletteInteraction.emitter.on('palette_assets_received', async (files) => {
 
 paletteInteraction.emitter.on('palette_asset_change', (asset) => {
     console.log(asset);
+});
+
+paletteInteraction.emitter.on('palette_directory_back', () => {
+    const assets = palette.getAssets();
+    const dirInfo = palette.getDirInfo();
+    palette.buildFrom(assets, dirInfo.prevDir, dirInfo.fullPath, true);
 });
 
 

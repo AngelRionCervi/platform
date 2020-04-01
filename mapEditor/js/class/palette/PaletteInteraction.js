@@ -5,6 +5,7 @@ export class PaletteInteraction {
     constructor() {
         this.emitter = new Emitter();
         this.dropZone = document.getElementById('palette_drop');
+        this.directoryBackButton = document.getElementById('directory_back_button');
         this.currentPaletteCell = { id: '' };
     }
 
@@ -23,9 +24,19 @@ export class PaletteInteraction {
         })
     }
 
+    watchDirectoryBack() {
+        this.directoryBackButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            console.log('hehehe')
+            this.emitter.emit('palette_directory_back');
+        })
+    }
+
     handlePaletteClick(e, _this, asset) {
+        console.log("palette click", asset.id, _this.currentPaletteCell.id)
         if (asset.id !== _this.currentPaletteCell.id) {
              _this.currentPaletteCell = asset;
+             console.log(asset)
              _this.emitter.emit('palette_asset_change', asset);
         }
     }

@@ -7,8 +7,15 @@ export class Palette {
         this.interaction = interaction;
         this.currentDir = '/';
         this.directories = [];
-        this.dirDepth = 0;
         this.authorizedExensions = ['png', 'jpg'];
+        this.assets;
+        this.dirInfo = {
+            prevDir: null,
+            absCurPath: null,
+            curDir: null,
+            fullPath: null,
+            curDepth: null
+        };
     }
 
 
@@ -34,9 +41,37 @@ export class Palette {
     }
 
 
-    buildFrom(assets, rootDir, fullPath, _this = null) {
+    setDirInfo(rootDir, fullPath, back) {
+        if (!this.dirInfo.absCurPath) {
+            fullPath += '/';
+            this.dirInfo.absCurPath = fullPath.slice(0, fullPath.indexOf(rootDir));
+        }
 
-        if (!_this) _this = this;
+        this.dirInfo.prevDir = this.dirInfo.absCurPath.slice(0, -1).split('/').pop() + '/';
+
+        if (back) {
+            const indexAbsDir = this.dirInfo.absCurPath.indexOf(rootDir);
+            const indexDir = rootDir.indexOf('/');
+            this.dirInfo.absCurPath = this.dirInfo.absCurPath.slice(0, indexAbsDir + indexDir) + '/';
+        } else {
+            this.dirInfo.absCurPath += rootDir;
+        }
+        
+
+        if (this.dirInfo.absCurPath.indexOf('assets/') >= this.dirInfo.absCurPath.indexOf(this.dirInfo.prevDir)) {
+            this.dirInfo.prevDir = 'assets/';
+        }
+
+        this.dirInfo.curDir = rootDir;
+        this.dirInfo.fullPath = fullPath;
+    }
+
+
+    buildFrom(assets, rootDir, fullPath, back = null) {
+
+        this.assets = assets;
+
+        this.setDirInfo(rootDir, fullPath, back);
 
         const paletteContainer = document.getElementById('palette_container');
 
@@ -44,29 +79,42 @@ export class Palette {
             paletteContainer.firstElementChild.remove();
         }
 
+        const directoriesList = [];
+
         assets.forEach((asset) => {
-     
+            console.log(asset)
             const relPath = asset.path.slice(asset.path.indexOf(rootDir), asset.path.length).split('/').removeAt(0, 1).join('/');
-            console.log(fullPath + '/' + rootDir + '/' + relPath);
-            
+
             if (relPath.includes('/')) {
                 const dirName = relPath.split('/').shift();
 
-                if (!_this.directories.includes(dirName)) {
-                    _this.directories.push(dirName);
-                    const listener = { type: 'click', callback: _this.buildFrom, args: [assets, dirName + '/', fullPath, _this], event: false };
+                if (!directoriesList.includes(dirName)) {
+                    directoriesList.push(dirName);
+                    const listener = { type: 'click', callback: this.buildFrom.bind(this), args: [assets, dirName + '/', fullPath], event: false };
                     const folder = dob.createNode('div', 'palette-folder', null, null, listener);
                     paletteContainer.appendChild(folder);
                 }
             }
-            else if (_this.authorizedExensions.includes(relPath.split('.').pop())) {
+            else if (this.authorizedExensions.includes(relPath.split('.').pop())) {
                 const imageNode = dob.createNode('img', 'palette-img');
                 imageNode.src = asset.path;
-                const listener = { type: 'click', callback: _this.interaction.handlePaletteClick, args: [_this.interaction, asset] };
+                const listener = { type: 'click', callback: this.interaction.handlePaletteClick, args: [this.interaction, asset] };
                 const paletteCell = dob.createNode('div', 'palette-cell', null, imageNode, listener);
                 paletteContainer.appendChild(paletteCell);
             }
         })
+
+        directoriesList.splice(0, directoriesList.length - 1);
+    }
+
+
+    getDirInfo() {
+        return this.dirInfo;
+    }
+
+
+    getAssets() {
+        return this.assets;
     }
 
 }

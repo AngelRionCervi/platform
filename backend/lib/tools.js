@@ -1,9 +1,11 @@
 const fs = require('fs');
 const { promisify } = require('util');
+const shortid = require('shortid');
 const readFileAsync = promisify(fs.readFile);
 const readdirAsync = promisify(fs.readdir);
 const writeFileAsync = promisify(fs.writeFile);
 const statAsync = promisify(fs.stat);
+
 
 function getUpperDirAndName(fullPath) {
     let upperFoldAndName = fullPath.split('/').slice(-2).join('/');
@@ -25,9 +27,9 @@ function getUpperDir(fullPath) {
 }
 
 
-async function getDirContent(dir, recFileObjs = null) {
+async function getDirContent(dir, recFileObjs = []) {
 
-    const fileObjs = recFileObjs || [];
+    const fileObjs = recFileObjs;
     const files = await readdirAsync(dir);
 
     for (const file of files) {
@@ -48,7 +50,15 @@ async function getDirContent(dir, recFileObjs = null) {
     return fileObjs;
 }
 
+function idfy(arr) {
+    arr.forEach((v) => {
+        v.id = shortid.generate();
+    });
+    return arr;
+}
+
 
 exports.getUpperDirAndName = getUpperDirAndName;
 exports.getUpperDir = getUpperDir;
 exports.getDirContent = getDirContent;
+exports.idfy = idfy;

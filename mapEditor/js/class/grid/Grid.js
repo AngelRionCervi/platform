@@ -11,7 +11,6 @@ export class Grid {
         this.gridWidth = 1280;
         this.gridHeight = 768;
         this.blockSize = 32;
-        this.lineWidth = 0.5;
         this.colliderW = 3;
         this.gridCoords;
         this.cellFillStyle = "black";
@@ -32,14 +31,6 @@ export class Grid {
 
         for (let x = 0; x < this.gridWidth; x += this.blockSize) {
             for (let y = 0; y < this.gridHeight; y += this.blockSize) {
-
-                this.ctx.lineWidth = this.lineWidth;
-
-                this.ctx.moveTo(this.lineWidth + x, this.lineWidth + y);
-                this.ctx.lineTo(this.lineWidth + x + this.blockSize, this.lineWidth + y);
-                this.ctx.lineTo(this.lineWidth + x + this.blockSize, this.lineWidth + y + this.blockSize);
-                this.ctx.strokeStyle = "black";
-                this.ctx.stroke();
 
                 let id = (x + y) / this.blockSize + idStart;
                 let cellObj = new Cell(this.ctx, id, x, y, "air", this.blockSize);

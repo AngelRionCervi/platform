@@ -7,6 +7,7 @@ export class Cell {
         this.blockType = blockType;
         this.blockSize = blockSize;
         this.cellFillStyle = 'white';
+        this.lineWidth = 0.5;
     }
 
     getCoords() {
@@ -19,6 +20,15 @@ export class Cell {
 
     fillCell(asset = null) {
         this.ctx.imageSmoothingEnabled = false;
+
+        this.ctx.beginPath();
+        this.ctx.moveTo(this.lineWidth + this.x, this.lineWidth + this.y);
+        this.ctx.lineTo(this.lineWidth + this.x + this.blockSize, this.lineWidth + this.y);
+        this.ctx.lineTo(this.lineWidth + this.x + this.blockSize, this.lineWidth + this.y + this.blockSize);
+        this.ctx.strokeStyle = "black";
+        this.ctx.stroke();
+        this.ctx.closePath();
+
         if (!asset) {
             if (this.blockType === "wall") {
                 this.cellFillStyle = "black"
@@ -40,7 +50,7 @@ export class Cell {
                 this.ctx.drawImage(image, this.x + 1, this.y + 1);
                 this.ctx.closePath();
             }
-            
+
         }
     }
 }

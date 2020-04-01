@@ -71,8 +71,8 @@ app.post('/assetsUpload', (req, res) => {
 })
 app.get('/getAssets', async (req, res) => {
     const fullPath = './userData/me/project1/assets';
-    const assets = await tools.getDirContent(fullPath);
-
+    const assets = tools.idfy(await tools.getDirContent(fullPath));
+    console.log(assets)
     res.status(200).send(JSON.stringify({ res: assets, rootDir: 'assets/', fullPath: fullPath }));
 })
 app.listen(5000, () => {
