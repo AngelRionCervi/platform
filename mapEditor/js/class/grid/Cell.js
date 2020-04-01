@@ -47,7 +47,7 @@ export class Cell {
             image.src = asset.path;
             image.onload = () => {
                 this.ctx.beginPath();
-                this.ctx.drawImage(image, this.x + 1, this.y + 1);
+                this.ctx.drawImage(image, this.x, this.y);
                 this.ctx.closePath();
             }
 
