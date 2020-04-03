@@ -25,7 +25,7 @@
     grid-template-columns: repeat(2, 1fr);
     grid-column-gap: 0px;
     grid-row-gap: 0px;
-    height: 100vh;
+    height: max-content;
     width: 10vw;
 }
 
@@ -33,17 +33,27 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    height: 5vw;
 }
 
 .palette-img {
     object-fit: contain;
-    width: 60%;
+    max-width: 4vw;
 }
 
 .palette-folder {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: blue;
+    grid-template-rows: repeat(2, 1fr);
+    display: grid;
+    height: 5vw;
+}
+
+.directory-img {
+    margin: 0 auto;
+}
+
+.directory-name {
+    text-align: center;
+    top: calc(5vw);
+    font-size: 0.7em;
 }
 

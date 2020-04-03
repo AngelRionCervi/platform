@@ -54,7 +54,6 @@ app.post('/assetsUpload', (req, res) => {
         const assetInfo = { path: '', name: '' };
         const fullClientPath = data.find(el => el.name === file.name).fullPath;
         const upperFold = plshelp.getUpperDir(fullClientPath);
-        console.log(upperFold, fullClientPath)
 
         const serverPath = './userData/me/project1/assets' + upperFold + '/' + file.name;
         const getPath = serverPath.substring(1); // remove the '.'
@@ -72,7 +71,7 @@ app.post('/assetsUpload', (req, res) => {
 app.get('/getAssets', async (req, res) => {
     const fullPath = './userData/me/project1/assets';
     const assets = tools.idfy(await tools.getDirContent(fullPath));
-    console.log(assets)
+
     res.status(200).send(JSON.stringify({ res: assets, rootDir: 'assets/', fullPath: fullPath }));
 })
 app.listen(5000, () => {

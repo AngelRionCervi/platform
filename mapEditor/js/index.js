@@ -22,7 +22,6 @@ paletteInteraction.watchDirectoryBack();
 
 gridInteraction.emitter.on('add_cell_by_cursor', (data) => {
     const asset = paletteInteraction.getCurrentPaletteCell();
-    console.log(data.detail, asset)
     grid.addCellByCursor(data.detail, asset);
 })
 
@@ -75,7 +74,6 @@ fetch('http://localhost:5000/getAssets')
     return res.json();
 })
 .then((assets) => {
-    console.log(assets)
     palette.buildFrom(assets.res, assets.rootDir, assets.fullPath);
 })
 /*

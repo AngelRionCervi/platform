@@ -27,7 +27,6 @@ export class PaletteInteraction {
     watchDirectoryBack() {
         this.directoryBackButton.addEventListener('click', (e) => {
             e.preventDefault();
-            console.log('hehehe')
             this.emitter.emit('palette_directory_back');
         })
     }
@@ -36,7 +35,6 @@ export class PaletteInteraction {
         console.log("palette click", asset.id, _this.currentPaletteCell.id)
         if (asset.id !== _this.currentPaletteCell.id) {
              _this.currentPaletteCell = asset;
-             console.log(asset)
              _this.emitter.emit('palette_asset_change', asset);
         }
     }
