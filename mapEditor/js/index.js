@@ -23,7 +23,7 @@ paletteInteraction.watchDrop();
 paletteInteraction.watchDirectoryBack();
 
 gridInteraction.emitter.on('add_cell_by_cursor', (data) => {
-    const asset = paletteInteraction.getCurrentPaletteCell();
+    const asset = palette.getCurrentAsset();
     grid.addCellByCursor(data.detail, asset);
 })
 
@@ -60,8 +60,9 @@ paletteInteraction.emitter.on('palette_assets_received', async (files) => {
     palette.buildFrom(assets.res, assets.rootDir, assets.fullPath);
 })
 
-paletteInteraction.emitter.on('palette_asset_change', (targetEl, asset) => {
-    palette.styleSelectedCell(targetEl.detail);
+paletteInteraction.emitter.on('palette_asset_change', (data) => {
+    palette.styleSelectedCell(data.detail.target);
+    palette.setCurrentAsset(data.detail.asset);
 });
 
 paletteInteraction.emitter.on('palette_directory_back', () => {

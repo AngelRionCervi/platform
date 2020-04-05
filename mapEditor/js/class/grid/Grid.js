@@ -32,11 +32,11 @@ export class Grid {
         for (let x = 0; x < this.gridWidth; x += this.blockSize) {
             for (let y = 0; y < this.gridHeight; y += this.blockSize) {
 
-                let id = (x + y) / this.blockSize + idStart;
-                let cellObj = new Cell(this.ctx, id, x, y, "air", this.blockSize);
+                const id = (x + y) / this.blockSize + idStart;
+                let cellObj = new Cell(this.ctx, id, x, y, "air", this.blockSize, null);
 
                 if (prevCoords[x / this.blockSize] && prevCoords[x / this.blockSize][y / this.blockSize]) {
-                    let prevCellObj = prevCoords[x / this.blockSize][y / this.blockSize];
+                    const prevCellObj = prevCoords[x / this.blockSize][y / this.blockSize];
                     prevCellObj.id = (x + y) / this.blockSize + idStart;
                     cellObj = prevCellObj;
                 }
@@ -44,7 +44,7 @@ export class Grid {
                 this.gridCoords[x / this.blockSize][y / this.blockSize] = cellObj;
             }
 
-            let minSide = Math.min(this.gridWidth, this.gridHeight)
+            const minSide = Math.min(this.gridWidth, this.gridHeight)
             idStart += minSide / this.blockSize - 1;
         }
 
@@ -58,23 +58,23 @@ export class Grid {
     }
 
     getCellByCursor(cursorPos) {
-        let roundX = plshelp.roundToPrevMult(cursorPos.x, this.blockSize);
-        let roundY = plshelp.roundToPrevMult(cursorPos.y, this.blockSize);
+        const roundX = plshelp.roundToPrevMult(cursorPos.x, this.blockSize);
+        const roundY = plshelp.roundToPrevMult(cursorPos.y, this.blockSize);
+        const flatCoord = this.gridCoords.flat();
+        const targetCell = flatCoord.find(n => n.x === roundX && n.y === roundY);
 
-        let flatCoord = this.gridCoords.flat();
-
-        let targetCell = flatCoord.find(n => n.x === roundX && n.y === roundY);
         return targetCell;
     }
 
     addCellByCursor(cursorPos, asset) {
-        let cell = this.getCellByCursor(cursorPos);
+        const cell = this.getCellByCursor(cursorPos);
         cell.setBlockType('wall');
-        cell.fillCell(asset);
+        cell.setAsset(asset);
+        cell.fillCell();
     }
 
     removeCellByCursor(cursorPos) {
-        let cell = this.getCellByCursor(cursorPos);
+        const cell = this.getCellByCursor(cursorPos);
         cell.setBlockType('air');
         cell.fillCell();
     }
@@ -113,7 +113,7 @@ export class Grid {
     debugBlocks(nMap) {
         console.log('nMap', nMap)
 
-        let colliders = [];
+        const colliders = [];
         
         nMap.forEach((v) => {
             colliders.push([{ type: 'yWall', x: v.x + this.colliderW, y: v.y, w: v.w - this.colliderW, h: this.colliderW }, //top

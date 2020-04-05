@@ -1,5 +1,5 @@
 export class Cell {
-    constructor(ctx, id, x, y, blockType, blockSize) {
+    constructor(ctx, id, x, y, blockType, blockSize, asset) {
         this.ctx = ctx;
         this.id = id;
         this.x = x;
@@ -8,6 +8,7 @@ export class Cell {
         this.blockSize = blockSize;
         this.cellFillStyle = 'white';
         this.lineWidth = 0.5;
+        this.asset = asset;
     }
 
     getCoords() {
@@ -18,7 +19,11 @@ export class Cell {
         this.blockType = type;
     }
 
-    fillCell(asset = null) {
+    setAsset(asset) {
+        this.asset = asset;
+    }
+
+    fillCell() {
         this.ctx.imageSmoothingEnabled = false;
 
         this.ctx.beginPath();
@@ -38,15 +43,15 @@ export class Cell {
             this.ctx.fill();
             this.ctx.closePath();
         }
-        else if (asset.id) {
+        else if (this.asset) {
             const image = new Image();
-            image.src = asset.path;
+            image.src = this.asset.path;
             image.onload = () => {
                 this.ctx.beginPath();
                 this.ctx.drawImage(image, this.x, this.y);
                 this.ctx.closePath();
             }
-
         }
     }
+
 }

@@ -10,6 +10,7 @@ export class Palette {
         this.authorizedExensions = ['png', 'jpg'];
         this.assets;
         this.paletteContainer = document.getElementById('palette_container');
+        this.currentAsset = { id: '' };
 
         this.dirInfo = {
             rootDir: null,
@@ -51,15 +52,13 @@ export class Palette {
         }
 
         if (back) {
-
             const splittedPath = this.dirInfo.absCurPath.split('/');
-            const indexAbsDir = splittedPath.removeAt(splittedPath.length -1, splittedPath.length).join('/').lastIndexOf(rootDir);
+            const indexAbsDir = splittedPath.removeAt(splittedPath.length - 1, splittedPath.length).join('/').lastIndexOf(rootDir);
             const indexDir = rootDir.indexOf('/');
             this.dirInfo.absCurPath = this.dirInfo.absCurPath.slice(0, indexAbsDir + indexDir) + '/';
 
-            this.dirInfo.prevDir = splittedPath[splittedPath.length -3] + '/';
+            this.dirInfo.prevDir = splittedPath[splittedPath.length - 3] + '/';
             this.dirInfo.prevDirIndex = this.dirInfo.absCurPath.indexOf(this.dirInfo.prevDir);
-            
         }
         else {
             this.dirInfo.prevDir = this.dirInfo.absCurPath.slice(0, -1).split('/').pop() + '/';
@@ -156,11 +155,20 @@ export class Palette {
         target.classList.add('palette-cell-target');
     }
 
+    setCurrentAsset(asset) {
+        console.log(asset)
+        if (asset.id !== this.currentAsset.id) {
+            this.currentAsset = asset;
+        }
+    }
+
+    getCurrentAsset() {
+        return this.currentAsset;
+    }
 
     getDirInfo() {
         return this.dirInfo;
     }
-
 
     getAssets() {
         return this.assets;
