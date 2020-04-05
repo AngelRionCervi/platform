@@ -29,20 +29,16 @@ export class Cell {
         this.ctx.stroke();
         this.ctx.closePath();
 
-        if (!asset) {
-            if (this.blockType === "wall") {
-                this.cellFillStyle = "black"
-            }
-            if (this.blockType === "air") {
-                this.cellFillStyle = "white"
-            }
+        if (this.blockType === 'air') {
+          
+            this.cellFillStyle = "white"
             this.ctx.beginPath();
             this.ctx.rect(this.x + 1, this.y + 1, this.blockSize - 1, this.blockSize - 1);
             this.ctx.fillStyle = this.cellFillStyle;
             this.ctx.fill();
             this.ctx.closePath();
         }
-        else {
+        else if (asset.id) {
             const image = new Image();
             image.src = asset.path;
             image.onload = () => {

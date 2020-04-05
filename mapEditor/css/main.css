@@ -25,26 +25,28 @@
     grid-template-columns: repeat(2, 1fr);
     grid-column-gap: 0px;
     grid-row-gap: 0px;
-    height: max-content;
+    height: 25vh;
     width: 10vw;
 }
 
 .palette-cell {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    grid-template-rows: repeat(2, 1fr);
+    display: grid;
     height: 5vw;
+    border: 4px solid transparent;
 }
 
 .palette-img {
     object-fit: contain;
     max-width: 4vw;
+    margin: 10% auto;
 }
 
 .palette-folder {
     grid-template-rows: repeat(2, 1fr);
     display: grid;
     height: 5vw;
+    border: 4px solid transparent;
 }
 
 .directory-img {
@@ -53,7 +55,11 @@
 
 .directory-name {
     text-align: center;
-    top: calc(5vw);
+    top: 5vw;
     font-size: 0.7em;
+}
+
+.palette-cell-target {
+    border: 4px solid blue;
 }
 

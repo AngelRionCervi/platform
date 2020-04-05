@@ -10,8 +10,13 @@ Object.filter = function (obj, predicate) {
     return result;
 };
 
-Array.prototype.removeAt = function (index, to) {
-    this.splice(index, to);
+Array.prototype.removeAt = function (from, to) {
+    this.splice(from, to);
+    return this;
+}
+
+String.prototype.removeAt = function (from, to) {
+    this.substring(from, to);
     return this;
 }
 

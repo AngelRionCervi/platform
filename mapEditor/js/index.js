@@ -2,6 +2,7 @@ const canvas = document.getElementById('mapEditorCanvas');
 const ctx = canvas.getContext('2d');
 
 import { Emitter } from "/mapEditor/js/lib/Emitter.js";
+import { Project } from "/mapEditor/js/class/project/userProject.js";
 import { GridInteraction } from "/mapEditor/js/class/grid/GridInteraction.js";
 import { Grid } from "/mapEditor/js/class/grid/Grid.js";
 import { MapDownloader } from "/mapEditor/js/class/download/MapDownloader.js";
@@ -15,6 +16,7 @@ const paletteInteraction = new PaletteInteraction();
 const palette = new Palette(paletteInteraction);
 const mapDownloader = new MapDownloader(canvas);
 
+let project;
 
 grid.create();
 paletteInteraction.watchDrop();
@@ -47,7 +49,6 @@ gridInteraction.emitter.on('remove_col', () => {
 
 gridInteraction.emitter.on('dl_map', () => {
     const rndmName = 'map_' + Date.now() + Math.random();
-    const map = grid.getMap();
     mapDownloader.downloadMap(map, rndmName);
 })
 
@@ -55,27 +56,30 @@ gridInteraction.emitter.on('dl_map', () => {
 
 paletteInteraction.emitter.on('palette_assets_received', async (files) => {
     const assets = await palette.loadAssets(files);
-    palette.buildFrom(assets, 'assets/');
+    project = new Project(assets.projectID);
+    palette.buildFrom(assets.res, assets.rootDir, assets.fullPath);
 })
 
-paletteInteraction.emitter.on('palette_asset_change', (asset) => {
-    console.log(asset);
+paletteInteraction.emitter.on('palette_asset_change', (targetEl, asset) => {
+    palette.styleSelectedCell(targetEl.detail);
 });
 
 paletteInteraction.emitter.on('palette_directory_back', () => {
     const assets = palette.getAssets();
     const dirInfo = palette.getDirInfo();
-    palette.buildFrom(assets, dirInfo.prevDir, dirInfo.fullPath, true);
+    if (project.getID() !== dirInfo.prevDir.slice(0, -1)) {
+        palette.buildFrom(assets, dirInfo.prevDir, dirInfo.absCurPath, true);
+    }
 });
 
-
 fetch('http://localhost:5000/getAssets')
-.then((res) => {
-    return res.json();
-})
-.then((assets) => {
-    palette.buildFrom(assets.res, assets.rootDir, assets.fullPath);
-})
+    .then((res) => {
+        return res.json();
+    })
+    .then((assets) => {
+        project = new Project(assets.projectID);
+        palette.buildFrom(assets.res, assets.rootDir, assets.fullPath);
+    })
 /*
 document.addEventListener('drop', function(e) {
     e.stopPropagation()

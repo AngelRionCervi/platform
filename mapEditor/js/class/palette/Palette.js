@@ -12,6 +12,7 @@ export class Palette {
         this.paletteContainer = document.getElementById('palette_container');
 
         this.dirInfo = {
+            rootDir: null,
             prevDir: null,
             absCurPath: null,
             curDir: null,
@@ -27,7 +28,7 @@ export class Palette {
 
         filesObj.detail.forEach((fobj) => {
 
-            if (!this.authorizedExensions.includes(fobj.name)) {
+            if (!this.authorizedExensions.includes(fobj.name.split('.').pop())) {
                 throw new Error('files must be either .png or .jpg');
             }
 
@@ -43,28 +44,36 @@ export class Palette {
     }
 
 
-    setDirInfo(rootDir, fullPath, back) {
+    setDirInfo(rootDir, fullPath, back = null) {
         if (!this.dirInfo.absCurPath) {
             fullPath += '/';
             this.dirInfo.absCurPath = fullPath.slice(0, fullPath.indexOf(rootDir));
         }
 
-        this.dirInfo.prevDir = this.dirInfo.absCurPath.slice(0, -1).split('/').pop() + '/';
-
         if (back) {
-            const indexAbsDir = this.dirInfo.absCurPath.indexOf(rootDir);
+
+            const splittedPath = this.dirInfo.absCurPath.split('/');
+            const indexAbsDir = splittedPath.removeAt(splittedPath.length -1, splittedPath.length).join('/').lastIndexOf(rootDir);
             const indexDir = rootDir.indexOf('/');
             this.dirInfo.absCurPath = this.dirInfo.absCurPath.slice(0, indexAbsDir + indexDir) + '/';
-        } else {
-            this.dirInfo.absCurPath += rootDir;
-        }
 
-        if (this.dirInfo.absCurPath.indexOf('assets/') >= this.dirInfo.absCurPath.indexOf(this.dirInfo.prevDir)) {
-            this.dirInfo.prevDir = 'assets/';
+            this.dirInfo.prevDir = splittedPath[splittedPath.length -3] + '/';
+            this.dirInfo.prevDirIndex = this.dirInfo.absCurPath.indexOf(this.dirInfo.prevDir);
+            
         }
+        else {
+            this.dirInfo.prevDir = this.dirInfo.absCurPath.slice(0, -1).split('/').pop() + '/';
+            this.dirInfo.prevDirIndex = this.dirInfo.absCurPath.indexOf(this.dirInfo.prevDir);
+
+            this.dirInfo.absCurPath += rootDir;
+
+        }
+        console.log(this.dirInfo.absCurPath, '------------', this.dirInfo.prevDir);
 
         this.dirInfo.curDir = rootDir;
+        this.dirInfo.curDirIndex = this.dirInfo.absCurPath.lastIndexOf(rootDir);
         this.dirInfo.fullPath = fullPath;
+
     }
 
 
@@ -78,12 +87,11 @@ export class Palette {
         const directoriesList = [];
 
         assets.forEach((asset) => {
-           
-            const relPath = asset.path.slice(asset.path.indexOf(rootDir), asset.path.length).split('/').removeAt(0, 1).join('/');
+            const currentPath = asset.path.slice(this.dirInfo.curDirIndex - 1);
+            const relPath = currentPath.slice(currentPath.indexOf(rootDir), currentPath.length).split('/').removeAt(0, 1).join('/');
 
             if (relPath.includes('/')) {
                 const dirName = relPath.split('/').shift();
-
                 if (!directoriesList.includes(dirName)) {
                     directoriesList.push(dirName);
                     const directoryEl = this.getDirectoryEl(dirName, assets, fullPath);
@@ -95,7 +103,6 @@ export class Palette {
                 this.paletteContainer.appendChild(paletteCellEl);
             }
         })
-
     }
 
 
@@ -118,12 +125,35 @@ export class Palette {
 
 
     getPaletteCellEl(asset) {
+        let name;
+        if (asset.name.length > 20) {
+            name = asset.name.slice(0, 20) + '...';
+        } else {
+            name = asset.name;
+        }
+        const nameNode = dob.createNode('div', 'directory-name', null, name);
         const imageNode = dob.createNode('img', 'palette-img');
         imageNode.src = asset.path;
         const listener = { type: 'click', callback: this.interaction.handlePaletteClick, args: [this.interaction, asset] };
-        const paletteCellEl = dob.createNode('div', 'palette-cell', null, imageNode, listener);
+        const paletteCellEl = dob.createNode('div', 'palette-cell', null, [imageNode, nameNode], listener);
 
         return paletteCellEl;
+    }
+
+
+    styleSelectedCell(target) {
+
+        while (!target.classList.contains('palette-cell')) {
+            target = target.parentElement;
+        }
+
+        Array.from(document.getElementsByClassName('palette-cell')).forEach((cell) => {
+            if (cell.classList.contains('palette-cell-target')) {
+                cell.classList.remove('palette-cell-target');
+            }
+        })
+
+        target.classList.add('palette-cell-target');
     }
 
 

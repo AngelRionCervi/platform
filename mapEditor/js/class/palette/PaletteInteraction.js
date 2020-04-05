@@ -32,10 +32,9 @@ export class PaletteInteraction {
     }
 
     handlePaletteClick(e, _this, asset) {
-        console.log("palette click", asset.id, _this.currentPaletteCell.id)
         if (asset.id !== _this.currentPaletteCell.id) {
              _this.currentPaletteCell = asset;
-             _this.emitter.emit('palette_asset_change', asset);
+             _this.emitter.emit('palette_asset_change', e.target, asset);
         }
     }
 

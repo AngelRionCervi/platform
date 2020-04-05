@@ -57,8 +57,15 @@ function idfy(arr) {
     return arr;
 }
 
+async function getProjectCollectionByID(userID, projectID) {
+    const path = './backend/user_projects/' + userID + '/' + projectID + '/' + 'asset_collection.json';
+    const res = JSON.parse(await readFileAsync(path));
+    return res;
+}   
+
 
 exports.getUpperDirAndName = getUpperDirAndName;
 exports.getUpperDir = getUpperDir;
 exports.getDirContent = getDirContent;
 exports.idfy = idfy;
+exports.getProjectCollectionByID = getProjectCollectionByID;
