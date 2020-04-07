@@ -30,12 +30,21 @@ export class PaletteInteraction {
         })
     }
 
-    handlePaletteClick(e, _this, asset) {
-        console.log(asset)
-        _this.emitter.emit('palette_asset_change', { target: e.target, asset: asset });
+    handlePaletteClick(e, asset) {
+        this.emitter.emit('palette_asset_change', { target: e.target, asset: asset });
     }
 
-    handleDirectoryClick(e, _this, directory) {
+    handlePaletteContextClick(e, asset) {
+        e.preventDefault();
+        const coord = {
+            x: e.pageX,
+            y: e.pageY
+        };
+        this.emitter.emit('palette_context_toggle', { coord, asset });
+        return false;
+    }
+
+    handleDirectoryClick(e, directory) {
         console.log('click on directory ', directory)
     }
 

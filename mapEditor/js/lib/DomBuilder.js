@@ -1,6 +1,5 @@
 export class DomBuilder {
 
-
     createNode(type, _class = null, id = null, inner = null, listener = null) {
 
         let el = document.createElement(type);
@@ -33,18 +32,29 @@ export class DomBuilder {
         } 
     
         if (listener) {
-            el.addEventListener(listener.type, (e) => {
-                e.preventDefault();
-                if (listener.hasOwnProperty('event') && !listener.event) {
-                    listener.callback(...listener.args);
-                }
-                else {
-                    listener.callback(e, ...listener.args);
-                }
-            })
+            if (Array.isArray(listener)) {
+                listener.forEach((l) => {
+                    this.createListener(el, l);
+                })
+            } else {
+                this.createListener(el, listener);
+            }
         }
     
         return el;
+    }
+
+    createListener(el, l) {
+        el.addEventListener(l.type, (e) => {
+            e.preventDefault();
+            if (l.hasOwnProperty('event') && !l.event) {
+                l.callback(...l.args);
+            }
+            else {
+                l.callback(e, ...l.args);
+            }
+            return false;
+        })
     }
 
 }

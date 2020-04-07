@@ -2,6 +2,7 @@ const canvas = document.getElementById('mapEditorCanvas');
 const ctx = canvas.getContext('2d');
 
 import { Emitter } from "/mapEditor/js/lib/Emitter.js";
+import { ContextMenu } from "/mapEditor/js/class/general/ContextMenu.js";
 import { Project } from "/mapEditor/js/class/project/userProject.js";
 import { GridInteraction } from "/mapEditor/js/class/grid/GridInteraction.js";
 import { Grid } from "/mapEditor/js/class/grid/Grid.js";
@@ -15,6 +16,7 @@ const grid = new Grid(canvas, ctx);
 const paletteInteraction = new PaletteInteraction();
 const palette = new Palette(paletteInteraction);
 const mapDownloader = new MapDownloader(canvas);
+const contextMenu = new ContextMenu();
 
 let project;
 
@@ -73,6 +75,11 @@ paletteInteraction.emitter.on('palette_directory_back', () => {
     }
 });
 
+paletteInteraction.emitter.on('palette_context_toggle', (data) => {
+   contextMenu.toggle('paletteContextMenu', data.detail.coord, data.detail.asset);
+});
+
+
 fetch('http://localhost:5000/getAssets')
     .then((res) => {
         return res.json();
@@ -81,6 +88,12 @@ fetch('http://localhost:5000/getAssets')
         project = new Project(assets.projectID);
         palette.buildFrom(assets.res, assets.rootDir, assets.fullPath);
     })
+
+
+document.addEventListener('click', (e) => {
+    e.preventDefault();
+    contextMenu.toggleAllOff();
+})
 /*
 document.addEventListener('drop', function(e) {
     e.stopPropagation()

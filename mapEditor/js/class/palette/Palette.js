@@ -67,7 +67,6 @@ export class Palette {
             this.dirInfo.absCurPath += rootDir;
 
         }
-        console.log(this.dirInfo.absCurPath, '------------', this.dirInfo.prevDir);
 
         this.dirInfo.curDir = rootDir;
         this.dirInfo.curDirIndex = this.dirInfo.absCurPath.lastIndexOf(rootDir);
@@ -133,8 +132,9 @@ export class Palette {
         const nameNode = dob.createNode('div', 'directory-name', null, name);
         const imageNode = dob.createNode('img', 'palette-img');
         imageNode.src = asset.path;
-        const listener = { type: 'click', callback: this.interaction.handlePaletteClick, args: [this.interaction, asset] };
-        const paletteCellEl = dob.createNode('div', 'palette-cell', null, [imageNode, nameNode], listener);
+        const leftListener = { type: 'click', callback: this.interaction.handlePaletteClick.bind(this.interaction), args: [asset] };
+        const contextListener = { type: 'contextmenu', callback: this.interaction.handlePaletteContextClick.bind(this.interaction), args: [asset] };
+        const paletteCellEl = dob.createNode('div', 'palette-cell', null, [imageNode, nameNode], [leftListener, contextListener]);
 
         return paletteCellEl;
     }
@@ -156,7 +156,6 @@ export class Palette {
     }
 
     setCurrentAsset(asset) {
-        console.log(asset)
         if (asset.id !== this.currentAsset.id) {
             this.currentAsset = asset;
         }

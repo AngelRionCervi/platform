@@ -8,8 +8,8 @@ export class Grid {
     constructor(canvas, ctx) {
         this.canvas = canvas;
         this.ctx = ctx;
-        this.gridWidth = 1280;
-        this.gridHeight = 768;
+        this.gridWidth = 1024;
+        this.gridHeight = 576;
         this.blockSize = 32;
         this.colliderW = 3;
         this.gridCoords;

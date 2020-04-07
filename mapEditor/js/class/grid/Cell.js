@@ -43,7 +43,7 @@ export class Cell {
             this.ctx.fill();
             this.ctx.closePath();
         }
-        else if (this.asset) {
+        else if (this.asset.id) {
             const image = new Image();
             image.src = this.asset.path;
             image.onload = () => {
