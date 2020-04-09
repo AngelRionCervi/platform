@@ -73,21 +73,39 @@ body {
 .game-objects-container {
     display: grid;
     grid-template-rows: repeat(2, 1fr);
+    grid-template-columns: repeat(12, 1fr);
     grid-column-gap: 0px;
     grid-row-gap: 0px;
     height: 25vh;
     width: calc(100vw - 2px);
-
     border: 1px solid black;
 }
 
-.game-object {
-    
+
+.game-object-name {
+    text-align: center;
+    top: 5vw;
+    font-size: 0.7em;
+}
+
+.game-object-img {
+    object-fit: contain;
+    max-width: 4vw;
+    margin: 10% auto;
+}
+
+.game-object-cell {
+    grid-template-rows: repeat(2, 1fr);
+    display: grid;
+    height: 5vw;
+    width: 5vw;
+    border: 4px solid transparent;
 }
 
 
 .palette-context-menu {
-    width: 120px;
+    width: 200px;
+    background-color: white;
     box-shadow: 0 4px 5px 3px rgba(0, 0, 0, 0.2);
     position: relative;
 }
@@ -95,6 +113,7 @@ body {
 .palette-context-menu-ul {
     list-style: none;
     padding: 10px 0;
+    margin: 0;
 }
 
 .palette-context-menu-li {
