@@ -9,11 +9,11 @@ export class GameObjectList {
         this.domEl = document.getElementById("game_objects_container");
         this.prevObjectsIDs = [];
         this.objects = [];
-        this.curSelected = null;
+        this.curSelectedID = null;
     }
 
-    addObject({ path, name, id }) {
-        const object = new GameObject(path, name, id);
+    addObject(asset) {
+        const object = new GameObject(asset);
 
         this.objects.push(object);
         this.updateDomList();
@@ -33,7 +33,7 @@ export class GameObjectList {
         const toRemove = prevIDs.filter((el) => !currentIDs.includes(el));
 
         toAdd.forEach((id) => {
-            this.buildDomNode(this.getObjectById(id));
+            this.buildDomNode(this.getByID(id));
         });
         toRemove.forEach((id) => {
             this.removeDomNode(id);
@@ -81,6 +81,10 @@ export class GameObjectList {
         }
     }
 
+    isAnObjectSelected() {
+        return this.curSelectedID ? true : false;
+    }
+
     styleDomNode(target) {
         while (!target.classList.contains("game-object-cell")) {
             target = target.parentElement;
@@ -100,7 +104,11 @@ export class GameObjectList {
         this.removeSelectedStyle();
     }
 
-    getObjectById(id) {
+    getCurrentObjectID() {
+        return this.curSelectedID;
+    }
+
+    getByID(id) {
         return this.objects.find((el) => el.id === id);
     }
 }

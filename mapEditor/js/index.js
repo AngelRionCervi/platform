@@ -10,6 +10,8 @@ import { Assets } from "./class/project/Assets.js";
 import { MapDownloader } from "/mapEditor/js/class/download/MapDownloader.js";
 import { Palette } from "/mapEditor/js/class/palette/Palette.js";
 import { PaletteInteraction } from "/mapEditor/js/class/palette/PaletteInteraction.js";
+import { SceneObjectList } from "./class/sceneObjects/SceneObjectList.js";
+import { SceneObjectListInteraction } from "./class/sceneObjects/SceneObjectListInteraction.js";
 import { GameObjectList } from "/mapEditor/js/class/gameObjects/GameObjectList.js";
 import { GameObjectListInteraction } from "/mapEditor/js/class/gameObjects/GameObjectListInteraction.js";
 
@@ -22,6 +24,8 @@ const mapDownloader = new MapDownloader(canvas);
 const contextMenu = new ContextMenu(paletteInteraction);
 const gameObjectListInteraction = new GameObjectListInteraction();
 const gameObjectList = new GameObjectList(gameObjectListInteraction);
+const sceneObjectListInteraction = new SceneObjectListInteraction();
+const sceneObjectList = new SceneObjectList(sceneObjectListInteraction);
 const _assets = new Assets();
 
 let project;
@@ -31,12 +35,25 @@ paletteInteraction.watchDrop();
 paletteInteraction.watchDirectoryBack();
 
 gridInteraction.emitter.on("add_cell_by_cursor", ({ detail }) => {
-    const assetID = palette.getCurrentAssetID();
-    const asset = _assets.getByID(assetID);
-    grid.addCellByCursor(detail, asset);
+    let objToDraw = null;
+    if (palette.isAnAssetSelected()) {
+        const assetID = palette.getCurrentAssetID();
+        const asset = _assets.getByID(assetID);
+        sceneObjectList.addSceneObject(detail, asset);
+        objToDraw = { obj: asset, type: "asset" };
+    } 
+    else if (gameObjectList.isAnObjectSelected()) {
+        const objectID = gameObjectList.getCurrentObjectID();
+        objToDraw = { obj: gameObjectList.getByID(objectID), type: "object" };
+    }
+    if (!objToDraw) return;
+
+    grid.addCellByCursor(detail, objToDraw);
 });
 
 gridInteraction.emitter.on("remove_cell_by_cursor", ({ detail }) => {
+    sceneObjectList.removeSceneObject(detail.id);
+    console.log(sceneObjectList.sceneObjects)
     grid.removeCellByCursor(detail);
 });
 
@@ -86,7 +103,8 @@ paletteInteraction.emitter.on("palette_context_toggle", ({ detail }) => {
 });
 
 contextMenu.emitter.on("new_game_object", ({ detail }) => {
-    gameObjectList.addObject(detail);
+    const asset = _assets.getByID(detail.id);
+    gameObjectList.addObject(asset);
 });
 
 contextMenu.emitter.on("remove_game_object", ({ detail }) => {

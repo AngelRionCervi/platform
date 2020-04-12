@@ -39,7 +39,12 @@ export class Cell {
         this.ctx.moveTo(this.lineWidth + this.x, this.lineWidth + this.y);
         this.ctx.lineTo(this.lineWidth + this.x + this.blockSize, this.lineWidth + this.y);
         this.ctx.lineTo(this.lineWidth + this.x + this.blockSize, this.lineWidth + this.y + this.blockSize);
-        this.ctx.strokeStyle = "black";
+
+        if (this.asset && this.asset.type === "object") {
+            this.ctx.strokeStyle = "red";
+        } else {
+            this.ctx.strokeStyle = "black";
+        }
         this.ctx.stroke();
         this.ctx.closePath();
 
@@ -48,7 +53,7 @@ export class Cell {
         } else if (this.asset) {
             this.resetCell();
             this.ctx.beginPath();
-            this.ctx.drawImage(this.asset.sprite, this.x, this.y);
+            this.ctx.drawImage(this.asset.obj.getSprite(), this.x, this.y);
             this.ctx.closePath();
         }
     }

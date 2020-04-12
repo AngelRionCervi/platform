@@ -25,6 +25,18 @@ export class Asset {
         });
     }
 
+    getID() {
+        return this.id;
+    }
+
+    getFileName() {
+        return this.name;
+    }
+
+    getSpritePath() {
+        return this.path;
+    }
+
     getSprite() {
         return this.sprite;
     }

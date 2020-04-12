@@ -10,7 +10,7 @@ export class Palette {
         this.authorizedExensions = ["png", "jpg"];
         this.assets;
         this.paletteContainer = document.getElementById("palette_container");
-        this.currentAssetID = "";
+        this.currentAssetID = null;
 
         this.dirInfo = {
             rootDir: null,
@@ -175,6 +175,10 @@ export class Palette {
         Array.from(document.getElementsByClassName("palette-cell-target")).forEach((cell) => {
             cell.classList.remove("palette-cell-target");
         });
+    }
+
+    isAnAssetSelected() {
+        return this.currentAssetID ? true : false;
     }
 
     getCurrentAssetID() {
