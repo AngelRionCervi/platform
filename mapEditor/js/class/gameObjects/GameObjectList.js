@@ -4,8 +4,9 @@ import * as helper from "../../lib/helpers.js";
 const dob = new DomBuilder();
 
 export class GameObjectList {
-    constructor() {
-        this.domEl = document.getElementById('game_objects_container');
+    constructor(interaction) {
+        this.interaction = interaction;
+        this.domEl = document.getElementById("game_objects_container");
         this.prevObjectsIDs = [];
         this.objects = [];
     }
@@ -17,39 +18,63 @@ export class GameObjectList {
         this.updateDomList();
     }
 
+    removeObject(id) {
+        const curIds = this.objects.map((el) => el.getID());
+        this.objects.splice(curIds.indexOf(id), 1);
+        this.updateDomList();
+    }
+
     updateDomList() {
-        const currentIDs = this.objects.map(el => el.id);
+        const currentIDs = this.objects.map((el) => el.id);
         const prevIDs = this.prevObjectsIDs;
 
-        const toAdd = currentIDs.filter(el => !prevIDs.includes(el));
-        const toRemove = prevIDs.filter(el => !currentIDs.includes(el));
-        //console.log('current', this.objects, "toadd", toAdd, "toremove", toRemove)
+        const toAdd = currentIDs.filter((el) => !prevIDs.includes(el));
+        const toRemove = prevIDs.filter((el) => !currentIDs.includes(el));
+      
         toAdd.forEach((id) => {
             this.buildDomNode(this.getObjectById(id));
-        })
+        });
         toRemove.forEach((id) => {
-            this.removeDomNode(this.getObjectById(id));
-        })
+            this.removeDomNode(id);
+        });
 
-        this.prevObjectsIDs = this.objects.map(el => el.id);
+        this.prevObjectsIDs = this.objects.map((el) => el.id);
     }
 
     buildDomNode(object) {
         let name = object.getFileName();
         if (name.length > 20) {
-            name = name.slice(0, 20) + '...';
+            name = name.slice(0, 20) + "...";
         }
-        const nameNode = dob.createNode('div', 'game-object-name', null, name);
-        const imageNode = dob.createNode('img', 'game-object-img');
+        const nameNode = dob.createNode("div", "game-object-name", null, name);
+        const imageNode = dob.createNode("img", "game-object-img");
         imageNode.src = object.getSpritePath();
-        /*const leftListener = { type: 'click', callback: this.interaction.handlePaletteClick.bind(this.interaction), args: [asset] };
-        const contextListener = { type: 'contextmenu', callback: this.interaction.handlePaletteContextClick.bind(this.interaction), args: [asset] };*/
-        const paletteCellEl = dob.createNode('div', 'game-object-cell', null, [imageNode, nameNode]);
-        this.domEl.appendChild(paletteCellEl);
+        const leftListener = {
+            type: "click",
+            callback: this.interaction.handleGameObjectClick.bind(this.interaction),
+            args: [object],
+        };
+        const contextListener = {
+            type: "contextmenu",
+            callback: this.interaction.handleGameObjectContextClick.bind(this.interaction),
+            args: [object],
+        };
+        const objectEl = dob.createNode(
+            "div",
+            "game-object-cell",
+            "go_" + object.getID(),
+            [imageNode, nameNode],
+            [leftListener, contextListener]
+        );
+        this.domEl.appendChild(objectEl);
     }
 
+    removeDomNode(id) {
+        const el = document.getElementById("go_" + id);
+        el.remove();
+    }
 
     getObjectById(id) {
-        return this.objects.find(el => el.id === id);
+        return this.objects.find((el) => el.id === id);
     }
 }

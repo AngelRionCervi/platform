@@ -11,7 +11,7 @@ import { MapDownloader } from "/mapEditor/js/class/download/MapDownloader.js";
 import { Palette } from "/mapEditor/js/class/palette/Palette.js";
 import { PaletteInteraction } from "/mapEditor/js/class/palette/PaletteInteraction.js";
 import { GameObjectList } from "/mapEditor/js/class/gameObjects/GameObjectList.js";
-
+import { GameObjectListInteraction } from "/mapEditor/js/class/gameObjects/GameObjectListInteraction.js";
 
 const gridInteraction = new GridInteraction();
 const grid = new Grid(canvas, ctx);
@@ -20,7 +20,8 @@ const paletteInteraction = new PaletteInteraction();
 const palette = new Palette(paletteInteraction);
 const mapDownloader = new MapDownloader(canvas);
 const contextMenu = new ContextMenu(paletteInteraction);
-const gameObjectList = new GameObjectList();
+const gameObjectListInteraction = new GameObjectListInteraction();
+const gameObjectList = new GameObjectList(gameObjectListInteraction);
 const _assets = new Assets();
 
 let project;
@@ -85,6 +86,18 @@ paletteInteraction.emitter.on("palette_context_toggle", ({ detail }) => {
 
 contextMenu.emitter.on("new_game_object", ({ detail }) => {
     gameObjectList.addObject(detail);
+});
+
+contextMenu.emitter.on("remove_game_object", ({ detail }) => {
+    gameObjectList.removeObject(detail.getID());
+});
+
+gameObjectListInteraction.emitter.on("game_object_click", ({ detail }) => {
+   console.log(detail)
+});
+
+gameObjectListInteraction.emitter.on("game_object_context_toggle", ({ detail }) => {
+    contextMenu.toggle("gameObjectContextMenu", detail.coord, detail.object);
 });
 
 fetch("http://localhost:5000/getAssets")

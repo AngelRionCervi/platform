@@ -71,8 +71,6 @@ body {
     border: 4px solid blue;
 }
 
-
-
 .game-objects-container {
     display: grid;
     grid-template-rows: repeat(2, 1fr);
@@ -84,7 +82,6 @@ body {
     border: 1px solid black;
     overflow: scroll;
 }
-
 
 .game-object-name {
     text-align: center;
@@ -106,28 +103,26 @@ body {
     border: 4px solid transparent;
 }
 
-
-.palette-context-menu {
+.context-menu {
     width: 200px;
     background-color: white;
     box-shadow: 0 4px 5px 3px rgba(0, 0, 0, 0.2);
     position: relative;
 }
 
-.palette-context-menu-ul {
+.context-menu-ul {
     list-style: none;
     padding: 10px 0;
     margin: 0;
 }
 
-.palette-context-menu-li {
+.context-menu-li {
     font-weight: 500;
     font-size: 14px;
     padding: 10px 40px 10px 20px;
     cursor: pointer;
 }
 
-.palette-context-menu-li :hover {
+.context-menu-li :hover {
     background: rgba(0, 0, 0, 0.2);
 }
-

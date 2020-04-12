@@ -6,7 +6,9 @@ export class DomBuilder {
     
         if (_class) {
             _class = [_class].flat(); 
-            el.classList.add(..._class);
+            _class.forEach((c) => {
+                el.classList.add(...c.split(' '));
+            })
         }
 
         if (id) {

@@ -8,22 +8,44 @@ export class ContextMenu {
         this.emitter = new Emitter();
 
         this.types = {
-            palette: {
+            paletteContextMenu: {
                 menu_el: {
                     tag: "div",
-                    class: "palette-context-menu",
+                    class: "palette-context-menu context-menu",
                     id: "palette_context_menu",
                     elements: {
                         list_el: {
                             tag: "ul",
-                            class: "palette-context-menu-ul",
+                            class: "palette-context-menu-ul context-menu-ul",
                             elements: {
                                 option_1_el: {
                                     name: "game_object_init",
                                     tag: "li",
-                                    class: "palette-context-menu-li",
+                                    class: "palette-context-menu-li context-menu-li",
                                     callback: "createGameObject",
                                     inner: "Create game object",
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+            gameObjectContextMenu: {
+                menu_el: {
+                    tag: "div",
+                    class: "gameObject-context-menu context-menu",
+                    id: "gameObject_context_menu",
+                    elements: {
+                        list_el: {
+                            tag: "ul",
+                            class: "gameObject-context-menu-ul context-menu-ul",
+                            elements: {
+                                option_1_el: {
+                                    name: "game_object_remove",
+                                    tag: "li",
+                                    class: "gameObject-context-menu-li context-menu-li",
+                                    callback: "removeGameObject",
+                                    inner: "Remove game object",
                                 },
                             },
                         },
@@ -34,18 +56,19 @@ export class ContextMenu {
 
         this.contextMenuStates = {
             paletteContextMenu: false,
+            gameObjectContextMenu: false,
         };
     }
 
-    paletteContextMenuCreate(asset) {
-        const menuJSON = this.types.palette.menu_el;
+    createContextNode(nodeVar, load) {
+        const menuJSON = this.types[nodeVar].menu_el;
         const listJSON = menuJSON.elements.list_el;
         const optionsJSON = listJSON.elements;
 
         const options = [];
 
         Object.keys(optionsJSON).forEach((key) => {
-            const listener = { type: "click", callback: this[optionsJSON[key].callback].bind(this), args: [asset], event: false };
+            const listener = { type: "click", callback: this[optionsJSON[key].callback].bind(this), args: [load], event: false };
             const optionNode = dob.createNode(optionsJSON[key].tag, optionsJSON[key].class, null, optionsJSON[key].inner, listener);
             options.push(optionNode);
         });
@@ -56,14 +79,14 @@ export class ContextMenu {
         return menu;
     }
 
-    toggle(nodeVar, coord, asset) {
-        if (this.contextMenuStates[nodeVar]) {
-            const htmlNode = document.getElementById(this.types.palette.menu_el.id);
+    toggle(nodeVar, coord, obj) {
+        if (this.contextMenuStates[nodeVar]) { // [nodevar] context menu is already showing, remove it
+            const htmlNode = document.getElementById(this.types[nodeVar].menu_el.id);
             htmlNode.remove();
             this.contextMenuStates[nodeVar] = false;
         }
 
-        const htmlNode = this[`${nodeVar}Create`](asset);
+        const htmlNode = this.createContextNode(nodeVar, obj);
 
         htmlNode.style.position = "absolute";
         htmlNode.style.left = `${coord.x}px`;
@@ -85,5 +108,9 @@ export class ContextMenu {
 
     createGameObject(asset) {
         this.emitter.emit("new_game_object", asset);
+    }
+
+    removeGameObject(object) {
+        this.emitter.emit("remove_game_object", object);
     }
 }
