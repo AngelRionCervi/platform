@@ -1,5 +1,6 @@
 import { SceneObject } from "./SceneObject.js";
 import * as helper from "../../lib/helpers.js";
+import { _GLOBALS_ } from "../../lib/globals.js";
 
 export class SceneObjectList {
     constructor(interaction) {
@@ -9,20 +10,27 @@ export class SceneObjectList {
 
     addSceneObject(coord, asset) {
         const curSceneObject = this.getByCoord(coord);
-        console.log(curSceneObject, this.sceneObjects);
+        let sceneObject = null;
         if (!curSceneObject) {
-            const sceneObject = new SceneObject(coord, asset);
-            this.sceneObjects.push(sceneObject);
-        } else if (curSceneObject && curSceneObject.id.split("_").pop() !== asset.id) {
-            this.removeSceneObject(curSceneObject.id);
-            const sceneObject = new SceneObject(coord, asset);
-            this.sceneObjects.push(sceneObject);
+            sceneObject = new SceneObject(coord, asset);
+        } else if (curSceneObject && curSceneObject.asset.getID() !== asset.id) {
+            this.removeSceneObject(curSceneObject.getID());
+            sceneObject = new SceneObject(coord, asset);
+        } else {
+            return false;
         }
+
+        this.sceneObjects.push(sceneObject);
+        return sceneObject;
     }
 
     removeSceneObject(id) {
         const curIds = this.sceneObjects.map((el) => el.getID());
-        this.sceneObjects.splice(curIds.indexOf(id), 1);
+        const index = curIds.indexOf(id);
+
+        if (index !== -1) {
+            this.sceneObjects.splice(index, 1);
+        }
     }
 
     getAllIDs() {
@@ -30,9 +38,8 @@ export class SceneObjectList {
     }
 
     getByCoord(coord) {
-        return this.sceneObjects.find(
-            (el) =>
-                helper.roundToPrevMult(coord.x, 32) === el.coord.x && helper.roundToPrevMult(coord.y, 32) === el.coord.y
-        );
+        const x = helper.roundToPrevMult(coord.x, _GLOBALS_.blockSize);
+        const y = helper.roundToPrevMult(coord.y, _GLOBALS_.blockSize);
+        return this.sceneObjects.find((el) => x === el.coord.x && y === el.coord.y);
     }
 }

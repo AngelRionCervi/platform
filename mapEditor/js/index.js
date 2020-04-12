@@ -39,8 +39,10 @@ gridInteraction.emitter.on("add_cell_by_cursor", ({ detail }) => {
     if (palette.isAnAssetSelected()) {
         const assetID = palette.getCurrentAssetID();
         const asset = _assets.getByID(assetID);
-        sceneObjectList.addSceneObject(detail, asset);
-        objToDraw = { obj: asset, type: "asset" };
+        const prop = sceneObjectList.addSceneObject(detail, asset);
+        if (prop) {
+            objToDraw = { obj: prop, type: "asset" };
+        }
     } 
     else if (gameObjectList.isAnObjectSelected()) {
         const objectID = gameObjectList.getCurrentObjectID();
@@ -52,9 +54,11 @@ gridInteraction.emitter.on("add_cell_by_cursor", ({ detail }) => {
 });
 
 gridInteraction.emitter.on("remove_cell_by_cursor", ({ detail }) => {
-    sceneObjectList.removeSceneObject(detail.id);
-    console.log(sceneObjectList.sceneObjects)
-    grid.removeCellByCursor(detail);
+    const prop = grid.getCellByCursor(detail).getObject();
+    if (prop) {
+        sceneObjectList.removeSceneObject(prop.obj.getID());
+        grid.removeCellByCursor(detail);
+    }
 });
 
 gridInteraction.emitter.on("add_row", () => {

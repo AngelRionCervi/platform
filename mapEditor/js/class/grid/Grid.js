@@ -1,6 +1,7 @@
 import { Cell } from './Cell.js';
 import { GridNormalization } from './GridNormalization.js';
 import * as plshelp from '../../lib/helpers.js';
+import { _GLOBALS_ } from "../../lib/globals.js";
 
 const gridNormal = new GridNormalization();
 
@@ -10,7 +11,7 @@ export class Grid {
         this.ctx = ctx;
         this.gridWidth = 1024;
         this.gridHeight = 576;
-        this.blockSize = 32;
+        this.blockSize = _GLOBALS_.blockSize;
         this.colliderW = 3;
         this.gridCoords;
         this.cellFillStyle = "black";

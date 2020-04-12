@@ -57,4 +57,8 @@ export class Cell {
             this.ctx.closePath();
         }
     }
+
+    getObject() {
+        return this.asset;
+    }
 }
