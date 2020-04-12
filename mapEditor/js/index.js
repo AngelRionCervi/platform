@@ -68,8 +68,9 @@ paletteInteraction.emitter.on("palette_assets_received", async (files) => {
 });
 
 paletteInteraction.emitter.on("palette_asset_change", ({ detail }) => {
+    palette.selectAsset(detail.asset);
     palette.styleSelectedCell(detail.target);
-    palette.setCurrentAssetID(detail.asset);
+    gameObjectList.resetSelection();
 });
 
 paletteInteraction.emitter.on("palette_directory_back", () => {
@@ -93,7 +94,9 @@ contextMenu.emitter.on("remove_game_object", ({ detail }) => {
 });
 
 gameObjectListInteraction.emitter.on("game_object_click", ({ detail }) => {
-   console.log(detail)
+    gameObjectList.selectObject(detail.object);
+    gameObjectList.styleDomNode(detail.target);
+    palette.resetSelection();
 });
 
 gameObjectListInteraction.emitter.on("game_object_context_toggle", ({ detail }) => {

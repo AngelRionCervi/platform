@@ -6,7 +6,7 @@ export class GameObjectListInteraction {
     }
 
     handleGameObjectClick(e, object) {
-        this.emitter.emit("game_object_click", object);
+        this.emitter.emit("game_object_click", { target: e.target, object: object });
     }
 
     handleGameObjectContextClick(e, object) {
@@ -15,9 +15,6 @@ export class GameObjectListInteraction {
             x: e.pageX,
             y: e.pageY,
         };
-
         this.emitter.emit("game_object_context_toggle", { object, coord });
-
-        return false;
     }
 }

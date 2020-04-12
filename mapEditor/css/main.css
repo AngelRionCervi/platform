@@ -103,6 +103,10 @@ body {
     border: 4px solid transparent;
 }
 
+.game-object-cell-target {
+    border: 4px solid blue;
+}
+
 .context-menu {
     width: 200px;
     background-color: white;

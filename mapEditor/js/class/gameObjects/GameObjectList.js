@@ -9,6 +9,7 @@ export class GameObjectList {
         this.domEl = document.getElementById("game_objects_container");
         this.prevObjectsIDs = [];
         this.objects = [];
+        this.curSelected = null;
     }
 
     addObject({ path, name, id }) {
@@ -30,7 +31,7 @@ export class GameObjectList {
 
         const toAdd = currentIDs.filter((el) => !prevIDs.includes(el));
         const toRemove = prevIDs.filter((el) => !currentIDs.includes(el));
-      
+
         toAdd.forEach((id) => {
             this.buildDomNode(this.getObjectById(id));
         });
@@ -72,6 +73,31 @@ export class GameObjectList {
     removeDomNode(id) {
         const el = document.getElementById("go_" + id);
         el.remove();
+    }
+
+    selectObject(object) {
+        if (this.curSelectedID !== object.getID()) {
+            this.curSelectedID = object.getID();
+        }
+    }
+
+    styleDomNode(target) {
+        while (!target.classList.contains("game-object-cell")) {
+            target = target.parentElement;
+        }
+        this.removeSelectedStyle();
+        target.classList.add("game-object-cell-target");
+    }
+
+    removeSelectedStyle() {
+        Array.from(document.getElementsByClassName("game-object-cell-target")).forEach((cell) => {
+            cell.classList.remove("game-object-cell-target");
+        });
+    }
+
+    resetSelection() {
+        this.curSelectedID = null;
+        this.removeSelectedStyle();
     }
 
     getObjectById(id) {

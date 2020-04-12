@@ -41,7 +41,6 @@ export class PaletteInteraction {
             y: e.pageY
         };
         this.emitter.emit('palette_context_toggle', { coord, asset });
-        return false;
     }
 
     handleDirectoryClick(e, directory) {
