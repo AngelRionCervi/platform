@@ -6,7 +6,7 @@ export class Cell {
         this.y = y;
         this.blockType = blockType;
         this.blockSize = blockSize;
-        this.cellFillStyle = 'white';
+        this.cellFillStyle = "white";
         this.lineWidth = 0.5;
         this.asset = asset;
     }
@@ -23,6 +23,15 @@ export class Cell {
         this.asset = asset;
     }
 
+    resetCell() {
+        this.cellFillStyle = "white";
+        this.ctx.beginPath();
+        this.ctx.rect(this.x + 1, this.y + 1, this.blockSize - 1, this.blockSize - 1);
+        this.ctx.fillStyle = this.cellFillStyle;
+        this.ctx.fill();
+        this.ctx.closePath();
+    }
+
     fillCell() {
         this.ctx.imageSmoothingEnabled = false;
 
@@ -34,24 +43,13 @@ export class Cell {
         this.ctx.stroke();
         this.ctx.closePath();
 
-        if (this.blockType === 'air') {
-          
-            this.cellFillStyle = "white"
+        if (this.blockType === "air") {
+            this.resetCell();
+        } else if (this.asset) {
+            this.resetCell();
             this.ctx.beginPath();
-            this.ctx.rect(this.x + 1, this.y + 1, this.blockSize - 1, this.blockSize - 1);
-            this.ctx.fillStyle = this.cellFillStyle;
-            this.ctx.fill();
+            this.ctx.drawImage(this.asset.sprite, this.x, this.y);
             this.ctx.closePath();
         }
-        else if (this.asset.id) {
-            const image = new Image();
-            image.src = this.asset.path;
-            image.onload = () => {
-                this.ctx.beginPath();
-                this.ctx.drawImage(image, this.x, this.y);
-                this.ctx.closePath();
-            }
-        }
     }
-
 }

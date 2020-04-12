@@ -10,7 +10,7 @@ export class Palette {
         this.authorizedExensions = ['png', 'jpg'];
         this.assets;
         this.paletteContainer = document.getElementById('palette_container');
-        this.currentAsset = { id: '' };
+        this.currentAssetID = '';
 
         this.dirInfo = {
             rootDir: null,
@@ -155,14 +155,14 @@ export class Palette {
         target.classList.add('palette-cell-target');
     }
 
-    setCurrentAsset(asset) {
-        if (asset.id !== this.currentAsset.id) {
-            this.currentAsset = asset;
+    setCurrentAssetID(asset) {
+        if (asset.id !== this.currentAssetID) {
+            this.currentAssetID = asset.id;
         }
     }
 
-    getCurrentAsset() {
-        return this.currentAsset;
+    getCurrentAssetID() {
+        return this.currentAssetID;
     }
 
     getDirInfo() {

@@ -6,6 +6,7 @@ import { ContextMenu } from "/mapEditor/js/class/general/ContextMenu.js";
 import { Project } from "/mapEditor/js/class/project/userProject.js";
 import { GridInteraction } from "/mapEditor/js/class/grid/GridInteraction.js";
 import { Grid } from "/mapEditor/js/class/grid/Grid.js";
+import { Assets } from "./class/project/Assets.js";
 import { MapDownloader } from "/mapEditor/js/class/download/MapDownloader.js";
 import { Palette } from "/mapEditor/js/class/palette/Palette.js";
 import { PaletteInteraction } from "/mapEditor/js/class/palette/PaletteInteraction.js";
@@ -20,6 +21,7 @@ const palette = new Palette(paletteInteraction);
 const mapDownloader = new MapDownloader(canvas);
 const contextMenu = new ContextMenu(paletteInteraction);
 const gameObjectList = new GameObjectList();
+const _assets = new Assets();
 
 let project;
 
@@ -28,7 +30,8 @@ paletteInteraction.watchDrop();
 paletteInteraction.watchDirectoryBack();
 
 gridInteraction.emitter.on("add_cell_by_cursor", ({ detail }) => {
-    const asset = palette.getCurrentAsset();
+    const assetID = palette.getCurrentAssetID();
+    const asset = _assets.getByID(assetID);
     grid.addCellByCursor(detail, asset);
 });
 
@@ -65,7 +68,7 @@ paletteInteraction.emitter.on("palette_assets_received", async (files) => {
 
 paletteInteraction.emitter.on("palette_asset_change", ({ detail }) => {
     palette.styleSelectedCell(detail.target);
-    palette.setCurrentAsset(detail.asset);
+    palette.setCurrentAssetID(detail.asset);
 });
 
 paletteInteraction.emitter.on("palette_directory_back", () => {
@@ -88,7 +91,8 @@ fetch("http://localhost:5000/getAssets")
     .then((res) => {
         return res.json();
     })
-    .then((assets) => {
+    .then(async (assets) => {
+        await _assets.createCollection(assets);
         project = new Project(assets.projectID);
         palette.buildFrom(assets.res, assets.rootDir, assets.fullPath);
     });
