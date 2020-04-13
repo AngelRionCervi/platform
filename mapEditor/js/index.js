@@ -33,6 +33,7 @@ const _assets = new Assets();
 let project = null;
 let keys = _keyboard.initKeys();
 
+grid.init();
 grid.create();
 _keyboard.listen();
 paletteInteraction.watchDrop();
@@ -47,7 +48,7 @@ gridInteraction.emitter.on("grid_left_click", ({ detail }) => {
     if (keys.ctrl) {
         grid.newPanPoint(detail);
     } else {
-        handleGridObjLeftClick(detail);
+        handle_Grid_Left_Click_Drawing(detail);
     }
 });
 
@@ -55,7 +56,7 @@ gridInteraction.emitter.on("grid_right_click", ({ detail }) => {
     if (keys.ctrl) {
         return;
     } else {
-        hanldeGridObjRightClick(detail)
+        hanlde_Grid_Right_Click_Drawing(detail);
     }
 });
 
@@ -63,7 +64,7 @@ gridInteraction.emitter.on("grid_left_move", ({ detail }) => {
     if (keys.ctrl) {
         grid.pan(detail);
     } else {
-        handleGridObjLeftClick(detail);
+        handle_Grid_Left_Click_Drawing(detail);
     }
 });
 
@@ -71,44 +72,9 @@ gridInteraction.emitter.on("grid_right_move", ({ detail }) => {
     if (keys.ctrl) {
         return;
     } else {
-        hanldeGridObjRightClick(detail)
+        hanlde_Grid_Right_Click_Drawing(detail);
     }
 });
-
-function handleGridObjLeftClick(detail) {
-    // detail is coord
-    let objToDraw = null;
-    if (palette.isAnAssetSelected()) {
-        const assetID = palette.getCurrentAssetID();
-        const asset = _assets.getByID(assetID);
-        const prop = sceneObjectList.addSceneObject(detail, asset);
-        if (prop) {
-            objToDraw = { obj: prop, type: "sceneObject" };
-        }
-    } else if (gameObjectList.isAnObjectSelected()) {
-        const objectID = gameObjectList.getCurrentObjectID();
-        const prop = gameObjectList.addGameObjectToScene(detail, objectID);
-        if (prop) {
-            objToDraw = { obj: prop, type: "gameObject" };
-        }
-    }
-    if (!objToDraw) return;
-
-    grid.addCellByCursor(detail, objToDraw);
-}
-
-function hanldeGridObjRightClick(detail) {
-    const prop = grid.getCellByCursor(detail).getObject();
-    if (prop) {
-        if (prop.type === "gameObject") {
-            gameObjectList.removeShowGameObject(prop.obj.getUniqID());
-        } else {
-            sceneObjectList.removeSceneObject(prop.obj.getID());
-        }
-
-        grid.removeCellByCursor(detail); // visually removes the sprite;
-    }
-}
 
 gridInteraction.emitter.on("add_row", () => {
     grid.addRow();
@@ -194,3 +160,42 @@ document.addEventListener('drop', function(e) {
     e.preventDefault();
     console.log(e)
 })*/
+
+
+
+
+// top level handler
+
+function handle_Grid_Left_Click_Drawing(coord) {
+    let objToDraw = null;
+    if (palette.isAnAssetSelected()) {
+        const assetID = palette.getCurrentAssetID();
+        const asset = _assets.getByID(assetID);
+        const prop = sceneObjectList.addSceneObject(coord, asset);
+        if (prop) {
+            objToDraw = { obj: prop, type: "sceneObject" };
+        }
+    } else if (gameObjectList.isAnObjectSelected()) {
+        const objectID = gameObjectList.getCurrentObjectID();
+        const prop = gameObjectList.addGameObjectToScene(coord, objectID);
+        if (prop) {
+            objToDraw = { obj: prop, type: "gameObject" };
+        }
+    }
+    if (!objToDraw) return;
+
+    grid.addCellByCursor(coord, objToDraw);
+}
+
+function hanlde_Grid_Right_Click_Drawing(coord) {
+    const prop = grid.getCellByCursor(coord).getObject();
+    if (prop) {
+        if (prop.type === "gameObject") {
+            gameObjectList.removeShowGameObject(prop.obj.getUniqID());
+        } else {
+            sceneObjectList.removeSceneObject(prop.obj.getID());
+        }
+
+        grid.removeCellByCursor(coord); // visually removes the sprite;
+    }
+}

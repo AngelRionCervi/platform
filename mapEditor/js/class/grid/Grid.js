@@ -10,8 +10,8 @@ export class Grid {
         this.canvas = canvas;
         this.ctx = ctx;
         this.origin = { x: 0, y: 0 };
-        this.gridWidth = 1024;
-        this.gridHeight = 576;
+        this.gridWidth = 3200;
+        this.gridHeight = 2048;
         this.viewPortWidth = 1024;
         this.viewPortHeight = 576;
         this.blockSize = _GLOBALS_.blockSize;
@@ -21,67 +21,82 @@ export class Grid {
         this.panning = false;
 
         this.xOffset = 0;
-        this.yOffset = 0
+        this.yOffset = 0;
     }
 
-    create(prevCoords = []) {;
+    init() {
         this.gridCoords = new Array(this.gridWidth / this.blockSize);
 
         for (let u = 0; u < this.gridCoords.length; u++) {
             this.gridCoords[u] = new Array(this.gridHeight / this.blockSize);
         }
-
-        this.canvas.width = this.gridWidth;
-        this.canvas.height = this.gridHeight;
-
         let idStart = 0;
-
-        for (let x = this.xOffset; x < this.viewPortWidth; x += this.blockSize) {
-            for (let y = this.yOffset; y < this.viewPortHeight; y += this.blockSize) {
-                const id = (x + y) / this.blockSize + idStart;
-                let cellObj = new Cell(this.ctx, id, x, y, "air", this.blockSize, null);
-
-                if (prevCoords[x / this.blockSize] && prevCoords[x / this.blockSize][y / this.blockSize]) {
-                    const prevCellObj = prevCoords[x / this.blockSize][y / this.blockSize];
-                    prevCellObj.id = (x + y) / this.blockSize + idStart;
-                    cellObj = prevCellObj;
-                }
-
-                let gridX = Math.round((x - this.xOffset) / this.blockSize);
-                let gridY = Math.round((y - this.yOffset) / this.blockSize);
-                if (gridX > 31) gridX = 31;
-                if (gridY > 20) gridY = 20;
-                this.gridCoords[gridX][gridY] = cellObj;
+        for (let x = 0; x < this.gridWidth / this.blockSize; x++) {
+            for (let y = 0; y < this.gridHeight / this.blockSize; y++) {
+                const id = x + y + idStart;
+                const cellObj = new Cell(
+                    this.ctx,
+                    id,
+                    x * this.blockSize,
+                    y * this.blockSize,
+                    x,
+                    y,
+                    "air",
+                    this.blockSize,
+                    null
+                );
+                this.gridCoords[x][y] = cellObj;
             }
-
             const minSide = Math.min(this.gridWidth, this.gridHeight);
-            idStart += minSide / this.blockSize - 1;
+            idStart += minSide - 1;
         }
 
-        this.fillAllCells();
+        this.canvas.width = this.viewPortWidth;
+        this.canvas.height = this.viewPortHeight;
+
+        console.log(this.gridCoords);
     }
 
-    fillAllCells() {
-        this.gridCoords.flat().forEach((cellObj) => {
+    create(prevCoords = []) {
+        const cellToRender = [];
+        this.ctx.fillStyle = "white";
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height)
+
+        for (let x = this.xOffset / this.blockSize; x < this.viewPortWidth / this.blockSize; x++) {
+            for (let y = this.yOffset / this.blockSize; y < this.viewPortHeight / this.blockSize; y++) {
+                const gridX = x * this.blockSize - this.xOffset;
+                const gridY = y * this.blockSize - this.yOffset;
+                let n = Math.round(gridX / this.blockSize);
+                let m = Math.round(gridY / this.blockSize);
+                if (n < 0) n = 0;
+                if (m < 0) m = 0;
+
+                const cell = this.gridCoords[n][m];
+                cell.xOffset = this.xOffset;
+                cell.yOffset = this.yOffset;
+                cellToRender.push(cell);
+            }
+        }
+
+        this.fillAllCells(cellToRender);
+    }
+
+    fillAllCells(cellToRender) {
+        cellToRender.flat().forEach((cellObj) => {
             cellObj.fillCell();
         });
     }
 
     newPanPoint(curPos) {
-        
-            this.panning = true;
-            this.origin.x = curPos.x - this.xOffset;
-            this.origin.y = curPos.y - this.yOffset;
-        
+        this.panning = true;
+        this.origin.x = curPos.x - this.xOffset;
+        this.origin.y = curPos.y - this.yOffset;
     }
 
     pan(curPos) {
-        
         this.xOffset = -Math.round(this.origin.x - curPos.x);
         this.yOffset = -Math.round(this.origin.y - curPos.y);
-        console.log(this.xOffset, this.yOffset)
-        console.log("panning");
-        this.create([]);
+        this.create();
     }
 
     stopPan() {
@@ -89,20 +104,19 @@ export class Grid {
     }
 
     getCellByCursor(cursorPos) {
-        const roundX = plshelp.roundToPrevMult(cursorPos.x, this.blockSize);
-        const roundY = plshelp.roundToPrevMult(cursorPos.y, this.blockSize);
+        const x = plshelp.roundToPrevMult(Math.round(cursorPos.x - this.xOffset), this.blockSize);
+        const y = plshelp.roundToPrevMult(Math.round(cursorPos.y - this.yOffset), this.blockSize);
         const flatCoord = this.gridCoords.flat();
-        const targetCell = flatCoord.find((n) => n.x === roundX && n.y === roundY);
-
+        const targetCell = flatCoord.find((n) => n.absX === x && n.absY === y);
+        //console.log(cursorPos, targetCell, x, y, flatCoord);
         return targetCell;
     }
 
     addCellByCursor(cursorPos, object) {
         const cell = this.getCellByCursor(cursorPos);
-        /*
-        cell.setBlockType('wall');
+        cell.setBlockType("wall");
         cell.setAsset(object);
-        cell.fillCell();*/
+        cell.fillCell();
     }
 
     removeCellByCursor(cursorPos) {
