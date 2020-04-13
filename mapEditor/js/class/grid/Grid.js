@@ -57,12 +57,14 @@ export class Grid {
         console.log(this.gridCoords);
     }
 
-    create() {
-        const cellToRender = [];
+    resetCanvas() {
         this.ctx.fillStyle = "white";
-       
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height)
-        console.log(this.xOffset / this.blockSize, this.yOffset / this.blockSize)
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    }
+
+    getCellToRender() {
+        const cellToRender = [];
+        
         for (let x = this.xOffset / this.blockSize; x < this.viewPortWidth / this.blockSize; x++) {
             for (let y = this.yOffset / this.blockSize; y < this.viewPortHeight / this.blockSize; y++) {
                 if (x >= -1 && y >= -1) {
@@ -82,11 +84,19 @@ export class Grid {
                 }
             }
         }
-        console.log('cell rendered', cellToRender.length)
-        this.fillAllCells(cellToRender);
+
+        return cellToRender;
+    }
+
+    create() {
+        const c = this.getCellToRender();
+
+        console.log('cell rendered : ', c.length)
+        this.fillAllCells(c);
     }
 
     fillAllCells(cellToRender) {
+        this.resetCanvas();
         cellToRender.flat().forEach((cellObj) => {
             cellObj.fillCell();
         });
@@ -118,11 +128,11 @@ export class Grid {
     }
 
     getCellByCursor(cursorPos) {
-        const x = plshelp.roundToPrevMult(Math.round(cursorPos.x - this.xOffset), this.blockSize);
-        const y = plshelp.roundToPrevMult(Math.round(cursorPos.y - this.yOffset), this.blockSize);
-        const flatCoord = this.gridCoords.flat();
-        const targetCell = flatCoord.find((n) => n.absX === x && n.absY === y);
-        //console.log(cursorPos, targetCell, x, y, flatCoord);
+        const x = plshelp.roundToPrevMult(Math.round(cursorPos.x + this.xOffset), this.blockSize);
+        const y = plshelp.roundToPrevMult(Math.round(cursorPos.y + this.yOffset), this.blockSize);
+        const flatCoord = this.getCellToRender().flat();
+        const targetCell = flatCoord.find((n) => n.tx() === x && n.ty() === y);
+        console.log(targetCell, x, y, flatCoord);
         return targetCell;
     }
 
