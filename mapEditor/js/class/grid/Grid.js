@@ -57,27 +57,32 @@ export class Grid {
         console.log(this.gridCoords);
     }
 
-    create(prevCoords = []) {
+    create() {
         const cellToRender = [];
         this.ctx.fillStyle = "white";
+       
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height)
-
+        console.log(this.xOffset / this.blockSize, this.yOffset / this.blockSize)
         for (let x = this.xOffset / this.blockSize; x < this.viewPortWidth / this.blockSize; x++) {
             for (let y = this.yOffset / this.blockSize; y < this.viewPortHeight / this.blockSize; y++) {
-                const gridX = x * this.blockSize - this.xOffset;
-                const gridY = y * this.blockSize - this.yOffset;
-                let n = Math.round(gridX / this.blockSize);
-                let m = Math.round(gridY / this.blockSize);
-                if (n < 0) n = 0;
-                if (m < 0) m = 0;
-
-                const cell = this.gridCoords[n][m];
-                cell.xOffset = this.xOffset;
-                cell.yOffset = this.yOffset;
-                cellToRender.push(cell);
+                if (x >= -1 && y >= -1) {
+                    const gridX = x * this.blockSize - this.xOffset;
+                    const gridY = y * this.blockSize - this.yOffset;
+                    let n = Math.round(gridX / this.blockSize);
+                    let m = Math.round(gridY / this.blockSize);
+                    if (n < 0) n = 0;
+                    if (m < 0) m = 0;
+                    if (n >= this.gridWidth / this.blockSize) n = (this.gridWidth / this.blockSize) -1;
+                    if (m >= this.gridHeight / this.blockSize) m = (this.gridHeight / this.blockSize) -1;
+    
+                    const cell = this.gridCoords[n][m];
+                    cell.xOffset = this.xOffset;
+                    cell.yOffset = this.yOffset;
+                    cellToRender.push(cell);
+                }
             }
         }
-
+        console.log('cell rendered', cellToRender.length)
         this.fillAllCells(cellToRender);
     }
 
@@ -96,6 +101,15 @@ export class Grid {
     pan(curPos) {
         this.xOffset = -Math.round(this.origin.x - curPos.x);
         this.yOffset = -Math.round(this.origin.y - curPos.y);
+        if (this.xOffset > 0 || this.yOffset > 0) {
+            if (this.xOffset > 0) {
+                this.xOffset = 0;
+            }
+            if (this.yOffset > 0) {
+                this.yOffset = 0;
+            }
+            this.newPanPoint(curPos);
+        }
         this.create();
     }
 
