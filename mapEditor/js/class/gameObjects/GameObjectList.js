@@ -1,5 +1,7 @@
 import { GameObject } from "/mapEditor/js/class/gameObjects/GameObject.js";
+import { ShowGameObject } from "/mapEditor/js/class/gameObjects/ShowGameObject.js";
 import { DomBuilder } from "../../lib/DomBuilder.js";
+import { _GLOBALS_ } from "../../lib/globals.js";
 import * as helper from "../../lib/helpers.js";
 const dob = new DomBuilder();
 
@@ -8,25 +10,56 @@ export class GameObjectList {
         this.interaction = interaction;
         this.domEl = document.getElementById("game_objects_container");
         this.prevObjectsIDs = [];
-        this.objects = [];
+        this.curDisplayed = [];
+        this.gameObjects = [];
         this.curSelectedID = null;
     }
 
-    addObject(asset) {
+    addGameObject(asset) {
         const object = new GameObject(asset);
 
-        this.objects.push(object);
+        this.gameObjects.push(object);
         this.updateDomList();
     }
 
+    addGameObjectToScene(coord, id) {
+        const curGameObject = this.getByID(this.curSelectedID);
+        const curShowGameObject = this.getByCoord(coord);
+        const choseObj = this.getByID(id);
+        
+        let gameObjectShow = null;
+        if (!curShowGameObject) {
+            gameObjectShow = new ShowGameObject(id, choseObj.getAsset(), coord);
+        } else if (curShowGameObject && curGameObject.getID() !== id) {
+            this.removeShowGameObject(curShowGameObject.getUniqID());
+            gameObjectShow = new ShowGameObject(id, choseObj.getAsset(), coord);
+        } else {
+            return false;
+        }
+
+        this.curDisplayed.push(gameObjectShow);
+        return gameObjectShow;
+    }
+
+    removeShowGameObject(id) {
+        const curIDs = this.curDisplayed.map((el) => el.getUniqID());
+        const index = curIDs.indexOf(id);
+        if (index !== -1) {
+            this.curDisplayed.splice(index, 1);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     removeObject(id) {
-        const curIds = this.objects.map((el) => el.getID());
-        this.objects.splice(curIds.indexOf(id), 1);
+        const curIds = this.gameObjects.map((el) => el.getID());
+        this.gameObjects.splice(curIds.indexOf(id), 1);
         this.updateDomList();
     }
 
     updateDomList() {
-        const currentIDs = this.objects.map((el) => el.id);
+        const currentIDs = this.gameObjects.map((el) => el.id);
         const prevIDs = this.prevObjectsIDs;
 
         const toAdd = currentIDs.filter((el) => !prevIDs.includes(el));
@@ -39,7 +72,7 @@ export class GameObjectList {
             this.removeDomNode(id);
         });
 
-        this.prevObjectsIDs = this.objects.map((el) => el.id);
+        this.prevObjectsIDs = this.gameObjects.map((el) => el.id);
     }
 
     buildDomNode(object) {
@@ -49,7 +82,7 @@ export class GameObjectList {
         }
         const nameNode = dob.createNode("div", "game-object-name", null, name);
         const imageNode = dob.createNode("img", "game-object-img");
-        imageNode.src = object.getSpritePath();
+        imageNode.src = object.getAsset().getSpritePath();
         const leftListener = {
             type: "click",
             callback: this.interaction.handleGameObjectClick.bind(this.interaction),
@@ -109,6 +142,20 @@ export class GameObjectList {
     }
 
     getByID(id) {
-        return this.objects.find((el) => el.id === id);
+        return this.gameObjects.find((el) => el.id === id);
+    }
+
+    getAllIDs() {
+        return this.gameObjects.map((el) => el.id);
+    }
+
+    getByCoord(coord) {
+        const x = helper.roundToPrevMult(coord.x, _GLOBALS_.blockSize);
+        const y = helper.roundToPrevMult(coord.y, _GLOBALS_.blockSize);
+        return this.curDisplayed.find((el) => x === el.coord.x && y === el.coord.y);
+    }
+
+    getCurDisplayed() {
+        return this.curDisplayed;
     }
 }

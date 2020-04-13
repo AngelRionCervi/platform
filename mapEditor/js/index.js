@@ -34,29 +34,37 @@ grid.create();
 paletteInteraction.watchDrop();
 paletteInteraction.watchDirectoryBack();
 
-gridInteraction.emitter.on("add_cell_by_cursor", ({ detail }) => {
+gridInteraction.emitter.on("add_cell_by_cursor", ({ detail }) => { // detail is coord
     let objToDraw = null;
     if (palette.isAnAssetSelected()) {
         const assetID = palette.getCurrentAssetID();
         const asset = _assets.getByID(assetID);
         const prop = sceneObjectList.addSceneObject(detail, asset);
         if (prop) {
-            objToDraw = { obj: prop, type: "asset" };
+            objToDraw = { obj: prop, type: "sceneObject" };
         }
     } 
     else if (gameObjectList.isAnObjectSelected()) {
         const objectID = gameObjectList.getCurrentObjectID();
-        objToDraw = { obj: gameObjectList.getByID(objectID), type: "object" };
+        const prop = gameObjectList.addGameObjectToScene(detail, objectID);
+        if (prop) {
+            objToDraw = { obj: prop, type: "gameObject" };
+        }
     }
     if (!objToDraw) return;
-
+    console.log(gameObjectList.gameObjects, gameObjectList.curDisplayed)
     grid.addCellByCursor(detail, objToDraw);
 });
 
 gridInteraction.emitter.on("remove_cell_by_cursor", ({ detail }) => {
     const prop = grid.getCellByCursor(detail).getObject();
     if (prop) {
-        sceneObjectList.removeSceneObject(prop.obj.getID());
+        if (prop.type === "gameObject") {
+            gameObjectList.removeShowGameObject(prop.obj.getUniqID());
+        } else {
+            sceneObjectList.removeSceneObject(prop.obj.getID());
+        }
+        
         grid.removeCellByCursor(detail);
     }
 });
@@ -108,7 +116,7 @@ paletteInteraction.emitter.on("palette_context_toggle", ({ detail }) => {
 
 contextMenu.emitter.on("new_game_object", ({ detail }) => {
     const asset = _assets.getByID(detail.id);
-    gameObjectList.addObject(asset);
+    gameObjectList.addGameObject(asset);
 });
 
 contextMenu.emitter.on("remove_game_object", ({ detail }) => {

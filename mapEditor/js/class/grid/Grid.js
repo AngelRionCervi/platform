@@ -68,7 +68,6 @@ export class Grid {
     }
 
     addCellByCursor(cursorPos, object) {
-        console.log(object)
         const cell = this.getCellByCursor(cursorPos);
         cell.setBlockType('wall');
         cell.setAsset(object);

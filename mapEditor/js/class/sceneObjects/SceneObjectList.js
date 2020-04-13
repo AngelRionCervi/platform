@@ -25,11 +25,14 @@ export class SceneObjectList {
     }
 
     removeSceneObject(id) {
-        const curIds = this.sceneObjects.map((el) => el.getID());
-        const index = curIds.indexOf(id);
+        const curIDs = this.sceneObjects.map((el) => el.getID());
+        const index = curIDs.indexOf(id);
 
         if (index !== -1) {
             this.sceneObjects.splice(index, 1);
+            return true;
+        } else {
+            return false;
         }
     }
 

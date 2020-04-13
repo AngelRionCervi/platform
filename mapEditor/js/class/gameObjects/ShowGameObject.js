@@ -1,22 +1,20 @@
-import * as helper from "../../lib/helpers.js";
+import { GameObject } from "./GameObject.js";
 import { _GLOBALS_ } from "../../lib/globals.js";
+import * as helper from "../../lib/helpers.js";
 
-export class SceneObject {
-    constructor(coord, asset) {
+export class ShowGameObject {
+    constructor(goID, asset, coord) {
         this.asset = asset;
         this.coord = {
             x: helper.roundToPrevMult(coord.x, _GLOBALS_.blockSize),
             y: helper.roundToPrevMult(coord.y, _GLOBALS_.blockSize),
         };
-        this.id = "so_" + asset.getID() + "_" + helper.uniqid();
+        this.goID = goID;
+        this.uniqid = "ou_" + helper.uniqid();
     }
 
-    getID() {
-        return this.id;
-    }
-
-    getCoord() {
-        return this.coord;
+    getUniqID() {
+        return this.uniqid;
     }
 
     getAsset() {

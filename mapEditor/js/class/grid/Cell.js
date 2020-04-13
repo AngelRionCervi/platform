@@ -1,5 +1,5 @@
 export class Cell {
-    constructor(ctx, id, x, y, blockType, blockSize, asset) {
+    constructor(ctx, id, x, y, blockType, blockSize, prop) {
         this.ctx = ctx;
         this.id = id;
         this.x = x;
@@ -8,7 +8,7 @@ export class Cell {
         this.blockSize = blockSize;
         this.cellFillStyle = "white";
         this.lineWidth = 0.5;
-        this.asset = asset;
+        this.prop = prop;
     }
 
     getCoords() {
@@ -19,8 +19,8 @@ export class Cell {
         this.blockType = type;
     }
 
-    setAsset(asset) {
-        this.asset = asset;
+    setAsset(prop) {
+        this.prop = prop;
     }
 
     resetCell() {
@@ -40,7 +40,7 @@ export class Cell {
         this.ctx.lineTo(this.lineWidth + this.x + this.blockSize, this.lineWidth + this.y);
         this.ctx.lineTo(this.lineWidth + this.x + this.blockSize, this.lineWidth + this.y + this.blockSize);
 
-        if (this.asset && this.asset.type === "object") {
+        if (this.prop && this.prop.type === "gameObject") {
             this.ctx.strokeStyle = "red";
         } else {
             this.ctx.strokeStyle = "black";
@@ -50,15 +50,17 @@ export class Cell {
 
         if (this.blockType === "air") {
             this.resetCell();
-        } else if (this.asset) {
+        } else if (this.prop) {
             this.resetCell();
+            console.log(this.prop)
+            const sprite = this.prop.obj.getAsset().getSprite();
             this.ctx.beginPath();
-            this.ctx.drawImage(this.asset.obj.getSprite(), this.x, this.y);
+            this.ctx.drawImage(sprite, this.x, this.y);
             this.ctx.closePath();
         }
     }
 
     getObject() {
-        return this.asset;
+        return this.prop;
     }
 }
