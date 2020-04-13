@@ -2,22 +2,24 @@ const canvas = document.getElementById("mapEditorCanvas");
 const ctx = canvas.getContext("2d");
 
 import { Emitter } from "/mapEditor/js/lib/Emitter.js";
-import { ContextMenu } from "/mapEditor/js/class/general/ContextMenu.js";
-import { Project } from "/mapEditor/js/class/project/userProject.js";
-import { GridInteraction } from "/mapEditor/js/class/grid/GridInteraction.js";
-import { Grid } from "/mapEditor/js/class/grid/Grid.js";
+import { ContextMenu } from "./class/general/ContextMenu.js";
+import { Keyboard } from "./class/keyboardHandling/Keyboard.js";
+import { Project } from "./class/project/userProject.js";
+import { GridInteraction } from "./class/grid/GridInteraction.js";
+import { Grid } from "./class/grid/Grid.js";
 import { Assets } from "./class/project/Assets.js";
-import { MapDownloader } from "/mapEditor/js/class/download/MapDownloader.js";
-import { Palette } from "/mapEditor/js/class/palette/Palette.js";
-import { PaletteInteraction } from "/mapEditor/js/class/palette/PaletteInteraction.js";
+import { MapDownloader } from "./class/download/MapDownloader.js";
+import { Palette } from "./class/palette/Palette.js";
+import { PaletteInteraction } from "./class/palette/PaletteInteraction.js";
 import { SceneObjectList } from "./class/sceneObjects/SceneObjectList.js";
 import { SceneObjectListInteraction } from "./class/sceneObjects/SceneObjectListInteraction.js";
-import { GameObjectList } from "/mapEditor/js/class/gameObjects/GameObjectList.js";
-import { GameObjectListInteraction } from "/mapEditor/js/class/gameObjects/GameObjectListInteraction.js";
+import { GameObjectList } from "./class/gameObjects/GameObjectList.js";
+import { GameObjectListInteraction } from "./class/gameObjects/GameObjectListInteraction.js";
 
 const gridInteraction = new GridInteraction();
 const grid = new Grid(canvas, ctx);
 
+const _keyboard = new Keyboard();
 const paletteInteraction = new PaletteInteraction();
 const palette = new Palette(paletteInteraction);
 const mapDownloader = new MapDownloader(canvas);
@@ -28,13 +30,53 @@ const sceneObjectListInteraction = new SceneObjectListInteraction();
 const sceneObjectList = new SceneObjectList(sceneObjectListInteraction);
 const _assets = new Assets();
 
-let project;
+let project = null;
+let keys = _keyboard.initKeys();
 
 grid.create();
+_keyboard.listen();
 paletteInteraction.watchDrop();
 paletteInteraction.watchDirectoryBack();
 
-gridInteraction.emitter.on("add_cell_by_cursor", ({ detail }) => { // detail is coord
+_keyboard.emitter.on("keyboard_input_change", ({ detail }) => {
+    keys = detail;
+    if (!keys.ctrl) grid.stopPan();
+});
+
+gridInteraction.emitter.on("grid_left_click", ({ detail }) => {
+    if (keys.ctrl) {
+        grid.newPanPoint(detail);
+    } else {
+        handleGridObjLeftClick(detail);
+    }
+});
+
+gridInteraction.emitter.on("grid_right_click", ({ detail }) => {
+    if (keys.ctrl) {
+        return;
+    } else {
+        hanldeGridObjRightClick(detail)
+    }
+});
+
+gridInteraction.emitter.on("grid_left_move", ({ detail }) => {
+    if (keys.ctrl) {
+        grid.pan(detail);
+    } else {
+        handleGridObjLeftClick(detail);
+    }
+});
+
+gridInteraction.emitter.on("grid_right_move", ({ detail }) => {
+    if (keys.ctrl) {
+        return;
+    } else {
+        hanldeGridObjRightClick(detail)
+    }
+});
+
+function handleGridObjLeftClick(detail) {
+    // detail is coord
     let objToDraw = null;
     if (palette.isAnAssetSelected()) {
         const assetID = palette.getCurrentAssetID();
@@ -43,8 +85,7 @@ gridInteraction.emitter.on("add_cell_by_cursor", ({ detail }) => { // detail is 
         if (prop) {
             objToDraw = { obj: prop, type: "sceneObject" };
         }
-    } 
-    else if (gameObjectList.isAnObjectSelected()) {
+    } else if (gameObjectList.isAnObjectSelected()) {
         const objectID = gameObjectList.getCurrentObjectID();
         const prop = gameObjectList.addGameObjectToScene(detail, objectID);
         if (prop) {
@@ -54,9 +95,9 @@ gridInteraction.emitter.on("add_cell_by_cursor", ({ detail }) => { // detail is 
     if (!objToDraw) return;
 
     grid.addCellByCursor(detail, objToDraw);
-});
+}
 
-gridInteraction.emitter.on("remove_cell_by_cursor", ({ detail }) => {
+function hanldeGridObjRightClick(detail) {
     const prop = grid.getCellByCursor(detail).getObject();
     if (prop) {
         if (prop.type === "gameObject") {
@@ -64,10 +105,10 @@ gridInteraction.emitter.on("remove_cell_by_cursor", ({ detail }) => {
         } else {
             sceneObjectList.removeSceneObject(prop.obj.getID());
         }
-        
+
         grid.removeCellByCursor(detail); // visually removes the sprite;
     }
-});
+}
 
 gridInteraction.emitter.on("add_row", () => {
     grid.addRow();

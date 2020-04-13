@@ -1,6 +1,6 @@
-import { Cell } from './Cell.js';
-import { GridNormalization } from './GridNormalization.js';
-import * as plshelp from '../../lib/helpers.js';
+import { Cell } from "./Cell.js";
+import { GridNormalization } from "./GridNormalization.js";
+import * as plshelp from "../../lib/helpers.js";
 import { _GLOBALS_ } from "../../lib/globals.js";
 
 const gridNormal = new GridNormalization();
@@ -9,16 +9,22 @@ export class Grid {
     constructor(canvas, ctx) {
         this.canvas = canvas;
         this.ctx = ctx;
+        this.origin = { x: 0, y: 0 };
         this.gridWidth = 1024;
         this.gridHeight = 576;
+        this.viewPortWidth = 1024;
+        this.viewPortHeight = 576;
         this.blockSize = _GLOBALS_.blockSize;
         this.colliderW = 3;
         this.gridCoords;
         this.cellFillStyle = "black";
+        this.panning = false;
+
+        this.xOffset = 0;
+        this.yOffset = 0
     }
 
-    create(prevCoords = []) {
-
+    create(prevCoords = []) {;
         this.gridCoords = new Array(this.gridWidth / this.blockSize);
 
         for (let u = 0; u < this.gridCoords.length; u++) {
@@ -30,9 +36,8 @@ export class Grid {
 
         let idStart = 0;
 
-        for (let x = 0; x < this.gridWidth; x += this.blockSize) {
-            for (let y = 0; y < this.gridHeight; y += this.blockSize) {
-
+        for (let x = this.xOffset; x < this.viewPortWidth; x += this.blockSize) {
+            for (let y = this.yOffset; y < this.viewPortHeight; y += this.blockSize) {
                 const id = (x + y) / this.blockSize + idStart;
                 let cellObj = new Cell(this.ctx, id, x, y, "air", this.blockSize, null);
 
@@ -41,11 +46,15 @@ export class Grid {
                     prevCellObj.id = (x + y) / this.blockSize + idStart;
                     cellObj = prevCellObj;
                 }
-                
-                this.gridCoords[x / this.blockSize][y / this.blockSize] = cellObj;
+
+                let gridX = Math.round((x - this.xOffset) / this.blockSize);
+                let gridY = Math.round((y - this.yOffset) / this.blockSize);
+                if (gridX > 31) gridX = 31;
+                if (gridY > 20) gridY = 20;
+                this.gridCoords[gridX][gridY] = cellObj;
             }
 
-            const minSide = Math.min(this.gridWidth, this.gridHeight)
+            const minSide = Math.min(this.gridWidth, this.gridHeight);
             idStart += minSide / this.blockSize - 1;
         }
 
@@ -55,28 +64,50 @@ export class Grid {
     fillAllCells() {
         this.gridCoords.flat().forEach((cellObj) => {
             cellObj.fillCell();
-        })
+        });
+    }
+
+    newPanPoint(curPos) {
+        
+            this.panning = true;
+            this.origin.x = curPos.x - this.xOffset;
+            this.origin.y = curPos.y - this.yOffset;
+        
+    }
+
+    pan(curPos) {
+        
+        this.xOffset = -Math.round(this.origin.x - curPos.x);
+        this.yOffset = -Math.round(this.origin.y - curPos.y);
+        console.log(this.xOffset, this.yOffset)
+        console.log("panning");
+        this.create([]);
+    }
+
+    stopPan() {
+        this.panning = false;
     }
 
     getCellByCursor(cursorPos) {
         const roundX = plshelp.roundToPrevMult(cursorPos.x, this.blockSize);
         const roundY = plshelp.roundToPrevMult(cursorPos.y, this.blockSize);
         const flatCoord = this.gridCoords.flat();
-        const targetCell = flatCoord.find(n => n.x === roundX && n.y === roundY);
+        const targetCell = flatCoord.find((n) => n.x === roundX && n.y === roundY);
 
         return targetCell;
     }
 
     addCellByCursor(cursorPos, object) {
         const cell = this.getCellByCursor(cursorPos);
+        /*
         cell.setBlockType('wall');
         cell.setAsset(object);
-        cell.fillCell();
+        cell.fillCell();*/
     }
 
     removeCellByCursor(cursorPos) {
         const cell = this.getCellByCursor(cursorPos);
-        cell.setBlockType('air');
+        cell.setBlockType("air");
         cell.fillCell();
     }
 
@@ -112,16 +143,24 @@ export class Grid {
     }
 
     debugBlocks(nMap) {
-        console.log('nMap', nMap)
+        console.log("nMap", nMap);
 
         const colliders = [];
-        
+
         nMap.forEach((v) => {
-            colliders.push([{ type: 'yWall', x: v.x + this.colliderW, y: v.y, w: v.w - this.colliderW, h: this.colliderW }, //top
-                { type: 'yWall', x: v.x + this.colliderW, y: v.y + v.h - this.colliderW, w: v.w - this.colliderW, h: this.colliderW }, //bottom
-                { type: 'xWall', x: v.x, y: v.y, w: this.colliderW, h: v.h }, //left
-                { type: 'xWall', x: v.x + v.w - this.colliderW, y: v.y, w: this.colliderW, h: v.h }]); //right
-        })
+            colliders.push([
+                { type: "yWall", x: v.x + this.colliderW, y: v.y, w: v.w - this.colliderW, h: this.colliderW }, //top
+                {
+                    type: "yWall",
+                    x: v.x + this.colliderW,
+                    y: v.y + v.h - this.colliderW,
+                    w: v.w - this.colliderW,
+                    h: this.colliderW,
+                }, //bottom
+                { type: "xWall", x: v.x, y: v.y, w: this.colliderW, h: v.h }, //left
+                { type: "xWall", x: v.x + v.w - this.colliderW, y: v.y, w: this.colliderW, h: v.h },
+            ]); //right
+        });
 
         return colliders;
     }

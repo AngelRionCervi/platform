@@ -42,12 +42,12 @@ export class GridInteraction {
                 case 0:
                     this.drawing = true;
                     this.erasing = false;
-                    this.emitter.emit('add_cell_by_cursor', cursorPos);
+                    this.emitter.emit('grid_left_click', cursorPos);
                     break;
                 case 2:
                     this.drawing = false;
                     this.erasing = true;
-                    this.emitter.emit('remove_cell_by_cursor', cursorPos);
+                    this.emitter.emit('grid_right_click', cursorPos);
                     break;
             }
         });
@@ -70,10 +70,10 @@ export class GridInteraction {
             if (this.drawing || this.erasing) cursorPos = mouse.getCursorPos(evt);
 
             if (this.drawing) {
-                this.emitter.emit('add_cell_by_cursor', cursorPos);
+                this.emitter.emit('grid_left_move', cursorPos);
             } 
             else if (this.erasing) {
-                this.emitter.emit('remove_cell_by_cursor', cursorPos);
+                this.emitter.emit('grid_right_move', cursorPos);
             }
         })
         
