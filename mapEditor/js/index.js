@@ -54,6 +54,7 @@ gridInteraction.emitter.on("add_cell_by_cursor", ({ detail }) => { // detail is 
     if (!objToDraw) return;
 
     grid.addCellByCursor(detail, objToDraw);
+    console.log(gameObjectList.curDisplayed, sceneObjectList.sceneObjects)
 });
 
 gridInteraction.emitter.on("remove_cell_by_cursor", ({ detail }) => {

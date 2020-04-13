@@ -52,7 +52,6 @@ export class Cell {
             this.resetCell();
         } else if (this.prop) {
             this.resetCell();
-            console.log(this.prop)
             const sprite = this.prop.obj.getAsset().getSprite();
             this.ctx.beginPath();
             this.ctx.drawImage(sprite, this.x, this.y);
