@@ -52,7 +52,7 @@ gridInteraction.emitter.on("add_cell_by_cursor", ({ detail }) => { // detail is 
         }
     }
     if (!objToDraw) return;
-    console.log(gameObjectList.gameObjects, gameObjectList.curDisplayed)
+
     grid.addCellByCursor(detail, objToDraw);
 });
 
@@ -65,7 +65,7 @@ gridInteraction.emitter.on("remove_cell_by_cursor", ({ detail }) => {
             sceneObjectList.removeSceneObject(prop.obj.getID());
         }
         
-        grid.removeCellByCursor(detail);
+        grid.removeCellByCursor(detail); // visually removes the sprite;
     }
 });
 
