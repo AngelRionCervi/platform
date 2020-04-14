@@ -64,7 +64,7 @@ export class Grid {
 
     getCellToRender() {
         const cellToRender = [];
-        
+
         for (let x = this.xOffset / this.blockSize; x < this.viewPortWidth / this.blockSize; x++) {
             for (let y = this.yOffset / this.blockSize; y < this.viewPortHeight / this.blockSize; y++) {
                 if (x >= -1 && y >= -1) {
@@ -74,9 +74,9 @@ export class Grid {
                     let m = Math.round(gridY / this.blockSize);
                     if (n < 0) n = 0;
                     if (m < 0) m = 0;
-                    if (n >= this.gridWidth / this.blockSize) n = (this.gridWidth / this.blockSize) -1;
-                    if (m >= this.gridHeight / this.blockSize) m = (this.gridHeight / this.blockSize) -1;
-    
+                    if (n >= this.gridWidth / this.blockSize) n = this.gridWidth / this.blockSize - 1;
+                    if (m >= this.gridHeight / this.blockSize) m = this.gridHeight / this.blockSize - 1;
+
                     const cell = this.gridCoords[n][m];
                     cell.xOffset = this.xOffset;
                     cell.yOffset = this.yOffset;
@@ -84,6 +84,7 @@ export class Grid {
                 }
             }
         }
+        console.log(cellToRender[0].tx(), cellToRender[0].ty());
 
         return cellToRender;
     }
@@ -91,7 +92,7 @@ export class Grid {
     create() {
         const c = this.getCellToRender();
 
-        console.log('cell rendered : ', c.length)
+        console.log("cell rendered : ", c.length);
         this.fillAllCells(c);
     }
 
@@ -128,11 +129,11 @@ export class Grid {
     }
 
     getCellByCursor(cursorPos) {
-        const x = plshelp.roundToPrevMult(Math.round(cursorPos.x + this.xOffset), this.blockSize);
-        const y = plshelp.roundToPrevMult(Math.round(cursorPos.y + this.yOffset), this.blockSize);
+        const x = plshelp.roundToPrevMult(Math.round(cursorPos.x - this.xOffset), this.blockSize);
+        const y = plshelp.roundToPrevMult(Math.round(cursorPos.y - this.yOffset), this.blockSize);
         const flatCoord = this.getCellToRender().flat();
-        const targetCell = flatCoord.find((n) => n.tx() === x && n.ty() === y);
-        console.log(targetCell, x, y, flatCoord);
+        const targetCell = flatCoord.find((n) => n.x === x && n.y === y);
+        console.log(x, y, cursorPos.x - this.xOffset, cursorPos.y - this.yOffset);
         return targetCell;
     }
 
