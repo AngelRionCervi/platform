@@ -6,12 +6,13 @@ import { _GLOBALS_ } from "../../lib/globals.js";
 const gridNormal = new GridNormalization();
 
 export class Grid {
-    constructor(canvas, ctx) {
+    constructor(gridDiv, canvas, ctx) {
+        this.gridDiv = gridDiv;
         this.canvas = canvas;
         this.ctx = ctx;
         this.origin = { x: 0, y: 0 };
-        this.gridWidth = 3200;
-        this.gridHeight = 2048;
+        this.gridWidth = 1600;
+        this.gridHeight = 1024;
         this.viewPortWidth = 1024;
         this.viewPortHeight = 576;
         this.blockSize = _GLOBALS_.blockSize;
@@ -53,8 +54,6 @@ export class Grid {
 
         this.canvas.width = this.viewPortWidth;
         this.canvas.height = this.viewPortHeight;
-
-        console.log(this.gridCoords);
     }
 
     resetCanvas() {
@@ -84,7 +83,6 @@ export class Grid {
                 }
             }
         }
-        console.log(cellToRender[0].tx(), cellToRender[0].ty());
 
         return cellToRender;
     }
@@ -112,15 +110,30 @@ export class Grid {
     pan(curPos) {
         this.xOffset = -Math.round(this.origin.x - curPos.x);
         this.yOffset = -Math.round(this.origin.y - curPos.y);
-        if (this.xOffset > 0 || this.yOffset > 0) {
+        console.log(-this.xOffset > this.gridWidth - this.viewPortWidth, this.xOffset)
+        if (
+            this.xOffset > 0 ||
+            this.yOffset > 0 ||
+            -this.xOffset > this.gridWidth - this.viewPortWidth ||
+            -this.yOffset > this.gridHeight - this.viewPortHeight
+        ) {
             if (this.xOffset > 0) {
                 this.xOffset = 0;
             }
             if (this.yOffset > 0) {
                 this.yOffset = 0;
             }
+            if (-this.xOffset > this.gridWidth - this.viewPortWidth) {
+                this.xOffset = -this.gridWidth + this.viewPortWidth;
+            }
+            if (-this.yOffset > this.gridHeight - this.viewPortHeight) {
+                this.yOffset = -this.gridHeight + this.viewPortHeight;
+            }
+
             this.newPanPoint(curPos);
         }
+        console.log(this.xOffset)
+        this.gridDiv.style.backgroundPosition = `${this.xOffset}px ${this.yOffset}px`;
         this.create();
     }
 
@@ -133,7 +146,6 @@ export class Grid {
         const y = plshelp.roundToPrevMult(Math.round(cursorPos.y - this.yOffset), this.blockSize);
         const flatCoord = this.getCellToRender().flat();
         const targetCell = flatCoord.find((n) => n.x === x && n.y === y);
-        console.log(x, y, cursorPos.x - this.xOffset, cursorPos.y - this.yOffset);
         return targetCell;
     }
 

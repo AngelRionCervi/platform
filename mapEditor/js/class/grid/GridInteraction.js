@@ -1,7 +1,7 @@
 import { Emitter } from "/mapEditor/js/lib/Emitter.js";
 import { Mouse } from "/mapEditor/js/class/mouseHandling/Mouse.js";
-const canvas = document.getElementById('mapEditorCanvas');
-const mouse = new Mouse(canvas);
+const grid = document.getElementById('canvas_grid');
+const mouse = new Mouse(grid);
 
 export class GridInteraction {
     constructor() {
@@ -17,7 +17,7 @@ export class GridInteraction {
             { name: 'dlButton', el: document.getElementById('dl_map_btn'), ev: "dl_map" },
         ]
 
-        this.canvasListeners();
+        this.gridListeners();
         this.buttonListeners();
     }
 
@@ -32,11 +32,12 @@ export class GridInteraction {
         })
     }
 
-    canvasListeners() {
+    gridListeners() {
 
-        canvas.addEventListener('mousedown', (evt) => {
+        grid.addEventListener('mousedown', (evt) => {
             evt.preventDefault();
             const cursorPos = mouse.getCursorPos(evt);
+            console.log(cursorPos)
             
             switch(evt.button) {
                 case 0:
@@ -52,7 +53,7 @@ export class GridInteraction {
             }
         });
         
-        canvas.addEventListener('mouseup', (evt) => {
+        grid.addEventListener('mouseup', (evt) => {
             evt.preventDefault();
             
             switch(evt.button) {
@@ -65,7 +66,7 @@ export class GridInteraction {
             }
         });
         
-        canvas.addEventListener('mousemove', (evt) => {
+        grid.addEventListener('mousemove', (evt) => {
             let cursorPos;
             if (this.drawing || this.erasing) cursorPos = mouse.getCursorPos(evt);
 
@@ -77,7 +78,7 @@ export class GridInteraction {
             }
         })
         
-        canvas.addEventListener("contextmenu", (e) => {
+        grid.addEventListener("contextmenu", (e) => {
             e.preventDefault();
             return false;
         });

@@ -1,5 +1,6 @@
 const canvas = document.getElementById("mapEditorCanvas");
 const ctx = canvas.getContext("2d");
+const gridDiv = document.getElementById('canvas_grid');
 
 import { Emitter } from "/mapEditor/js/lib/Emitter.js";
 import { ContextMenu } from "./class/general/ContextMenu.js";
@@ -17,7 +18,7 @@ import { GameObjectList } from "./class/gameObjects/GameObjectList.js";
 import { GameObjectListInteraction } from "./class/gameObjects/GameObjectListInteraction.js";
 
 const gridInteraction = new GridInteraction();
-const grid = new Grid(canvas, ctx);
+const grid = new Grid(gridDiv, canvas, ctx);
 
 const _keyboard = new Keyboard();
 const paletteInteraction = new PaletteInteraction();

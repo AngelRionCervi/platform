@@ -1,13 +1,13 @@
 export class Mouse {
-    constructor(canvas) {
-        this.canvas = canvas;
+    constructor(grid) {
+        this.grid = grid;
     }
 
     getCursorPos(evt) {
-        let rect = this.canvas.getBoundingClientRect();
+        const rect = this.grid.getBoundingClientRect();
         return {
-            x: (evt.clientX - rect.left) / (rect.right - rect.left) * this.canvas.width,
-            y: (evt.clientY - rect.top) / (rect.bottom - rect.top) * this.canvas.height
+            x: (evt.clientX - rect.left) / (rect.right - rect.left) * this.grid.offsetWidth,
+            y: (evt.clientY - rect.top) / (rect.bottom - rect.top) * this.grid.offsetHeight
         };
     }
 }

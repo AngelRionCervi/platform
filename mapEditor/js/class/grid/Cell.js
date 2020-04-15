@@ -32,7 +32,7 @@ export class Cell {
     resetCell() {
         this.cellFillStyle = "white";
         this.ctx.beginPath();
-        this.ctx.rect(this.tx() + 1, this.ty() + 1, this.blockSize - 1, this.blockSize - 1);
+        this.ctx.rect(this.tx(), this.ty(), this.blockSize, this.blockSize);
         this.ctx.fillStyle = this.cellFillStyle;
         this.ctx.fill();
         this.ctx.closePath();
@@ -42,7 +42,7 @@ export class Cell {
         this.ctx.imageSmoothingEnabled = false;
         const x = this.tx();
         const y = this.ty();
-
+/*
         this.ctx.beginPath();
         this.ctx.moveTo(this.lineWidth + x, this.lineWidth + y);
         this.ctx.lineTo(this.lineWidth + x + this.blockSize, this.lineWidth + y);
@@ -54,7 +54,7 @@ export class Cell {
             this.ctx.strokeStyle = "black";
         }
         this.ctx.stroke();
-        this.ctx.closePath();
+        this.ctx.closePath();*/
 
         if (this.blockType === "air") {
             this.resetCell();

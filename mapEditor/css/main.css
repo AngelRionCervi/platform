@@ -130,3 +130,17 @@ body {
 .context-menu-li :hover {
     background: rgba(0, 0, 0, 0.2);
 }
+
+.scene-container {
+    position: relative;
+}
+
+.canvas-grid {
+    position: absolute;
+    top: 1px;
+    left: 1px;
+    width: 1024px;
+    height: 576px;
+    background-position: 0px 0px;
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAADlJREFUWIXt0KENADAMA8Gs2+zPE9QZXKn3xNS6qp873ZP+kI0AAQIECBAgQIAAAQIECLwjcJ8kdgFLpEVFZ8sF6gAAAABJRU5ErkJggg==')
+}
