@@ -110,7 +110,7 @@ export class Grid {
     pan(curPos) {
         this.xOffset = -Math.round(this.origin.x - curPos.x);
         this.yOffset = -Math.round(this.origin.y - curPos.y);
-        console.log(-this.xOffset > this.gridWidth - this.viewPortWidth, this.xOffset)
+      
         if (
             this.xOffset > 0 ||
             this.yOffset > 0 ||
@@ -132,7 +132,7 @@ export class Grid {
 
             this.newPanPoint(curPos);
         }
-        console.log(this.xOffset)
+     
         this.gridDiv.style.backgroundPosition = `${this.xOffset}px ${this.yOffset}px`;
         this.create();
     }
@@ -142,24 +142,27 @@ export class Grid {
     }
 
     getCellByCursor(cursorPos) {
-        const x = plshelp.roundToPrevMult(Math.round(cursorPos.x - this.xOffset), this.blockSize);
-        const y = plshelp.roundToPrevMult(Math.round(cursorPos.y - this.yOffset), this.blockSize);
+        const x = plshelp.roundToPrevMult(Math.round(cursorPos.x - this.xOffset), _GLOBALS_.blockSize);
+        const y = plshelp.roundToPrevMult(Math.round(cursorPos.y - this.yOffset), _GLOBALS_.blockSize);
         const flatCoord = this.getCellToRender().flat();
         const targetCell = flatCoord.find((n) => n.x === x && n.y === y);
+        //setTimeout(() => {this.debugTargetCell(targetCell)}, 0)
         return targetCell;
+    }
+
+    debugTargetCell(targetCell) {
+        this.ctx.fillStyle = 'red';
+        this.ctx.fillRect(targetCell.x, targetCell.y, _GLOBALS_.blockSize, _GLOBALS_.blockSize);
     }
 
     addCellByCursor(cursorPos, object) {
         const cell = this.getCellByCursor(cursorPos);
-        cell.setBlockType("wall");
-        cell.setAsset(object);
-        cell.fillCell();
+        cell.setBlockType("wall").setObject(object).fillCell();
     }
 
     removeCellByCursor(cursorPos) {
         const cell = this.getCellByCursor(cursorPos);
-        cell.setBlockType("air");
-        cell.fillCell();
+        cell.setBlockType("air").fillCell();
     }
 
     addCol() {

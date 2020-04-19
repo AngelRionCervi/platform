@@ -1,6 +1,6 @@
 const canvas = document.getElementById("mapEditorCanvas");
 const ctx = canvas.getContext("2d");
-const gridDiv = document.getElementById('canvas_grid');
+const gridDiv = document.getElementById("canvas_grid");
 
 import { Emitter } from "/mapEditor/js/lib/Emitter.js";
 import { ContextMenu } from "./class/general/ContextMenu.js";
@@ -162,9 +162,6 @@ document.addEventListener('drop', function(e) {
     console.log(e)
 })*/
 
-
-
-
 // top level handler
 
 function handle_Grid_Left_Click_Drawing(coord) {
@@ -172,10 +169,19 @@ function handle_Grid_Left_Click_Drawing(coord) {
     if (palette.isAnAssetSelected()) {
         const assetID = palette.getCurrentAssetID();
         const asset = _assets.getByID(assetID);
-        const prop = sceneObjectList.addSceneObject(coord, asset);
-        if (prop) {
-            objToDraw = { obj: prop, type: "sceneObject" };
+        const cell = grid.getCellByCursor(coord);
+
+        if (cell.isProp()) {
+            const cellAssetID = cell.getObject().obj.getAsset().getID();
+            if (cellAssetID === assetID) {
+                return;
+            } else {
+                const id = cell.getObject().obj.getID();
+                sceneObjectList.removeSceneObject(id);
+            }
         }
+        const prop = sceneObjectList.addSceneObject(coord, asset);
+        objToDraw = { obj: prop, type: "sceneObject" };
     } else if (gameObjectList.isAnObjectSelected()) {
         const objectID = gameObjectList.getCurrentObjectID();
         const prop = gameObjectList.addGameObjectToScene(coord, objectID);
@@ -189,14 +195,16 @@ function handle_Grid_Left_Click_Drawing(coord) {
 }
 
 function hanlde_Grid_Right_Click_Drawing(coord) {
-    const prop = grid.getCellByCursor(coord).getObject();
-    if (prop) {
+    const cell = grid.getCellByCursor(coord);
+    const isProp = cell.isProp();
+    if (isProp) {
+        const prop = cell.getObject();
         if (prop.type === "gameObject") {
             gameObjectList.removeShowGameObject(prop.obj.getUniqID());
         } else {
             sceneObjectList.removeSceneObject(prop.obj.getID());
         }
-
+        cell.reset();
         grid.removeCellByCursor(coord); // visually removes the sprite;
     }
 }

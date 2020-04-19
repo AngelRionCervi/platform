@@ -9,19 +9,10 @@ export class SceneObjectList {
     }
 
     addSceneObject(coord, asset) {
-        const curSceneObject = this.getByCoord(coord);
-        let sceneObject = null;
-        if (!curSceneObject) {
-            sceneObject = new SceneObject(coord, asset);
-        } else if (curSceneObject && curSceneObject.asset.getID() !== asset.id) {
-            this.removeSceneObject(curSceneObject.getID());
-            sceneObject = new SceneObject(coord, asset);
-        } else {
-            return false;
-        }
-
+        const sceneObject = new SceneObject(coord, asset);
         this.sceneObjects.push(sceneObject);
-        return sceneObject;
+        console.log(this.sceneObjects)
+        return sceneObject
     }
 
     removeSceneObject(id) {

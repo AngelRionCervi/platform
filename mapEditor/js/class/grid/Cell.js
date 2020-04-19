@@ -23,51 +23,58 @@ export class Cell {
 
     setBlockType(type) {
         this.blockType = type;
+        return this;
     }
 
-    setAsset(prop) {
-        this.prop = prop;
-    }
-
-    resetCell() {
+    clear() {
         this.cellFillStyle = "white";
         this.ctx.beginPath();
         this.ctx.rect(this.tx(), this.ty(), this.blockSize, this.blockSize);
         this.ctx.fillStyle = this.cellFillStyle;
         this.ctx.fill();
         this.ctx.closePath();
+        return this;
+    }
+
+    removeProp() {
+        this.prop = null;
+        return this;
+    }
+
+    reset() {
+        this.clear();
+        this.removeProp();
+        return this;
     }
 
     fillCell() {
         this.ctx.imageSmoothingEnabled = false;
         const x = this.tx();
         const y = this.ty();
-/*
-        this.ctx.beginPath();
-        this.ctx.moveTo(this.lineWidth + x, this.lineWidth + y);
-        this.ctx.lineTo(this.lineWidth + x + this.blockSize, this.lineWidth + y);
-        this.ctx.lineTo(this.lineWidth + x + this.blockSize, this.lineWidth + y + this.blockSize);
-
-        if (this.prop && this.prop.type === "gameObject") {
-            this.ctx.strokeStyle = "red";
-        } else {
-            this.ctx.strokeStyle = "black";
-        }
-        this.ctx.stroke();
-        this.ctx.closePath();*/
 
         if (this.blockType === "air") {
-            this.resetCell();
-        } else if (this.prop) {
-            this.resetCell();
+            this.reset();
+        } else if (this.prop && this.prop.obj) {
+            this.clear();
             const sprite = this.prop.obj.getAsset().getSprite();
             this.ctx.beginPath();
             this.ctx.drawImage(sprite, x, y);
             this.ctx.closePath();
         }
+        return this;
+    }
+
+    setObject(prop) {
+        this.prop = prop;
+        return this;
     }
 
     getObject() {
         return this.prop;
+    }
+
+    isProp() {
+        console.log(this.prop)
+        return !!this.prop;
     }
 }
