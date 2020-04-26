@@ -1,13 +1,12 @@
 const canvas = document.getElementById("mapEditorCanvas");
 const ctx = canvas.getContext("2d");
-const gridDiv = document.getElementById("canvas_grid");
 
 import { Emitter } from "/mapEditor/js/lib/Emitter.js";
 import { ContextMenu } from "./class/general/ContextMenu.js";
 import { Keyboard } from "./class/keyboardHandling/Keyboard.js";
 import { Project } from "./class/project/userProject.js";
 import { GridInteraction } from "./class/grid/GridInteraction.js";
-import { Grid } from "./class/grid/Grid.js";
+import { Grid, renderGrid, camera } from "./class/grid/Grid.js";
 import { Assets } from "./class/project/Assets.js";
 import { MapDownloader } from "./class/download/MapDownloader.js";
 import { Palette } from "./class/palette/Palette.js";
@@ -18,7 +17,7 @@ import { GameObjectList } from "./class/gameObjects/GameObjectList.js";
 import { GameObjectListInteraction } from "./class/gameObjects/GameObjectListInteraction.js";
 
 const gridInteraction = new GridInteraction();
-const grid = new Grid(gridDiv, canvas, ctx);
+const grid = new Grid();
 
 const _keyboard = new Keyboard();
 const paletteInteraction = new PaletteInteraction();
@@ -35,19 +34,19 @@ let project = null;
 let keys = _keyboard.initKeys();
 
 grid.init();
-grid.create();
+renderGrid();
 _keyboard.listen();
 paletteInteraction.watchDrop();
 paletteInteraction.watchDirectoryBack();
 
 _keyboard.emitter.on("keyboard_input_change", ({ detail }) => {
     keys = detail;
-    if (!keys.ctrl) grid.stopPan();
+    if (!keys.ctrl) camera.stopPan();
 });
 
 gridInteraction.emitter.on("grid_left_click", ({ detail }) => {
     if (keys.ctrl) {
-        grid.newPanPoint(detail);
+        camera.newPanPoint(detail);
     } else {
         handle_Grid_Left_Click_Drawing(detail);
     }
@@ -63,7 +62,7 @@ gridInteraction.emitter.on("grid_right_click", ({ detail }) => {
 
 gridInteraction.emitter.on("grid_left_move", ({ detail }) => {
     if (keys.ctrl) {
-        grid.pan(detail);
+        camera.pan(detail);
     } else {
         handle_Grid_Left_Click_Drawing(detail);
     }

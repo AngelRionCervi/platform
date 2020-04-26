@@ -1,6 +1,9 @@
+import { getContext } from "../general/canvasRef.js";
+
+const ctx = getContext();
+
 export class Cell {
-    constructor(ctx, id, x, y, absX, absY, blockType, blockSize, prop) {
-        this.ctx = ctx;
+    constructor(id, x, y, absX, absY, blockType, blockSize, prop) {
         this.id = id;
         this.x = x;
         this.y = y;
@@ -21,6 +24,11 @@ export class Cell {
         return { x: this.x, y: this.y };
     }
 
+    setCoords(x, y) {
+        this.x = x;
+        this.y = y;
+    }
+
     setBlockType(type) {
         this.blockType = type;
         return this;
@@ -28,11 +36,11 @@ export class Cell {
 
     clear() {
         this.cellFillStyle = "white";
-        this.ctx.beginPath();
-        this.ctx.rect(this.tx(), this.ty(), this.blockSize, this.blockSize);
-        this.ctx.fillStyle = this.cellFillStyle;
-        this.ctx.fill();
-        this.ctx.closePath();
+        ctx.beginPath();
+        ctx.rect(this.tx(), this.ty(), this.blockSize, this.blockSize);
+        ctx.fillStyle = this.cellFillStyle;
+        ctx.fill();
+        ctx.closePath();
         return this;
     }
 
@@ -48,7 +56,7 @@ export class Cell {
     }
 
     fillCell() {
-        this.ctx.imageSmoothingEnabled = false;
+        ctx.imageSmoothingEnabled = false;
         const x = this.tx();
         const y = this.ty();
 
@@ -57,9 +65,9 @@ export class Cell {
         } else if (this.prop && this.prop.obj) {
             this.clear();
             const sprite = this.prop.obj.getAsset().getSprite();
-            this.ctx.beginPath();
-            this.ctx.drawImage(sprite, x, y);
-            this.ctx.closePath();
+            ctx.beginPath();
+            ctx.drawImage(sprite, x, y);
+            ctx.closePath();
         }
         return this;
     }
@@ -74,7 +82,34 @@ export class Cell {
     }
 
     isProp() {
-        console.log(this.prop)
         return !!this.prop;
+    }
+
+    moveRight(times) {
+        for (let u = 0; u < times; u++) {
+            const coords = this.getCoords();
+            this.setCoords(coords.x + this.blockSize, coords.y);
+        }
+    }
+
+    moveLeft(times) {
+        for (let u = 0; u < times; u++) {
+            const coords = this.getCoords();
+            this.setCoords(coords.x - this.blockSize, coords.y);
+        }
+    }
+
+    moveDown(times) {
+        for (let u = 0; u < times; u++) {
+            const coords = this.getCoords();
+            this.setCoords(coords.x, coords.y + this.blockSize);
+        }
+    }
+
+    moveUp(times) {
+        for (let u = 0; u < times; u++) {
+            const coords = this.getCoords();
+            this.setCoords(coords.x, coords.y - this.blockSize);
+        }
     }
 }

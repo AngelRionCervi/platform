@@ -68,8 +68,19 @@ export class ContextMenu {
         const options = [];
 
         Object.keys(optionsJSON).forEach((key) => {
-            const listener = { type: "click", callback: this[optionsJSON[key].callback].bind(this), args: [load], event: false };
-            const optionNode = dob.createNode(optionsJSON[key].tag, optionsJSON[key].class, null, optionsJSON[key].inner, listener);
+            const listener = {
+                type: "click",
+                callback: this[optionsJSON[key].callback].bind(this),
+                args: [load],
+                event: false,
+            };
+            const optionNode = dob.createNode(
+                optionsJSON[key].tag,
+                optionsJSON[key].class,
+                null,
+                optionsJSON[key].inner,
+                listener
+            );
             options.push(optionNode);
         });
 
@@ -80,7 +91,8 @@ export class ContextMenu {
     }
 
     toggle(nodeVar, coord, obj) {
-        if (this.contextMenuStates[nodeVar]) { // [nodevar] context menu is already showing, remove it
+        if (this.contextMenuStates[nodeVar]) {
+            // [nodevar] context menu is already showing, remove it
             const htmlNode = document.getElementById(this.types[nodeVar].menu_el.id);
             htmlNode.remove();
             this.contextMenuStates[nodeVar] = false;

@@ -1,12 +1,12 @@
 import * as helper from "../../lib/helpers.js";
-import { _GLOBALS_ } from "../../lib/globals.js";
+import { _G } from "../../lib/globals.js";
 
 export class SceneObject {
     constructor(coord, asset) {
         this.asset = asset;
         this.coord = {
-            x: helper.roundToPrevMult(coord.x, _GLOBALS_.blockSize),
-            y: helper.roundToPrevMult(coord.y, _GLOBALS_.blockSize),
+            x: helper.roundToPrevMult(coord.x, _G.blockSize),
+            y: helper.roundToPrevMult(coord.y, _G.blockSize),
         };
         this.id = "so_" + asset.getID() + "_" + helper.uniqid();
     }

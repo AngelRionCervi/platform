@@ -1,7 +1,7 @@
 import { GameObject } from "/mapEditor/js/class/gameObjects/GameObject.js";
 import { ShowGameObject } from "/mapEditor/js/class/gameObjects/ShowGameObject.js";
 import { DomBuilder } from "../../lib/DomBuilder.js";
-import { _GLOBALS_ } from "../../lib/globals.js";
+import { _G } from "../../lib/globals.js";
 import * as helper from "../../lib/helpers.js";
 const dob = new DomBuilder();
 
@@ -26,7 +26,7 @@ export class GameObjectList {
         const curGameObject = this.getByID(this.curSelectedID);
         const curShowGameObject = this.getByCoord(coord);
         const choseObj = this.getByID(id);
-        
+
         let gameObjectShow = null;
         if (!curShowGameObject) {
             gameObjectShow = new ShowGameObject(id, choseObj.getAsset(), coord);
@@ -150,8 +150,8 @@ export class GameObjectList {
     }
 
     getByCoord(coord) {
-        const x = helper.roundToPrevMult(coord.x, _GLOBALS_.blockSize);
-        const y = helper.roundToPrevMult(coord.y, _GLOBALS_.blockSize);
+        const x = helper.roundToPrevMult(coord.x, _G.blockSize);
+        const y = helper.roundToPrevMult(coord.y, _G.blockSize);
         return this.curDisplayed.find((el) => x === el.coord.x && y === el.coord.y);
     }
 
