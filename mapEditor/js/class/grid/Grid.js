@@ -1,6 +1,6 @@
 import { Cell } from "./Cell.js";
 import { GridNormalization } from "./GridNormalization.js";
-import * as plshelp from "../../lib/helpers.js";
+import * as _H from "../../lib/helpers.js";
 import { _G } from "../../lib/globals.js";
 import Camera from "./Camera.js";
 import { getCanvas, getContext } from "../general/canvasRef.js";
@@ -9,9 +9,17 @@ export class GridProps {
     constructor() {
         this.gridWidth = _G.gridWidth;
         this.gridHeight = _G.gridHeight;
+        this.blockSize = _G.blockSize;
         this.gridCoords = [];
     }
 
+    getBlockSize() {
+        return this.blockSize;
+    }
+    setBlockSize(size) {
+        this.blockSize = size;
+        return this;
+    }
     setWidth(width) {
         this.gridWidth = width;
         return this;
@@ -106,27 +114,28 @@ const gridNormal = new GridNormalization();
 
 const canvas = getCanvas();
 const ctx = getContext();
+_H.spy(camera, "setScale", scale); // spy for the methods calls of either "increaseZoom" or "decreaseZoom" in camera and exec cb
 
 export class Grid {
     constructor() {
-        this.blockSize = _G.blockSize;
         this.colliderW = 3;
         this.cellFillStyle = "black";
     }
 
     init() {
+        const blockSize = gridProps.getBlockSize();
         const width = gridProps.getWidth();
         const height = gridProps.getHeight();
-        let coords = new Array(width / this.blockSize);
+        let coords = new Array(Math.round(width / blockSize));
 
         for (let u = 0; u < coords.length; u++) {
-            coords[u] = new Array(height / this.blockSize);
+            coords[u] = new Array(Math.round(height / blockSize));
         }
         let idStart = 0;
-        for (let x = 0; x < width / this.blockSize; x++) {
-            for (let y = 0; y < height / this.blockSize; y++) {
+        for (let x = 0; x < width / blockSize; x++) {
+            for (let y = 0; y < height / blockSize; y++) {
                 const id = x + y + idStart;
-                const cellObj = new Cell(id, x * this.blockSize, y * this.blockSize, x, y, "air", this.blockSize, null);
+                const cellObj = new Cell(id, x * blockSize, y * blockSize, x, y, "air", null);
                 coords[x][y] = cellObj;
             }
             const minSide = Math.min(width, height);
@@ -138,8 +147,9 @@ export class Grid {
     }
 
     getCellByCursor(cursorPos) {
-        const x = plshelp.roundToPrevMult(Math.round(cursorPos.x - camera.x), _G.blockSize);
-        const y = plshelp.roundToPrevMult(Math.round(cursorPos.y - camera.y), _G.blockSize);
+        const blockSize = gridProps.getBlockSize();
+        const x = _H.roundToPrevMult(Math.round(cursorPos.x - camera.x), blockSize);
+        const y = _H.roundToPrevMult(Math.round(cursorPos.y - camera.y), blockSize);
         const flatCoord = camera.getCellsToRender(gridProps.getCoords()).flat();
         const targetCell = flatCoord.find((n) => n.x === x && n.y === y);
         return targetCell;
@@ -161,22 +171,22 @@ export class Grid {
     }
 
     addCol(side) {
-        gridProps.setWidth(gridProps.getWidth() + this.blockSize);
+        const blockSize = gridProps.getBlockSize();
+        gridProps.setWidth(gridProps.getWidth() + blockSize);
         const newCol = [];
 
         if (side === "right") {
             let id = gridProps.getCoords().flat().pop().id;
 
-            for (let y = 0; y < gridProps.getHeight() / this.blockSize; y++) {
+            for (let y = 0; y < gridProps.getHeight() / blockSize; y++) {
                 id++;
                 const cellObj = new Cell(
                     id,
-                    gridProps.getWidth() - this.blockSize,
-                    y * this.blockSize,
-                    gridProps.getWidth() / this.blockSize - 1,
+                    gridProps.getWidth() - blockSize,
+                    y * blockSize,
+                    gridProps.getWidth() / blockSize - 1,
                     y,
                     "air",
-                    this.blockSize,
                     null
                 );
                 newCol.push(cellObj);
@@ -186,80 +196,73 @@ export class Grid {
         } else if (side === "left") {
             let id = gridProps.getCoords().flat().shift().id;
 
-            for (let y = 0; y < gridProps.getHeight() / this.blockSize; y++) {
+            for (let y = 0; y < gridProps.getHeight() / blockSize; y++) {
                 id--;
-                const cellObj = new Cell(id, 0, y * this.blockSize, 0, y, "air", this.blockSize, null);
+                const cellObj = new Cell(id, 0, y * blockSize, 0, y, "air", null);
                 newCol.push(cellObj);
             }
 
             gridProps.moveAllRight(1).newColLeft(newCol);
-            camera.moveRight(this.blockSize);
+            camera.moveRight(blockSize);
         }
 
         renderGrid();
     }
 
     addRow(side) {
-        gridProps.setHeight(gridProps.getHeight() + this.blockSize);
+        const blockSize = gridProps.getBlockSize();
+        gridProps.setHeight(gridProps.getHeight() + blockSize);
         const newRow = [];
 
         const coords = gridProps.getCoords();
 
         if (side === "bottom") {
-            for (let x = 0; x < gridProps.getWidth() / this.blockSize; x++) {
+            for (let x = 0; x < gridProps.getWidth() / blockSize; x++) {
                 const cellObj = new Cell(
                     coords[x][coords[x].length - 1].id + "_",
-                    x * this.blockSize,
-                    gridProps.getHeight() - this.blockSize,
+                    x * blockSize,
+                    gridProps.getHeight() - blockSize,
                     x,
-                    gridProps.getHeight() / this.blockSize - 1,
+                    gridProps.getHeight() / blockSize - 1,
                     "air",
-                    this.blockSize,
                     null
                 );
                 newRow.push(cellObj);
             }
             gridProps.newRowBottom(newRow);
         } else if (side === "top") {
-            for (let x = 0; x < gridProps.getWidth() / this.blockSize; x++) {
-                const cellObj = new Cell(
-                    coords[x][0].id + "-",
-                    x * this.blockSize,
-                    0,
-                    x,
-                    0,
-                    "air",
-                    this.blockSize,
-                    null
-                );
+            for (let x = 0; x < gridProps.getWidth() / blockSize; x++) {
+                const cellObj = new Cell(coords[x][0].id + "-", x * blockSize, 0, x, 0, "air", null);
                 newRow.push(cellObj);
             }
             gridProps.moveAllDown(1).newRowTop(newRow);
-            camera.moveBottom(this.blockSize);
+            camera.moveBottom(blockSize);
         }
 
         renderGrid();
     }
 
-    removeCol(side = "left") {
-        gridProps.setWidth(gridProps.getWidth() - this.blockSize);
+    removeCol(side) {
+        const blockSize = gridProps.getBlockSize();
+        gridProps.setWidth(gridProps.getWidth() - blockSize);
         if (side === "right") {
             gridProps.removeColRight();
         } else if (side === "left") {
             gridProps.removeColLeft().moveAllLeft(1);
+            camera.moveLeft(blockSize);
         }
-        camera.watchPos();
         renderGrid();
     }
 
-    removeRow(side = "bottom") {
-        gridProps.setHeight(gridProps.getHeight() - this.blockSize);
+    removeRow(side) {
+        const blockSize = gridProps.getBlockSize();
+        gridProps.setHeight(gridProps.getHeight() - blockSize);
         if (side === "bottom") {
             gridProps.removeRowBottom();
         } else if (side === "top") {
             gridProps.removeRowTop().moveAllUp(1);
+            camera.moveTop(blockSize);
         }
-        camera.watchPos();
         renderGrid();
     }
 
@@ -305,31 +308,45 @@ function createMapBorder() {
     const gridWidth = gridProps.getWidth();
     const gridHeight = gridProps.getHeight();
     const borderWidth = _G.mapBorderWidth;
-    console.log(cameraCoords.x);
 
     ctx.fillStyle = _G.mapBordersColor;
+    if (cameraCoords.x >= 0) {
+        ctx.fillRect(
+            cameraCoords.x - borderWidth,
+            cameraCoords.y - borderWidth,
+            borderWidth,
+            gridHeight + borderWidth * 2
+        );
+    }
+    if (-cameraCoords.x + viewPort.width >= gridWidth) {
+        ctx.fillRect(
+            gridWidth + cameraCoords.x,
+            cameraCoords.y - borderWidth,
+            borderWidth,
+            gridHeight + borderWidth * 2
+        );
+    }
+    if (cameraCoords.y >= 0) {
+        ctx.fillRect(cameraCoords.x, cameraCoords.y - borderWidth, gridWidth, borderWidth);
+    }
+    if (-cameraCoords.y + viewPort.height >= gridHeight) {
+        ctx.fillRect(cameraCoords.x, gridHeight + cameraCoords.y, gridWidth, borderWidth);
+    }
+}
 
-    ctx.beginPath();
-        if (cameraCoords.x >= 0) {
-            ctx.fillRect(cameraCoords.x, cameraCoords.y, 2, gridHeight);
-        }
-        if (-cameraCoords.x + viewPort.width >= gridWidth) {
-            ctx.fillRect(gridWidth + cameraCoords.x - 2, cameraCoords.y, 2, gridHeight);
-        }
-        if (cameraCoords.y >= 0) {
-            ctx.fillRect(cameraCoords.x, cameraCoords.y, gridWidth, 2);
-        }
-        if (-cameraCoords.y + viewPort.height >= gridHeight) {
-            console.log("on bottom")
-            ctx.fillRect(cameraCoords.x, gridHeight + cameraCoords.y - 2, gridWidth, 2);
-        }
-    ctx.closePath();
+function scale({ curPos }) {
+    const scale = camera.getScale();
+
+    ctx.translate(curPos.x, curPos.y);
+    ctx.scale(scale, scale);
+    ctx.translate(-curPos.x, -curPos.y);
+    renderGrid();
 }
 
 export function renderGrid() {
     const cells = camera.getCellsToRender(gridProps.getCoords());
     console.log("cell rendered : ", cells.length);
-    resetCanvas();
+    ctx.clear(true);
     fillAllCells(cells);
     createMapBorder();
 }
@@ -338,9 +355,4 @@ export function fillAllCells(cellsToRender) {
     cellsToRender.flat().forEach((cellObj) => {
         cellObj.fillCell();
     });
-}
-
-export function resetCanvas() {
-    ctx.fillStyle = "white";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
 }

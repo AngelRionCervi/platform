@@ -76,8 +76,11 @@ gridInteraction.emitter.on("grid_right_move", ({ detail }) => {
     }
 });
 
+gridInteraction.emitter.on("grid_wheel", ({ detail }) => { //dir, curPos
+    camera.setScale(detail);
+});
+
 gridInteraction.emitter.on("add_row", ({ detail }) => {
-    console.log(detail)
     grid.addRow(detail);
 });
 

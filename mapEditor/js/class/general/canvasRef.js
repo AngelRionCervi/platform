@@ -1,9 +1,11 @@
 export function getCanvas() {
-    const canvas = document.getElementById("mapEditorCanvas");
-    return canvas;
+    return document.getElementById("mapEditorCanvas");
 }
 
 export function getContext() {
-    const ctx = getCanvas().getContext("2d");
-    return ctx;
+    return getCanvas().getContext("2d");
+}
+
+export function getGridDiv() {
+    return document.getElementById('canvas_grid');
 }

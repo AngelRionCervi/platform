@@ -37,6 +37,20 @@ String.prototype.indexesOf = function (str) {
     return result;
 };
 
+CanvasRenderingContext2D.prototype.clear = 
+  CanvasRenderingContext2D.prototype.clear || function (preserveTransform) {
+    if (preserveTransform) {
+      this.save();
+      this.setTransform(1, 0, 0, 1, 0, 0);
+    }
+
+    this.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+    if (preserveTransform) {
+      this.restore();
+    }           
+};
+
 export function propsRemover(object, props = []) {
     return Object.keys(object)
         .filter((key) => !props.includes(key))
@@ -52,4 +66,30 @@ export function roundToPrevMult(n, mult) {
 
 export function uniqid() {
     return "_" + Math.random().toString(36).substr(2, 9);
+}
+
+export function precise(number, precision) {
+    return Number.parseFloat(number).toPrecision(precision);
+}
+
+export function spy(obj, methods, callback) {
+    const meths = [methods].flat();
+    const Spy = {
+        args: [],
+        count: 0,
+    };
+
+    for (const meth of meths) {
+        const original = obj[meth];
+        obj[meth] = function () {
+            let args = [].slice.apply(arguments);
+            if (Spy.args.length >= 50) Spy.args.pop();
+            Spy.count++;
+            Spy.args.unshift(args);
+            original.call(obj, ...args);
+            callback(...args);
+        };
+    }
+
+    return Spy;
 }

@@ -1,4 +1,5 @@
 import { getContext } from "../general/canvasRef.js";
+import { gridProps } from "./Grid.js";
 
 const ctx = getContext();
 
@@ -12,7 +13,6 @@ export class Cell {
         this.xOffset = 0;
         this.yOffset = 0;
         this.blockType = blockType;
-        this.blockSize = blockSize;
         this.cellFillStyle = "white";
         this.lineWidth = 0.5;
         this.prop = prop;
@@ -29,15 +29,21 @@ export class Cell {
         this.y = y;
     }
 
+    setOffsets(x, y) {
+        this.xOffset = x;
+        this.yOffset = y;
+    }
+
     setBlockType(type) {
         this.blockType = type;
         return this;
     }
 
     clear() {
+        const blockSize = gridProps.getBlockSize();
         this.cellFillStyle = "white";
         ctx.beginPath();
-        ctx.rect(this.tx(), this.ty(), this.blockSize, this.blockSize);
+        ctx.rect(this.tx(), this.ty(), blockSize, blockSize);
         ctx.fillStyle = this.cellFillStyle;
         ctx.fill();
         ctx.closePath();
@@ -56,6 +62,7 @@ export class Cell {
     }
 
     fillCell() {
+        const blockSize = gridProps.getBlockSize();
         ctx.imageSmoothingEnabled = false;
         const x = this.tx();
         const y = this.ty();
@@ -66,7 +73,7 @@ export class Cell {
             this.clear();
             const sprite = this.prop.obj.getAsset().getSprite();
             ctx.beginPath();
-            ctx.drawImage(sprite, x, y);
+            ctx.drawImage(sprite, x, y, blockSize, blockSize);
             ctx.closePath();
         }
         return this;
@@ -86,30 +93,34 @@ export class Cell {
     }
 
     moveRight(times) {
+        const blockSize = gridProps.getBlockSize();
         for (let u = 0; u < times; u++) {
             const coords = this.getCoords();
-            this.setCoords(coords.x + this.blockSize, coords.y);
+            this.setCoords(coords.x + blockSize, coords.y);
         }
     }
 
     moveLeft(times) {
+        const blockSize = gridProps.getBlockSize();
         for (let u = 0; u < times; u++) {
             const coords = this.getCoords();
-            this.setCoords(coords.x - this.blockSize, coords.y);
+            this.setCoords(coords.x - blockSize, coords.y);
         }
     }
 
     moveDown(times) {
+        const blockSize = gridProps.getBlockSize();
         for (let u = 0; u < times; u++) {
             const coords = this.getCoords();
-            this.setCoords(coords.x, coords.y + this.blockSize);
+            this.setCoords(coords.x, coords.y + blockSize);
         }
     }
 
     moveUp(times) {
+        const blockSize = gridProps.getBlockSize();
         for (let u = 0; u < times; u++) {
             const coords = this.getCoords();
-            this.setCoords(coords.x, coords.y - this.blockSize);
+            this.setCoords(coords.x, coords.y - blockSize);
         }
     }
 }
