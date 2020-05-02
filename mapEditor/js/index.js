@@ -76,20 +76,21 @@ gridInteraction.emitter.on("grid_right_move", ({ detail }) => {
     }
 });
 
-gridInteraction.emitter.on("add_row", () => {
-    grid.addRow();
+gridInteraction.emitter.on("add_row", ({ detail }) => {
+    console.log(detail)
+    grid.addRow(detail);
 });
 
-gridInteraction.emitter.on("remove_row", () => {
-    grid.removeRow();
+gridInteraction.emitter.on("remove_row", ({ detail }) => {
+    grid.removeRow(detail);
 });
 
-gridInteraction.emitter.on("add_col", () => {
-    grid.addCol();
+gridInteraction.emitter.on("add_col", ({ detail }) => {
+    grid.addCol(detail);
 });
 
-gridInteraction.emitter.on("remove_col", () => {
-    grid.removeCol();
+gridInteraction.emitter.on("remove_col", ({ detail }) => {
+    grid.removeCol(detail);
 });
 
 gridInteraction.emitter.on("dl_map", () => {

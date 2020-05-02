@@ -4,4 +4,6 @@ export const _G = {
     gridHeight: 1024,
     viewPortWidth: 1024,
     viewPortHeight: 576,
+    mapBordersColor: 'red',
+    mapBorderWidth: 2,
 }

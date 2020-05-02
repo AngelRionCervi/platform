@@ -9,11 +9,15 @@ export class GridInteraction {
         this.isErasing = false;
         this.emitter = new Emitter();
 
-        this.elButtons = [
-            { name: 'addCol', el: document.getElementById('add_col_btn'), ev: "add_col" },
-            { name: 'addRow', el: document.getElementById('add_row_btn'), ev: "add_row" },
-            { name: 'removeCol', el: document.getElementById('remove_col_btn'), ev: "remove_col" },
-            { name: 'removeRow', el: document.getElementById('remove_row_btn'), ev: "remove_row" },
+        this.buttons = [
+            { name: 'addColRight', el: document.getElementById('add_col_right_btn'), ev: "add_col", args: ['right'] },
+            { name: 'addColLeft', el: document.getElementById('add_col_left_btn'), ev: "add_col", args: ['left'] },
+            { name: 'addRowTop', el: document.getElementById('add_row_top_btn'), ev: "add_row", args: ['top'] },
+            { name: 'addRowBottom', el: document.getElementById('add_row_bottom_btn'), ev: "add_row", args: ['bottom'] },
+            { name: 'removeColRight', el: document.getElementById('remove_col_right_btn'), ev: "remove_col", args: ['right'] },
+            { name: 'removeColLeft', el: document.getElementById('remove_col_left_btn'), ev: "remove_col", args: ['left'] },
+            { name: 'removeRowTop', el: document.getElementById('remove_row_top_btn'), ev: "remove_row", args: ['top'] },
+            { name: 'removeRowBottom', el: document.getElementById('remove_row_bottom_btn'), ev: "remove_row", args: ['bottom'] },
             { name: 'dlButton', el: document.getElementById('dl_map_btn'), ev: "dl_map" },
         ]
 
@@ -22,12 +26,13 @@ export class GridInteraction {
     }
 
     buttonListeners() {
-
-        this.elButtons.forEach((btn) => {
+        this.buttons.forEach((btn) => {
             btn.el.addEventListener('click', (evt) => {
                 evt.preventDefault();
-                const cursorPos = mouse.getCursorPos(evt);
-                this.emitter.emit(btn.ev, cursorPos);
+                //const cursorPos = mouse.getCursorPos(evt);
+                let args;
+                if (btn.args !== undefined) args = btn.args;
+                this.emitter.emit(btn.ev, ...args);
             })
         })
     }

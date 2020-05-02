@@ -140,7 +140,6 @@ export class Grid {
     getCellByCursor(cursorPos) {
         const x = plshelp.roundToPrevMult(Math.round(cursorPos.x - camera.x), _G.blockSize);
         const y = plshelp.roundToPrevMult(Math.round(cursorPos.y - camera.y), _G.blockSize);
-        console.log("cell by cursor: ", camera.x, camera.y);
         const flatCoord = camera.getCellsToRender(gridProps.getCoords()).flat();
         const targetCell = flatCoord.find((n) => n.x === x && n.y === y);
         return targetCell;
@@ -161,7 +160,7 @@ export class Grid {
         cell.setBlockType("air").fillCell();
     }
 
-    addCol(side = "left") {
+    addCol(side) {
         gridProps.setWidth(gridProps.getWidth() + this.blockSize);
         const newCol = [];
 
@@ -194,12 +193,13 @@ export class Grid {
             }
 
             gridProps.moveAllRight(1).newColLeft(newCol);
+            camera.moveRight(this.blockSize);
         }
 
         renderGrid();
     }
 
-    addRow(side = "bottom") {
+    addRow(side) {
         gridProps.setHeight(gridProps.getHeight() + this.blockSize);
         const newRow = [];
 
@@ -235,6 +235,7 @@ export class Grid {
                 newRow.push(cellObj);
             }
             gridProps.moveAllDown(1).newRowTop(newRow);
+            camera.moveBottom(this.blockSize);
         }
 
         renderGrid();
@@ -298,11 +299,39 @@ export class Grid {
     }
 }
 
+function createMapBorder() {
+    const cameraCoords = camera.getCoords();
+    const viewPort = camera.getViewPort();
+    const gridWidth = gridProps.getWidth();
+    const gridHeight = gridProps.getHeight();
+    const borderWidth = _G.mapBorderWidth;
+    console.log(cameraCoords.x);
+
+    ctx.fillStyle = _G.mapBordersColor;
+
+    ctx.beginPath();
+        if (cameraCoords.x >= 0) {
+            ctx.fillRect(cameraCoords.x, cameraCoords.y, 2, gridHeight);
+        }
+        if (-cameraCoords.x + viewPort.width >= gridWidth) {
+            ctx.fillRect(gridWidth + cameraCoords.x - 2, cameraCoords.y, 2, gridHeight);
+        }
+        if (cameraCoords.y >= 0) {
+            ctx.fillRect(cameraCoords.x, cameraCoords.y, gridWidth, 2);
+        }
+        if (-cameraCoords.y + viewPort.height >= gridHeight) {
+            console.log("on bottom")
+            ctx.fillRect(cameraCoords.x, gridHeight + cameraCoords.y - 2, gridWidth, 2);
+        }
+    ctx.closePath();
+}
+
 export function renderGrid() {
     const cells = camera.getCellsToRender(gridProps.getCoords());
     console.log("cell rendered : ", cells.length);
     resetCanvas();
     fillAllCells(cells);
+    createMapBorder();
 }
 
 export function fillAllCells(cellsToRender) {

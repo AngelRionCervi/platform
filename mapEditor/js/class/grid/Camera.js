@@ -13,6 +13,14 @@ export default class Camera {
         this.y = 0;
     }
 
+    getCoords() {
+        return { x: this.x, y: this.y };
+    }
+
+    getViewPort() {
+        return { width: this.viewPortWidth, height: this.viewPortHeight };
+    }
+
     getCellsToRender(gridCoords) {
         const cellToRender = [];
         const gridWidth = gridProps.getWidth();
@@ -53,7 +61,7 @@ export default class Camera {
 
         const gridWidth = gridProps.getWidth();
         const gridHeight = gridProps.getHeight();
-
+/*
         if (
             this.x > 0 ||
             this.y > 0 ||
@@ -74,8 +82,8 @@ export default class Camera {
             }
 
             this.newPanPoint(curPos);
-        }
-    
+        }*/
+
         gridDiv.style.backgroundPosition = `${this.x}px ${this.y}px`;
         renderGrid();
     }
@@ -84,14 +92,31 @@ export default class Camera {
         this.panning = false;
     }
 
+    moveRight(distance) {
+        this.x -= distance;
+    }
+
+    moveLeft(distance) {
+        this.x += distance;
+    }
+
+    moveBottom(distance) {
+        this.y -= distance;
+    }
+
+    moveTop(distance) {
+        this.y += distance;
+    }
+
     watchPos() {
         //const coords = gridProps.getCoords();
-        console.log(-this.y + this.viewPortHeight, gridProps.getHeight());
-        if (-this.x + this.viewPortWidth > gridProps.getWidth()) {
+        //console.log(-this.y + this.viewPortHeight, gridProps.getHeight());
+        /*
+        if (-this.x + this.viewPortWidth < gridProps.getWidth()) {
             this.x += this.blockSize;
         }
         if (-this.y + this.viewPortHeight > gridProps.getHeight()) {
             this.y += this.blockSize;
-        }
+        }*/
     }
 }
