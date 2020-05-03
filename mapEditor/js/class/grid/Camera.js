@@ -44,13 +44,13 @@ export default class Camera {
         }*/
 
         if (dir > 0) {
-            this.scaleInc = 0.9;
+            this.scaleInc = 1*0.8;
         } else {
-            this.scaleInc = 1.1;
+            this.scaleInc = 1/0.8;
         }
-
+/*
         this.viewPortWidth /= this.scaleInc;
-        this.viewPortHeight /= this.scaleInc;
+        this.viewPortHeight /= this.scaleInc;*/
         //this.x = this.x + curPos.x / this.scaleInc - curPos.x;
         //this.y = this.y + curPos.y / this.scaleInc - curPos.y;
 
@@ -75,8 +75,7 @@ export default class Camera {
                 //if (x >= -1 && y >= -1) {
                 let n = Math.round((x - this.x) / bs);
                 let m = Math.round((y - this.y) / bs);
-                if (n < 0) n = 0;
-                if (m < 0) m = 0;
+                if (n < 0 || m < 0) break;
                 if (n >= gridWidth / bs || m >= gridHeight / bs) break;
 
                 const cell = gridCoords[n][m];
