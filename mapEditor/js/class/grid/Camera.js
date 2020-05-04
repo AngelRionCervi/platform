@@ -16,7 +16,7 @@ export default class Camera {
         this.x = 0;
         this.y = 0;
         this.scaleInc = 1;
-        this.scaleTrack = 50;
+        this.zoom = 1;
     }
 
     getCoords() {
@@ -48,9 +48,10 @@ export default class Camera {
         } else {
             this.scaleInc = 1/0.8;
         }
-/*
+        this.zoom *= this.scaleInc;
+
         this.viewPortWidth /= this.scaleInc;
-        this.viewPortHeight /= this.scaleInc;*/
+        this.viewPortHeight /= this.scaleInc;
         //this.x = this.x + curPos.x / this.scaleInc - curPos.x;
         //this.y = this.y + curPos.y / this.scaleInc - curPos.y;
 
@@ -90,18 +91,18 @@ export default class Camera {
 
     newPanPoint(curPos) {
         this.panning = true;
-        this.panOrigin.x = curPos.x - this.x;
-        this.panOrigin.y = curPos.y - this.y;
+        this.panOrigin.x = curPos.x - this.x * this.zoom;
+        this.panOrigin.y = curPos.y - this.y * this.zoom;
     }
 
     pan(curPos) {
-        this.x = -Math.round(this.panOrigin.x - curPos.x);
-        this.y = -Math.round(this.panOrigin.y - curPos.y);
+        this.x = -Math.round(this.panOrigin.x - curPos.x) / this.zoom;
+        this.y = -Math.round(this.panOrigin.y - curPos.y) / this.zoom;
         console.log("pan", this.x, this.y)
 
         const gridWidth = gridProps.getWidth();
         const gridHeight = gridProps.getHeight();
-        /* can't pan bayonf the map
+        /* //can't pan bayonf the map
         if (
             this.x > 0 ||
             this.y > 0 ||

@@ -337,9 +337,9 @@ function createMapBorder() {
 function scale({ curPos }) {
     const scale = camera.getScale();
 
-    ctx.translate(curPos.x, curPos.y);
+    //ctx.translate(curPos.x, curPos.y);
     ctx.scale(scale, scale);
-    ctx.translate(-curPos.x, -curPos.y);
+    //ctx.translate(-curPos.x, -curPos.y);
     renderGrid();
 }
 
