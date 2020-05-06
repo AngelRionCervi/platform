@@ -6,7 +6,7 @@ import { ContextMenu } from "./class/general/ContextMenu.js";
 import { Keyboard } from "./class/keyboardHandling/Keyboard.js";
 import { Project } from "./class/project/userProject.js";
 import { GridInteraction } from "./class/grid/GridInteraction.js";
-import { Grid, renderGrid, camera } from "./class/grid/Grid.js";
+import { Grid, renderGrid, camera, gridProps } from "./class/grid/Grid.js";
 import { Assets } from "./class/project/Assets.js";
 import { MapDownloader } from "./class/download/MapDownloader.js";
 import { Palette } from "./class/palette/Palette.js";
@@ -76,7 +76,8 @@ gridInteraction.emitter.on("grid_right_move", ({ detail }) => {
     }
 });
 
-gridInteraction.emitter.on("grid_wheel", ({ detail }) => { //dir, curPos
+gridInteraction.emitter.on("grid_wheel", ({ detail }) => {
+    //dir, curPos
     camera.setScale(detail);
 });
 
@@ -175,12 +176,14 @@ function handle_Grid_Left_Click_Drawing(coord) {
         const cell = grid.getCellByCursor(coord);
 
         if (cell.isProp()) {
-            const cellAssetID = cell.getObject().obj.getAsset().getID();
+            // can draw over existing tiles if different
+            const cellObj = cell.getProp().obj
+            const cellAssetID = cellObj.getAsset().getID();
             if (cellAssetID === assetID) {
                 return;
             } else {
-                const id = cell.getObject().obj.getID();
-                sceneObjectList.removeSceneObject(id);
+                const cellObjID = cellObj.getID();
+                sceneObjectList.removeSceneObject(cellObjID);
             }
         }
         const prop = sceneObjectList.addSceneObject(coord, asset);
@@ -199,15 +202,20 @@ function handle_Grid_Left_Click_Drawing(coord) {
 
 function hanlde_Grid_Right_Click_Drawing(coord) {
     const cell = grid.getCellByCursor(coord);
-    const isProp = cell.isProp();
-    if (isProp) {
-        const prop = cell.getObject();
-        if (prop.type === "gameObject") {
-            gameObjectList.removeShowGameObject(prop.obj.getUniqID());
-        } else {
-            sceneObjectList.removeSceneObject(prop.obj.getID());
-        }
-        cell.reset();
-        grid.removeCellByCursor(coord); // visually removes the sprite;
+    const isPropRef = cell.isPropRef();
+    const prop = isPropRef && cell.getPropFromRef(); // not good for drawing cause looping on all cells again
+
+    if (!prop) return;
+
+    if (prop.type === "gameObject") {
+        gameObjectList.removeShowGameObject(prop.obj.getUniqID());
+        const cellIDs = prop.obj.getCells();
+        cellIDs.forEach((cellID) => { // clear all the cells concerned by the game object
+            grid.removeCellByID(cellID);
+        })
+    } else {
+        sceneObjectList.removeSceneObject(prop.obj.getID());
+        grid.removeCellByCoord(coord);
     }
+    const cellIDs = prop.obj.getCells();
 }

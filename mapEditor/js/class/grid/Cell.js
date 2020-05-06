@@ -16,8 +16,13 @@ export class Cell {
         this.cellFillStyle = "white";
         this.lineWidth = 0.5;
         this.prop = prop;
+        this.propRef = null;
         this.tx = () => this.x + this.xOffset;
         this.ty = () => this.y + this.yOffset;
+    }
+
+    getID() {
+        return this.id;
     }
 
     getCoords() {
@@ -58,38 +63,66 @@ export class Cell {
     reset() {
         this.clear();
         this.removeProp();
+        this.removePropRef();
         return this;
     }
 
     fillCell() {
         const blockSize = gridProps.getBlockSize();
         ctx.imageSmoothingEnabled = false;
-        const x = this.tx();
-        const y = this.ty();
 
         if (this.blockType === "air") {
             this.reset();
         } else if (this.prop && this.prop.obj) {
             this.clear();
-            const sprite = this.prop.obj.getAsset().getSprite();
+
+            const asset = this.prop.obj.getAsset();
+            const sprite = asset.getSprite();
+            const width = asset.getWidth();
+            const height = asset.getHeight();
             ctx.beginPath();
-            ctx.drawImage(sprite, x, y, blockSize, blockSize);
+            ctx.drawImage(sprite, this.tx(), this.ty(), width, height);
             ctx.closePath();
         }
         return this;
     }
 
-    setObject(prop) {
+    setProp(prop) {
         this.prop = prop;
         return this;
     }
 
-    getObject() {
+    setPropRef(ref) {
+        this.propRef = ref;
+        return this;
+    }
+
+    removePropRef() {
+        this.propRef = null;
+        return this;
+    }
+
+    getPropRef() {
+        return this.propRef;
+    }
+
+    getProp() {
         return this.prop;
     }
 
     isProp() {
         return !!this.prop;
+    }
+
+    isPropRef() {
+        return !!this.propRef;
+    }
+
+    getPropFromRef() {
+        return gridProps
+            .getCoords()
+            .flat()
+            .find((el) => el?.prop?.obj && el.prop.obj.getID() === this.propRef)?.prop;
     }
 
     moveRight(times) {

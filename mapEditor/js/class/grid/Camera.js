@@ -27,7 +27,7 @@ export default class Camera {
         return { width: this.viewPortWidth, height: this.viewPortHeight };
     }
 
-    setScale({ dir, curPos }) {
+    setScale({ dir }) {
         /*
         if (this.scaleTrack > 0 && dir > 0) {
             this.scaleTrack -= 10;
@@ -44,48 +44,50 @@ export default class Camera {
         }*/
 
         if (dir > 0) {
-            this.scaleInc = 1*0.8;
+            this.scaleInc = 1 * 0.8;
         } else {
-            this.scaleInc = 1/0.8;
+            this.scaleInc = 1 / 0.8;
         }
         this.zoom *= this.scaleInc;
 
-        this.viewPortWidth /= this.scaleInc;
-        this.viewPortHeight /= this.scaleInc;
+        //this.viewPortWidth /= this.scaleInc;
+        //this.viewPortHeight /= this.scaleInc;
         //this.x = this.x + curPos.x / this.scaleInc - curPos.x;
         //this.y = this.y + curPos.y / this.scaleInc - curPos.y;
-
-        console.log("thisx", this.x, this.y);
-
-        console.log(this.scaleTrack);
     }
 
     getScale() {
         return this.scaleInc;
     }
 
+    getZoom() {
+        return this.zoom;
+    }
+
     getCellsToRender(gridCoords) {
         const cellToRender = [];
-        //const blockSize = gridProps.getBlockSize();
         const gridWidth = gridProps.getWidth();
         const gridHeight = gridProps.getHeight();
         const bs = gridProps.getBlockSize();
 
-        for (let x = this.x; x < this.viewPortWidth; x+=bs) {
-            for (let y = this.y; y < this.viewPortHeight; y+=bs) {
-                //if (x >= -1 && y >= -1) {
+        for (let x = this.x; x < Math.round(this.viewPortWidth / this.zoom); x += bs) {
+            for (let y = this.y; y < Math.round(this.viewPortHeight / this.zoom); y += bs) {
                 let n = Math.round((x - this.x) / bs);
                 let m = Math.round((y - this.y) / bs);
-                if (n < 0 || m < 0) break;
+
                 if (n >= gridWidth / bs || m >= gridHeight / bs) break;
 
                 const cell = gridCoords[n][m];
-                cell.setOffsets(this.x, this.y);
-                cellToRender.push(cell);
-                //}
+                if (
+                    (cell?.prop?.obj.asset.width + x > 0 && cell?.prop?.obj.asset.height + y > 0) ||
+                    (x >= -bs && y >= -bs)
+                ) {
+                    cell.setOffsets(this.x, this.y);
+                    cellToRender.push(cell);
+                }
             }
         }
-
+        gridProps.setRenderedCells(cellToRender);
         return cellToRender;
     }
 
@@ -96,12 +98,9 @@ export default class Camera {
     }
 
     pan(curPos) {
-        this.x = -Math.round(this.panOrigin.x - curPos.x) / this.zoom;
-        this.y = -Math.round(this.panOrigin.y - curPos.y) / this.zoom;
-        console.log("pan", this.x, this.y)
+        this.x = -(this.panOrigin.x - curPos.x) / this.zoom;
+        this.y = -(this.panOrigin.y - curPos.y) / this.zoom;
 
-        const gridWidth = gridProps.getWidth();
-        const gridHeight = gridProps.getHeight();
         /* //can't pan bayonf the map
         if (
             this.x > 0 ||
@@ -124,8 +123,9 @@ export default class Camera {
 
             this.newPanPoint(curPos);
         }*/
-
-        gridDiv.style.backgroundPosition = `${this.x}px ${this.y}px`;
+        const bs = gridProps.getBlockSize();
+        gridDiv.style.backgroundSize = `${bs * this.zoom}px`;
+        gridDiv.style.backgroundPosition = `${this.x * this.zoom}px ${this.y * this.zoom}px`;
         renderGrid();
     }
 

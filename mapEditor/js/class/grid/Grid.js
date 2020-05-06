@@ -41,6 +41,12 @@ export class GridProps {
     getCoords() {
         return this.gridCoords;
     }
+    setRenderedCells(renderedCells) {
+        this.renderedCells = renderedCells;
+    }
+    getRenderedCells() {
+        return this.renderedCells;
+    }
     newColRight(newCol) {
         this.gridCoords.push(newCol);
         return this;
@@ -122,6 +128,13 @@ export class Grid {
         this.cellFillStyle = "black";
     }
 
+    getCellByID(id) {
+        return gridProps
+            .getRenderedCells()
+            .flat()
+            .find((el) => el.id === id);
+    }
+
     init() {
         const blockSize = gridProps.getBlockSize();
         const width = gridProps.getWidth();
@@ -131,42 +144,73 @@ export class Grid {
         for (let u = 0; u < coords.length; u++) {
             coords[u] = new Array(Math.round(height / blockSize));
         }
-        let idStart = 0;
+
         for (let x = 0; x < width / blockSize; x++) {
             for (let y = 0; y < height / blockSize; y++) {
-                const id = x + y + idStart;
+                const id = _H.uniqid();
                 const cellObj = new Cell(id, x * blockSize, y * blockSize, x, y, "air", null);
                 coords[x][y] = cellObj;
             }
-            const minSide = Math.min(width, height);
-            idStart += minSide - 1;
         }
         gridProps.setCoords(coords);
         canvas.width = _G.viewPortWidth;
         canvas.height = _G.viewPortHeight;
     }
 
-    getCellByCursor(cursorPos) {
+    getCellByCursor(cursorPos, coords = null) {
         const blockSize = gridProps.getBlockSize();
-        const x = _H.roundToPrevMult(Math.round(cursorPos.x - camera.x), blockSize);
-        const y = _H.roundToPrevMult(Math.round(cursorPos.y - camera.y), blockSize);
-        const flatCoord = camera.getCellsToRender(gridProps.getCoords()).flat();
+        const zoom = camera.getZoom();
+        const x = _H.roundToPrevMult(Math.round(cursorPos.x / zoom - camera.x), blockSize);
+        const y = _H.roundToPrevMult(Math.round(cursorPos.y / zoom - camera.y), blockSize);
+        if (coords) {
+            const targetCell = coords.find((n) => n.x === x && n.y === y);
+            return targetCell;
+        }
+        const flatCoord = gridProps.getRenderedCells().flat();
         const targetCell = flatCoord.find((n) => n.x === x && n.y === y);
         return targetCell;
     }
 
     debugTargetCell(targetCell) {
         ctx.fillStyle = "red";
-        ctx.fillRect(targetCell.x, targetCell.y, _G.blockSize, _G.blockSize);
+        //ctx.fillRect(targetCell.x, targetCell.y, _G.blockSize, _G.blockSize);
     }
 
     addCellByCursor(cursorPos, object) {
-        const cell = this.getCellByCursor(cursorPos);
-        cell.setBlockType("wall").setObject(object).fillCell();
+        console.log(object);
+        const asset = object.obj.asset;
+        const blockSize = gridProps.getBlockSize();
+        const zoom = camera.getZoom();
+        const flatCoords = gridProps.getCoords().flat(); // no cellToRender because 1 sprite can be > viewport
+
+        const concernedCells = [];
+        for (let x = cursorPos.x; x < Math.floor(cursorPos.x + asset.width * zoom); x += blockSize * zoom) {
+            for (let y = cursorPos.y; y < Math.floor(cursorPos.y + asset.height * zoom); y += blockSize * zoom) {
+                const cell = this.getCellByCursor({ x, y }, flatCoords);
+                if (cell) {
+                    concernedCells.push(cell.getID());
+                    if (x === cursorPos.x && y === cursorPos.y) {
+                        cell.setBlockType("wall").setProp(object).setPropRef(object.obj.getID()).fillCell();
+                    } else {
+                        cell.setBlockType("wall").setProp(null).setPropRef(object.obj.getID());
+                    }
+                }
+            }
+        }
+        object.obj.setCells(concernedCells);
     }
 
-    removeCellByCursor(cursorPos) {
+    removeCellByCoord(cursorPos) {
         const cell = this.getCellByCursor(cursorPos);
+        if (!cell) return;
+        cell.reset();
+        cell.setBlockType("air").fillCell();
+    }
+
+    removeCellByID(id) {
+        const cell = this.getCellByID(id);
+        if (!cell) return;
+        cell.reset();
         cell.setBlockType("air").fillCell();
     }
 
@@ -176,10 +220,8 @@ export class Grid {
         const newCol = [];
 
         if (side === "right") {
-            let id = gridProps.getCoords().flat().pop().id;
-
             for (let y = 0; y < gridProps.getHeight() / blockSize; y++) {
-                id++;
+                const id = _H.uniqid();
                 const cellObj = new Cell(
                     id,
                     gridProps.getWidth() - blockSize,
@@ -194,10 +236,8 @@ export class Grid {
 
             gridProps.newColRight(newCol);
         } else if (side === "left") {
-            let id = gridProps.getCoords().flat().shift().id;
-
             for (let y = 0; y < gridProps.getHeight() / blockSize; y++) {
-                id--;
+                const id = _H.uniqid();
                 const cellObj = new Cell(id, 0, y * blockSize, 0, y, "air", null);
                 newCol.push(cellObj);
             }
@@ -214,12 +254,11 @@ export class Grid {
         gridProps.setHeight(gridProps.getHeight() + blockSize);
         const newRow = [];
 
-        const coords = gridProps.getCoords();
-
         if (side === "bottom") {
             for (let x = 0; x < gridProps.getWidth() / blockSize; x++) {
+                const id = _H.uniqid();
                 const cellObj = new Cell(
-                    coords[x][coords[x].length - 1].id + "_",
+                    id,
                     x * blockSize,
                     gridProps.getHeight() - blockSize,
                     x,
@@ -232,7 +271,8 @@ export class Grid {
             gridProps.newRowBottom(newRow);
         } else if (side === "top") {
             for (let x = 0; x < gridProps.getWidth() / blockSize; x++) {
-                const cellObj = new Cell(coords[x][0].id + "-", x * blockSize, 0, x, 0, "air", null);
+                const id = _H.uniqid();
+                const cellObj = new Cell(id, x * blockSize, 0, x, 0, "air", null);
                 newRow.push(cellObj);
             }
             gridProps.moveAllDown(1).newRowTop(newRow);
@@ -305,12 +345,14 @@ export class Grid {
 function createMapBorder() {
     const cameraCoords = camera.getCoords();
     const viewPort = camera.getViewPort();
+    const zoom = camera.getZoom();
     const gridWidth = gridProps.getWidth();
     const gridHeight = gridProps.getHeight();
     const borderWidth = _G.mapBorderWidth;
 
     ctx.fillStyle = _G.mapBordersColor;
     if (cameraCoords.x >= 0) {
+        // left
         ctx.fillRect(
             cameraCoords.x - borderWidth,
             cameraCoords.y - borderWidth,
@@ -318,7 +360,8 @@ function createMapBorder() {
             gridHeight + borderWidth * 2
         );
     }
-    if (-cameraCoords.x + viewPort.width >= gridWidth) {
+    if (-cameraCoords.x + viewPort.width / zoom >= gridWidth) {
+        //right
         ctx.fillRect(
             gridWidth + cameraCoords.x,
             cameraCoords.y - borderWidth,
@@ -327,14 +370,16 @@ function createMapBorder() {
         );
     }
     if (cameraCoords.y >= 0) {
+        // top
         ctx.fillRect(cameraCoords.x, cameraCoords.y - borderWidth, gridWidth, borderWidth);
     }
-    if (-cameraCoords.y + viewPort.height >= gridHeight) {
+    if (-cameraCoords.y + viewPort.height / zoom >= gridHeight) {
+        // bottom
         ctx.fillRect(cameraCoords.x, gridHeight + cameraCoords.y, gridWidth, borderWidth);
     }
 }
 
-function scale({ curPos }) {
+function scale() {
     const scale = camera.getScale();
 
     //ctx.translate(curPos.x, curPos.y);

@@ -10,8 +10,8 @@ export class Mouse {
         if (evt) {
             const rect = canva.getBoundingClientRect();
             this.lastPos = {
-                x: ((evt.clientX - rect.left) / (rect.right - rect.left)) * canva.offsetWidth,
-                y: ((evt.clientY - rect.top) / (rect.bottom - rect.top)) * canva.offsetHeight,
+                x: Math.floor(((evt.clientX - rect.left) / (rect.right - rect.left)) * canva.offsetWidth),
+                y: Math.floor(((evt.clientY - rect.top) / (rect.bottom - rect.top)) * canva.offsetHeight),
             };
         }
         return this.lastPos;

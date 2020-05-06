@@ -4,11 +4,16 @@ export class Asset {
         this.name;
         this.path;
         this.id;
+        this.width;
+        this.height;
         this.isPrep = false;
     }
 
     async build(info) {
-        this.sprite = await this.imageProcess(info.path);
+        const { sprite, width, height } = await this.loadImage(info.path);
+        this.sprite = sprite;
+        this.width = width;
+        this.height = height;
         this.path = info.path;
         this.name = info.name;
         this.folder = info.folder;
@@ -16,12 +21,17 @@ export class Asset {
         this.isPrep = true;
     }
 
-    async imageProcess(src) {
-        return new Promise((resolve, reject) => {
-            const img = new Image();
-            img.onload = () => resolve(img);
-            img.onerror = reject;
-            img.src = src;
+    async loadImage(src) {
+        return new Promise((resolve) => {
+            const buffer = document.createElement("canvas");
+            const image = new Image();
+            image.src = src;
+            image.addEventListener("load", () => {
+                buffer.width = image.naturalWidth;
+                buffer.height = image.naturalHeight;
+                buffer.getContext("2d").drawImage(image, 0, 0);
+                resolve({ sprite: buffer, width: buffer.width, height: buffer.height });
+            });
         });
     }
 
@@ -39,5 +49,13 @@ export class Asset {
 
     getSprite() {
         return this.sprite;
+    }
+
+    getWidth() {
+        return this.width;
+    }
+
+    getHeight() {
+        return this.height;
     }
 }
