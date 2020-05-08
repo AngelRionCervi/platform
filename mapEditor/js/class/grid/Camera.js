@@ -84,20 +84,44 @@ export default class Camera {
         const cellToRender = [];
         const gridWidth = gridProps.getWidth();
         const gridHeight = gridProps.getHeight();
+        const zoom = this.getZoom();
         const bs = gridProps.getBlockSize();
+        const trueBS = Math.floor(bs * zoom);
         const tw = this.toWorld.bind(this);
 
+        let lastCX;
         for (let x = this.x > 0 ? this.x : -bs; x < Math.round(tw(this.viewPortWidth) + bs); x += bs) {
-            for (let y = this.y > 0 ? this.y : -bs; y < Math.round(tw(this.viewPortHeight) + bs); y += bs) {
-                const n = Math.round((x - this.x) / bs);
-                const m = Math.round((y - this.y) / bs);
-                if (n >= gridWidth / bs || m >= gridHeight / bs) break;
-                const cell = gridCoords[n > 0 ? n : 0][m > 0 ? m : 0];
-                cell.setOffsets(this.x, this.y);
-                cellToRender.push(cell);
+            const n = Math.round((x - this.x) / bs);
+            if (n > gridWidth / bs) break;
+            const cx = n > 0 ? n - 1 : 0;
+            if (lastCX !== cx) {
+                lastCX = cx;
+                gridCoords[cx].map((cell) => {
+                    cell.setOffsetX(this.x);
+                });
+                if (cx > 0) {
+                    const addedW = Math.abs(gridCoords[cx][0].tx() - gridCoords[cx - 1][0].tx()) - trueBS;
+                    gridCoords[cx].map((cell) => {
+                        cell.setBlockAddedW(addedW);
+                    });
+                }
+                for (let y = this.y > 0 ? this.y : -bs; y < Math.round(tw(this.viewPortHeight) + bs); y += bs) {
+                    const m = Math.round((y - this.y) / bs);
+                    if (m >= gridHeight / bs) break;
+
+                    const cy = m > 0 ? m : 0;
+                    const cell = gridCoords[cx][cy];
+                    cell.setOffsetY(this.y);
+                    if (cy > 0) {
+                        const addedH = Math.abs(cell.ty() - gridCoords[cx][cy - 1].ty()) - trueBS;
+                        cell.setBlockAddedH(addedH);
+                    }
+                    cellToRender.push(cell);
+                }
             }
         }
         gridProps.setRenderedCells(cellToRender);
+        console.log("cell to render bitch : ", cellToRender);
         return cellToRender;
     }
 

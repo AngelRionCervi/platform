@@ -18,8 +18,10 @@ export class Cell {
         this.prop = prop;
         this.propRef = null;
         this.slice = { x: 0, y: 0 };
-        this.tx = () => this.x + this.xOffset;
-        this.ty = () => this.y + this.yOffset;
+        this.addedBlockW = 0;
+        this.addedBlockH = 0;
+        this.tx = () => Math.floor((this.x + this.xOffset) * camera.getZoom());
+        this.ty = () => Math.floor((this.y + this.yOffset) * camera.getZoom());
     }
 
     getID() {
@@ -28,6 +30,19 @@ export class Cell {
 
     getCoords() {
         return { x: this.x, y: this.y };
+    }
+
+    setBlockAddedSize({w, h}) {
+        this.addedBlockW = w;
+        this.addedBlockH = h;
+    }
+
+    setBlockAddedW(number) {
+        this.addedBlockW = number;
+    }
+
+    setBlockAddedH(number) {
+        this.addedBlockH = number;
     }
 
     setCoords(x, y) {
@@ -40,6 +55,14 @@ export class Cell {
         this.yOffset = y;
     }
 
+    setOffsetX(offset) {
+        this.xOffset = offset;
+    }
+
+    setOffsetY(offset) {
+        this.yOffset = offset;
+    }
+
     setBlockType(type) {
         this.blockType = type;
         return this;
@@ -47,12 +70,15 @@ export class Cell {
 
     clear() {
         const blockSize = gridProps.getBlockSize();
+        const zoom = camera.getZoom();
         this.cellFillStyle = "white";
-        ctx.beginPath();
-        ctx.rect(this.tx(), this.ty(), blockSize, blockSize);
+        ctx.clearRect(
+            this.tx() - this.addedBlockW,
+            this.ty() - this.addedBlockH,
+            Math.floor(blockSize * zoom) + this.addedBlockW,
+            Math.floor(blockSize * zoom) + this.addedBlockH
+        );
         ctx.fillStyle = this.cellFillStyle;
-        ctx.fill();
-        ctx.closePath();
         return this;
     }
 
@@ -70,13 +96,13 @@ export class Cell {
 
     fillCell() {
         const blockSize = gridProps.getBlockSize();
+        const zoom = camera.getZoom();
         ctx.imageSmoothingEnabled = false;
-        //ctx.globalCompositeOperation = "source-over";
-        
+        ctx.globalCompositeOperation = "source-over";
+
         if (this.blockType === "air") {
             this.reset();
         } else if (this.prop && this.prop.obj && this.slice) {
-            //console.log(this.tx(), this.ty())
             this.clear();
             const asset = this.prop.obj.getAsset();
             const sprite = asset.getSprite();
@@ -87,13 +113,12 @@ export class Cell {
                 this.slice.y,
                 blockSize,
                 blockSize,
-                this.tx(),
-                this.ty(),
-                blockSize,
-                blockSize
+                this.tx() - this.addedBlockW,
+                this.ty() - this.addedBlockH,
+                Math.floor(blockSize * zoom) + this.addedBlockW,
+                Math.floor(blockSize * zoom) + this.addedBlockH
             );
             ctx.closePath();
-
         }
         return this;
     }

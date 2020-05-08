@@ -120,7 +120,7 @@ const gridNormal = new GridNormalization();
 
 const canvas = getCanvas();
 const ctx = getContext();
-_H.spy(camera, "setScale", scale); // spy for the methods calls of either "increaseZoom" or "decreaseZoom" in camera and exec cb
+_H.spy(camera, "setScale", renderGrid); // spy for the methods calls of either "increaseZoom" or "decreaseZoom" in camera and exec cb
 
 export class Grid {
     constructor() {
@@ -350,53 +350,48 @@ export class Grid {
 }
 
 function createMapBorder() {
+    // visual
     const cameraCoords = camera.getCoords();
     const viewPort = camera.getViewPort();
     const zoom = camera.getZoom();
     const gridWidth = gridProps.getWidth();
     const gridHeight = gridProps.getHeight();
     const borderWidth = _G.mapBorderWidth;
+    const ts = camera.toScreen.bind(camera);
 
     ctx.fillStyle = _G.mapBordersColor;
     if (cameraCoords.x >= 0) {
         // left
         ctx.fillRect(
-            cameraCoords.x - borderWidth,
-            cameraCoords.y - borderWidth,
-            borderWidth,
-            gridHeight + borderWidth * 2
+            ts(cameraCoords.x) - ts(borderWidth),
+            ts(cameraCoords.y) - ts(borderWidth),
+            ts(borderWidth),
+            ts(gridHeight) + ts(borderWidth) * 2
         );
     }
     if (-cameraCoords.x + viewPort.width / zoom >= gridWidth) {
         //right
         ctx.fillRect(
-            gridWidth + cameraCoords.x,
-            cameraCoords.y - borderWidth,
-            borderWidth,
-            gridHeight + borderWidth * 2
+            ts(cameraCoords.x) + ts(gridWidth),
+            ts(cameraCoords.y) - ts(borderWidth),
+            ts(borderWidth),
+            ts(gridHeight) + ts(borderWidth) * 2
         );
     }
     if (cameraCoords.y >= 0) {
         // top
-        ctx.fillRect(cameraCoords.x, cameraCoords.y - borderWidth, gridWidth, borderWidth);
+        ctx.fillRect(ts(cameraCoords.x), ts(cameraCoords.y) - ts(borderWidth), ts(gridWidth), ts(borderWidth));
     }
     if (-cameraCoords.y + viewPort.height / zoom >= gridHeight) {
         // bottom
-        ctx.fillRect(cameraCoords.x, gridHeight + cameraCoords.y, gridWidth, borderWidth);
+        ctx.fillRect(ts(cameraCoords.x), ts(cameraCoords.y) + ts(gridHeight), ts(gridWidth), ts(borderWidth));
     }
-}
-
-function scale() {
-    const scale = camera.getScale();
-    //ctx.translate(curPos.x, curPos.y);
-    ctx.scale(scale, scale);
-    //ctx.translate(-curPos.x, -curPos.y);
-    renderGrid();
 }
 
 export function renderGrid() {
     const cells = camera.getCellsToRender(gridProps.getCoords());
     console.log("cell rendered : ", cells.length);
+    //const debugCells = debugRenderedCells(cells);
     ctx.clear(true);
     fillAllCells(cells);
     createMapBorder();
@@ -408,4 +403,35 @@ export function fillAllCells(cellsToRender) {
             cellObj.fillCell();
         }
     });
+}
+
+function debugRenderedCells(cells) {
+    // gap closing between cells
+    const zoom = camera.getZoom();
+    const bs = gridProps.getBlockSize();
+    const trueBS = Math.floor(bs * zoom);
+    let lastX;
+    let col = -1;
+    const newGrid = [];
+    for (const cell of cells) {
+        if (cell.x !== lastX) {
+            lastX = cell.x;
+            newGrid.push([]);
+            col++;
+        }
+        newGrid[col].push(cell);
+    }
+    newGrid.forEach((col, colIndex, grid) => {
+        if (colIndex > 0) {
+            col.map((cell) => {
+                cell.addedBlockW = Math.abs(grid[colIndex][0].tx() - grid[colIndex - 1][0].tx()) - trueBS;
+            });
+        }
+        col.forEach((cell, cellY, colArr) => {
+            if (cellY > 0) {
+                cell.addedBlockH = Math.abs(colArr[cellY].ty() - colArr[cellY - 1].ty()) - trueBS;
+            }
+        });
+    });
+    return newGrid.flat();
 }
