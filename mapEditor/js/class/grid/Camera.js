@@ -94,7 +94,7 @@ export default class Camera {
             const n = Math.round((x - this.x) / bs);
             if (n > gridWidth / bs) break;
             const cx = n > 0 ? n - 1 : 0;
-            if (lastCX !== cx) {
+            if (lastCX !== cx) { // prevents multiple occurence of 1st row
                 lastCX = cx;
                 gridCoords[cx].map((cell) => {
                     cell.setOffsetX(this.x);
