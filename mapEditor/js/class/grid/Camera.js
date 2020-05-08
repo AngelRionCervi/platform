@@ -1,7 +1,7 @@
 import { _G } from "../../lib/globals.js";
 import { Grid, renderGrid, fillAllCells, gridProps } from "./Grid.js";
 import { getContext, getCanvas } from "../general/canvasRef.js";
-import { precise } from "../../lib/helpers.js";
+import { precise, roundTo } from "../../lib/helpers.js";
 
 const ctx = getContext();
 const canvas = getCanvas();
@@ -27,6 +27,22 @@ export default class Camera {
         return { width: this.viewPortWidth, height: this.viewPortHeight };
     }
 
+    screenCoordToWorld({ x, y }) {
+        return { wx: x / this.zoom, wy: y / this.zoom };
+    }
+
+    worldCoordToScreen({ x, y }) {
+        return { sx: x * this.zoom, sy: y * this.zoom };
+    }
+
+    toWorld(number) {
+        return number / this.zoom;
+    }
+
+    toScreen(number) {
+        return number * this.zoom;
+    }
+
     setScale({ dir }) {
         /*
         if (this.scaleTrack > 0 && dir > 0) {
@@ -48,7 +64,7 @@ export default class Camera {
         } else {
             this.scaleInc = 1 / 0.8;
         }
-        this.zoom *= this.scaleInc;
+        this.zoom = roundTo(this.zoom * this.scaleInc, 2);
 
         //this.viewPortWidth /= this.scaleInc;
         //this.viewPortHeight /= this.scaleInc;
@@ -69,22 +85,16 @@ export default class Camera {
         const gridWidth = gridProps.getWidth();
         const gridHeight = gridProps.getHeight();
         const bs = gridProps.getBlockSize();
+        const tw = this.toWorld.bind(this);
 
-        for (let x = this.x; x < Math.round(this.viewPortWidth / this.zoom); x += bs) {
-            for (let y = this.y; y < Math.round(this.viewPortHeight / this.zoom); y += bs) {
-                let n = Math.round((x - this.x) / bs);
-                let m = Math.round((y - this.y) / bs);
-
+        for (let x = this.x > 0 ? this.x : -bs; x < Math.round(tw(this.viewPortWidth) + bs); x += bs) {
+            for (let y = this.y > 0 ? this.y : -bs; y < Math.round(tw(this.viewPortHeight) + bs); y += bs) {
+                const n = Math.round((x - this.x) / bs);
+                const m = Math.round((y - this.y) / bs);
                 if (n >= gridWidth / bs || m >= gridHeight / bs) break;
-
-                const cell = gridCoords[n][m];
-                if (
-                    (cell?.prop?.obj.asset.width + x > 0 && cell?.prop?.obj.asset.height + y > 0) ||
-                    (x >= -bs && y >= -bs)
-                ) {
-                    cell.setOffsets(this.x, this.y);
-                    cellToRender.push(cell);
-                }
+                const cell = gridCoords[n > 0 ? n : 0][m > 0 ? m : 0];
+                cell.setOffsets(this.x, this.y);
+                cellToRender.push(cell);
             }
         }
         gridProps.setRenderedCells(cellToRender);
@@ -93,13 +103,13 @@ export default class Camera {
 
     newPanPoint(curPos) {
         this.panning = true;
-        this.panOrigin.x = curPos.x - this.x * this.zoom;
-        this.panOrigin.y = curPos.y - this.y * this.zoom;
+        this.panOrigin.x = curPos.x - this.toScreen(this.x);
+        this.panOrigin.y = curPos.y - this.toScreen(this.y);
     }
 
     pan(curPos) {
-        this.x = -(this.panOrigin.x - curPos.x) / this.zoom;
-        this.y = -(this.panOrigin.y - curPos.y) / this.zoom;
+        this.x = Math.round(-this.toWorld(this.panOrigin.x - curPos.x));
+        this.y = Math.round(-this.toWorld(this.panOrigin.y - curPos.y));
 
         /* //can't pan bayonf the map
         if (
@@ -124,7 +134,7 @@ export default class Camera {
             this.newPanPoint(curPos);
         }*/
         const bs = gridProps.getBlockSize();
-        gridDiv.style.backgroundSize = `${bs * this.zoom}px`;
+        //gridDiv.style.backgroundSize = `${bs * this.zoom}px`;
         gridDiv.style.backgroundPosition = `${this.x * this.zoom}px ${this.y * this.zoom}px`;
         renderGrid();
     }

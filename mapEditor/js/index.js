@@ -217,5 +217,5 @@ function hanlde_Grid_Right_Click_Drawing(coord) {
         sceneObjectList.removeSceneObject(prop.obj.getID());
         grid.removeCellByCoord(coord);
     }
-    const cellIDs = prop.obj.getCells();
+    
 }

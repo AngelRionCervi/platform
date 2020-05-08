@@ -157,11 +157,16 @@ export class Grid {
         canvas.height = _G.viewPortHeight;
     }
 
-    getCellByCursor(cursorPos, coords = null) {
+    floorMouse(coords) {
         const blockSize = gridProps.getBlockSize();
         const zoom = camera.getZoom();
-        const x = _H.roundToPrevMult(Math.round(cursorPos.x / zoom - camera.x), blockSize);
-        const y = _H.roundToPrevMult(Math.round(cursorPos.y / zoom - camera.y), blockSize);
+        const x = _H.roundToPrevMult(Math.round(coords.x / zoom - camera.x), blockSize);
+        const y = _H.roundToPrevMult(Math.round(coords.y / zoom - camera.y), blockSize);
+        return { x, y };
+    }
+
+    getCellByCursor(cursorPos, coords = null) {
+        const { x, y } = this.floorMouse(cursorPos);
         if (coords) {
             const targetCell = coords.find((n) => n.x === x && n.y === y);
             return targetCell;
@@ -177,27 +182,29 @@ export class Grid {
     }
 
     addCellByCursor(cursorPos, object) {
-        console.log(object);
         const asset = object.obj.asset;
         const blockSize = gridProps.getBlockSize();
-        const zoom = camera.getZoom();
-        const flatCoords = gridProps.getCoords().flat(); // no cellToRender because 1 sprite can be > viewport
+        const gridCoords = gridProps.getCoords(); // no cellToRender because 1 sprite can be > viewport
+        const gridWidth = gridProps.getWidth();
+        const gridHeight = gridProps.getHeight();
+        const tw = camera.toWorld.bind(camera);
+        const ts = camera.toScreen.bind(camera);
 
         const concernedCells = [];
-        for (let x = cursorPos.x; x < Math.floor(cursorPos.x + asset.width * zoom); x += blockSize * zoom) {
-            for (let y = cursorPos.y; y < Math.floor(cursorPos.y + asset.height * zoom); y += blockSize * zoom) {
-                const cell = this.getCellByCursor({ x, y }, flatCoords);
-                if (cell) {
-                    concernedCells.push(cell.getID());
-                    if (x === cursorPos.x && y === cursorPos.y) {
-                        cell.setBlockType("wall").setProp(object).setPropRef(object.obj.getID()).fillCell();
-                    } else {
-                        cell.setBlockType("wall").setProp(null).setPropRef(object.obj.getID());
-                    }
-                }
+        for (let x = cursorPos.x; x < cursorPos.x + ts(asset.width); x += ts(blockSize)) {
+            for (let y = cursorPos.y; y < cursorPos.y + ts(asset.height); y += ts(blockSize)) {
+                const { wx, wy } = camera.screenCoordToWorld({ x, y });
+                if (wx > gridWidth || wy > gridHeight) break;
+
+                const floored = this.floorMouse({ x, y });
+                const cell = gridCoords[floored.x / blockSize][floored.y / blockSize];
+                concernedCells.push(cell.getID());
+                const slice = { x: Math.round(tw(x - cursorPos.x)), y: Math.round(tw(y - cursorPos.y)) };
+                cell.setBlockType("wall").setProp(object).setSlice(slice).fillCell();
             }
         }
-        object.obj.setCells(concernedCells);
+        console.log("concernedCells", concernedCells.length);
+        //object.obj.setCells(concernedCells);
     }
 
     removeCellByCoord(cursorPos) {
@@ -381,7 +388,6 @@ function createMapBorder() {
 
 function scale() {
     const scale = camera.getScale();
-
     //ctx.translate(curPos.x, curPos.y);
     ctx.scale(scale, scale);
     //ctx.translate(-curPos.x, -curPos.y);
@@ -397,7 +403,9 @@ export function renderGrid() {
 }
 
 export function fillAllCells(cellsToRender) {
-    cellsToRender.flat().forEach((cellObj) => {
-        cellObj.fillCell();
+    cellsToRender.forEach((cellObj) => {
+        if (cellObj.isProp()) {
+            cellObj.fillCell();
+        }
     });
 }

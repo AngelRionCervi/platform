@@ -1,5 +1,5 @@
 import { getContext } from "../general/canvasRef.js";
-import { gridProps } from "./Grid.js";
+import { gridProps, camera } from "./Grid.js";
 
 const ctx = getContext();
 
@@ -17,6 +17,7 @@ export class Cell {
         this.lineWidth = 0.5;
         this.prop = prop;
         this.propRef = null;
+        this.slice = { x: 0, y: 0 };
         this.tx = () => this.x + this.xOffset;
         this.ty = () => this.y + this.yOffset;
     }
@@ -70,25 +71,40 @@ export class Cell {
     fillCell() {
         const blockSize = gridProps.getBlockSize();
         ctx.imageSmoothingEnabled = false;
-
+        //ctx.globalCompositeOperation = "source-over";
+        
         if (this.blockType === "air") {
             this.reset();
-        } else if (this.prop && this.prop.obj) {
+        } else if (this.prop && this.prop.obj && this.slice) {
+            //console.log(this.tx(), this.ty())
             this.clear();
-
             const asset = this.prop.obj.getAsset();
             const sprite = asset.getSprite();
-            const width = asset.getWidth();
-            const height = asset.getHeight();
             ctx.beginPath();
-            ctx.drawImage(sprite, this.tx(), this.ty(), width, height);
+            ctx.drawImage(
+                sprite,
+                this.slice.x,
+                this.slice.y,
+                blockSize,
+                blockSize,
+                this.tx(),
+                this.ty(),
+                blockSize,
+                blockSize
+            );
             ctx.closePath();
+
         }
         return this;
     }
 
     setProp(prop) {
         this.prop = prop;
+        return this;
+    }
+
+    setSlice(slice) {
+        this.slice = slice;
         return this;
     }
 
@@ -122,7 +138,7 @@ export class Cell {
         return gridProps
             .getCoords()
             .flat()
-            .find((el) => el?.prop?.obj && el.prop.obj.getID() === this.propRef)?.prop;
+            .find((el) => el?.prop?.obj && el.prop.obj.getID() === this.getPropRef())?.prop;
     }
 
     moveRight(times) {

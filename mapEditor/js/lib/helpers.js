@@ -72,6 +72,10 @@ export function precise(number, precision) {
     return Number.parseFloat(number).toPrecision(precision);
 }
 
+export function roundTo(number, to) {
+    return Number(number.toFixed(to));
+}
+
 export function spy(obj, methods, callback) {
     const meths = [methods].flat();
     const Spy = {

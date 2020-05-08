@@ -17,7 +17,6 @@ export class SceneObjectList {
     removeSceneObject(id) {
         const curIDs = this.sceneObjects.map((el) => el.getID());
         const index = curIDs.indexOf(id);
-        console.log("remove so,",id, curIDs)
         if (index !== -1) {
             this.sceneObjects.splice(index, 1);
             console.log(this.sceneObjects)
