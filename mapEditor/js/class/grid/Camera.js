@@ -121,7 +121,6 @@ export default class Camera {
             }
         }
         gridProps.setRenderedCells(cellToRender);
-        console.log("cell to render bitch : ", cellToRender);
         return cellToRender;
     }
 
