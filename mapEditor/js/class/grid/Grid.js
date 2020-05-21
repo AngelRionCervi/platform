@@ -193,14 +193,12 @@ export class Grid {
         const concernedCells = [];
         for (let x = cursorPos.x; x < cursorPos.x + ts(asset.width); x += ts(blockSize)) {
             for (let y = cursorPos.y; y < cursorPos.y + ts(asset.height); y += ts(blockSize)) {
-                const { wx, wy } = camera.screenCoordToWorld({ x, y });
-                if (wx <= gridWidth && wy <= gridHeight) {
-                    const floored = this.floorMouse({ x, y });
-                    const cell = gridCoords[floored.x / blockSize][floored.y / blockSize];
-                    concernedCells.push(cell.getID());
-                    const slice = { x: Math.round(tw(x - cursorPos.x)), y: Math.round(tw(y - cursorPos.y)) };
-                    cell.setBlockType("wall").setProp(object).setSlice(slice).fillCell();
-                }
+                const floored = this.floorMouse({ x, y });
+                const cell = gridCoords[floored.x / blockSize][floored.y / blockSize] || false;
+                if (!cell) break;
+                concernedCells.push(cell.getID());
+                const slice = { x: Math.round(tw(x - cursorPos.x)), y: Math.round(tw(y - cursorPos.y)) };
+                cell.setBlockType("wall").setProp(object).setSlice(slice).fillCell();
             }
         }
         console.log("concernedCells", concernedCells.length);
