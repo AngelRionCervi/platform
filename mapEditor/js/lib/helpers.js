@@ -76,6 +76,10 @@ export function roundTo(number, to) {
     return Number(number.toFixed(to));
 }
 
+export function posOr0(number) {
+    return number > 0 ? number : 0;
+}
+
 export function spy(obj, methods, callback) {
     const meths = [methods].flat();
     const callbacks = [callback].flat();
@@ -98,3 +102,5 @@ export function spy(obj, methods, callback) {
 
     return Spy;
 }
+
+

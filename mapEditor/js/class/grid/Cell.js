@@ -83,6 +83,19 @@ export class Cell {
         return this;
     }
 
+    clearBufferCell(ctx) {
+        const blockSize = gridProps.getBlockSize();
+        this.cellFillStyle = "white";
+        ctx.clearRect(
+            this.x - this.addedBlockW,
+            this.y - this.addedBlockH,
+            blockSize + this.addedBlockW,
+            blockSize + this.addedBlockH
+        );
+        ctx.fillStyle = this.cellFillStyle;
+        return this;
+    }
+
     removeProp() {
         this.prop = null;
         return this;
@@ -128,10 +141,8 @@ export class Cell {
         const blockSize = gridProps.getBlockSize();
         ctx.imageSmoothingEnabled = false;
         ctx.globalCompositeOperation = "source-over";
-        if (this.blockType === "air") {
-            this.reset(ctx);
-        } else if (this.prop && this.prop.obj && this.slice) {
-            this.clear(ctx);
+        if (this.prop && this.prop.obj && this.slice) {
+            this.clearBufferCell(ctx);
             const asset = this.prop.obj.getAsset();
             const sprite = asset.getSprite();
             ctx.beginPath();
@@ -141,10 +152,10 @@ export class Cell {
                 this.slice.y,
                 blockSize,
                 blockSize,
-                this.x,
-                this.y,
-                Math.floor(blockSize),
-                Math.floor(blockSize)
+                this.x - this.addedBlockW,
+                this.y - this.addedBlockH,
+                blockSize + this.addedBlockW,
+                blockSize + this.addedBlockH
             );
             ctx.closePath();
         }

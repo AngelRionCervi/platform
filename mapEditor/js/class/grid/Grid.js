@@ -125,7 +125,7 @@ export class GridProps {
         return this.sceneBuffer;
     }
     getSceneBufferCtx() {
-        return this.getSceneBuffer().getContext('2d');
+        return this.getSceneBuffer().getContext("2d");
     }
 }
 
@@ -204,22 +204,25 @@ export class Grid {
         const gridCoords = gridProps.getCoords(); // no cellToRender because 1 sprite can be > viewport
         const tw = camera.toWorld.bind(camera);
         const ts = camera.toScreen.bind(camera);
+        const camCoords = camera.getCoords();
+
+        const maxX = tw(cursorPos.x + ts(asset.width)) - camCoords.x;
+        const restX = _H.posOr0(-(gridProps.getWidth() - maxX));
+        const maxY = tw(cursorPos.y + ts(asset.height)) - camCoords.y;
+        const restY = _H.posOr0(-(gridProps.getHeight() - maxY));
 
         const concernedCells = [];
-        for (let x = cursorPos.x; x < cursorPos.x + ts(asset.width); x += ts(blockSize)) {
-            for (let y = cursorPos.y; y < cursorPos.y + ts(asset.height); y += ts(blockSize)) {
+        for (let x = cursorPos.x; x < ts(maxX - restX + camCoords.x); x += ts(blockSize)) { // loops on every cells within the assets width and height and draw them
+            for (let y = cursorPos.y; y < ts(maxY - restY + camCoords.y); y += ts(blockSize)) {
                 const floored = this.floorMouse({ x, y });
-                const cell = gridCoords[floored.x / blockSize][floored.y / blockSize] || false;
-                if (!cell) break;
+                const cell = gridCoords[floored.x / blockSize][floored.y / blockSize];
                 concernedCells.push(cell.getID());
                 const slice = { x: Math.round(tw(x - cursorPos.x)), y: Math.round(tw(y - cursorPos.y)) };
                 cell.setBlockType("wall").setProp(object).setSlice(slice).fillCell();
                 gridProps.updateSceneBuffer(cell, object, slice);
-                //cell.setBlockType("wall").setProp(object).setSlice(slice);
-                //gridProps.updateSceneBuffer(cell);
             }
         }
-        console.log("concernedCells", concernedCells.length);
+        //console.log("concernedCells", concernedCells.length);
         //object.obj.setCells(concernedCells);
     }
 
@@ -402,19 +405,19 @@ function createMapBorder() {
     }
 }
 
-export function renderGrid(context = null) {
+export function renderGrid() {
     const cells = camera.getCellsToRender(gridProps.getCoords());
     console.log("cell rendered : ", cells.length);
     //const debugCells = debugRenderedCells(cells);
-    if (!context) ctx.clear(true);
-    fillAllCells(cells, context);
+    ctx.clear(true);
+    fillAllCells(cells);
     createMapBorder();
 }
 
-export function fillAllCells(cellsToRender, context = null) {
+export function fillAllCells(cellsToRender) {
     cellsToRender.forEach((cellObj) => {
         if (cellObj.isProp()) {
-            cellObj.fillCell(context);
+            cellObj.fillCell();
         }
     });
 }
