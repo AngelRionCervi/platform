@@ -5,5 +5,5 @@ export const _G = {
     viewPortWidth: 1024,
     viewPortHeight: 576,
     mapBordersColor: 'red',
-    mapBorderWidth: 2,
+    mapBorderWidth: 3,
 }

@@ -1,10 +1,13 @@
 import { getContext } from "../general/canvasRef.js";
-import { gridProps, camera } from "./Grid.js";
+import { gridProps } from "./Grid.js";
+import camera from "../Camera/Camera.js";
+import sceneBuffer from "../sceneObjects/SceneBuffer.js"
+const sceneBufferCtx = sceneBuffer.getBufferCtx();
 
 const baseCtx = getContext();
 
 export class Cell {
-    constructor(id, x, y, absX, absY, blockType, blockSize, prop) {
+    constructor(id, x, y, absX, absY, blockType, prop) {
         this.id = id;
         this.x = x;
         this.y = y;
@@ -83,7 +86,7 @@ export class Cell {
         return this;
     }
 
-    clearBufferCell(ctx) {
+    clearSceneBufferCell() {
         const blockSize = gridProps.getBlockSize();
         this.cellFillStyle = "white";
         ctx.clearRect(
@@ -108,7 +111,7 @@ export class Cell {
         return this;
     }
 
-    fillCell(context = null) {
+    /*fillCell(context = null) {
         const ctx = context ? context : baseCtx;
         const blockSize = gridProps.getBlockSize();
         const zoom = camera.getZoom();
@@ -135,18 +138,18 @@ export class Cell {
             ctx.closePath();
         }
         return this;
-    }
+    }*/
 
-    fillCellOnBuffer(ctx) {
+    fillSceneBufferCell() {
         const blockSize = gridProps.getBlockSize();
-        ctx.imageSmoothingEnabled = false;
-        ctx.globalCompositeOperation = "source-over";
+        sceneBufferCtx.imageSmoothingEnabled = false;
+        sceneBufferCtx.globalCompositeOperation = "source-over";
         if (this.prop && this.prop.obj && this.slice) {
-            this.clearBufferCell(ctx);
+           // this.clearSceneBufferCell(sceneBufferCtx);
             const asset = this.prop.obj.getAsset();
             const sprite = asset.getSprite();
-            ctx.beginPath();
-            ctx.drawImage(
+            sceneBufferCtx.beginPath();
+            sceneBufferCtx.drawImage(
                 sprite,
                 this.slice.x,
                 this.slice.y,
@@ -157,7 +160,7 @@ export class Cell {
                 blockSize + this.addedBlockW,
                 blockSize + this.addedBlockH
             );
-            ctx.closePath();
+            sceneBufferCtx.closePath();
         }
         return this;
     }

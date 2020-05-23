@@ -2,135 +2,13 @@ import { Cell } from "./Cell.js";
 import { GridNormalization } from "./GridNormalization.js";
 import * as _H from "../../lib/helpers.js";
 import { _G } from "../../lib/globals.js";
-import Camera from "./Camera.js";
 import { getCanvas, getContext } from "../general/canvasRef.js";
-
-export class GridProps {
-    constructor() {
-        this.gridWidth = _G.gridWidth;
-        this.gridHeight = _G.gridHeight;
-        this.blockSize = _G.blockSize;
-        this.gridCoords = [];
-        this.sceneBuffer = document.createElement("canvas");
-    }
-
-    getBlockSize() {
-        return this.blockSize;
-    }
-    setBlockSize(size) {
-        this.blockSize = size;
-        return this;
-    }
-    setWidth(width) {
-        this.gridWidth = width;
-        return this;
-    }
-    setHeight(height) {
-        this.gridHeight = height;
-        return this;
-    }
-    getWidth() {
-        return this.gridWidth;
-    }
-    getHeight() {
-        return this.gridHeight;
-    }
-    setCoords(gridCoords) {
-        this.gridCoords = gridCoords;
-        return this;
-    }
-    getCoords() {
-        return this.gridCoords;
-    }
-    setRenderedCells(renderedCells) {
-        this.renderedCells = renderedCells;
-    }
-    getRenderedCells() {
-        return this.renderedCells;
-    }
-    newColRight(newCol) {
-        this.gridCoords.push(newCol);
-        return this;
-    }
-    newColLeft(newCol) {
-        this.gridCoords.unshift(newCol);
-        return this;
-    }
-    removeColRight() {
-        this.gridCoords.pop();
-        return this;
-    }
-    removeColLeft() {
-        this.gridCoords.shift();
-        return this;
-    }
-    newRowBottom(row) {
-        this.gridCoords.forEach((col, i) => {
-            col.push(row[i]);
-        });
-        return this;
-    }
-    newRowTop(row) {
-        this.gridCoords.forEach((col, i) => {
-            col.unshift(row[i]);
-        });
-        return this;
-    }
-    removeRowBottom() {
-        this.gridCoords.forEach((col) => {
-            col.pop();
-        });
-        return this;
-    }
-    removeRowTop() {
-        this.gridCoords.forEach((col) => {
-            col.shift();
-        });
-        return this;
-    }
-    moveAllRight(times) {
-        this.gridCoords.flat().forEach((cell) => {
-            cell.moveRight(times);
-        });
-        return this;
-    }
-    moveAllLeft(times) {
-        this.gridCoords.flat().forEach((cell) => {
-            cell.moveLeft(times);
-        });
-        return this;
-    }
-    moveAllDown(times) {
-        this.gridCoords.flat().forEach((cell) => {
-            cell.moveDown(times);
-        });
-        return this;
-    }
-    moveAllUp(times) {
-        this.gridCoords.flat().forEach((cell) => {
-            cell.moveUp(times);
-        });
-        return this;
-    }
-    setSceneBuffer() {
-        this.sceneBuffer.width = this.gridWidth;
-        this.sceneBuffer.height = this.gridHeight;
-        //renderGrid(this.sceneBuffer.getContext("2d"));
-        document.body.appendChild(this.sceneBuffer);
-    }
-    updateSceneBuffer(cell, object, slice) {
-        cell.setBlockType("wall").setProp(object).setSlice(slice).fillCellOnBuffer(this.getSceneBufferCtx());
-    }
-    getSceneBuffer() {
-        return this.sceneBuffer;
-    }
-    getSceneBufferCtx() {
-        return this.getSceneBuffer().getContext("2d");
-    }
-}
+import GridProps from "../grid/GridProps.js";
+import sceneBuffer from "../sceneObjects/SceneBuffer.js";
+import camera from "../Camera/Camera.js";
 
 export const gridProps = new GridProps();
-export const camera = new Camera();
+//export const camera = new Camera();
 
 const gridNormal = new GridNormalization();
 
@@ -155,23 +33,23 @@ export class Grid {
         const blockSize = gridProps.getBlockSize();
         const width = gridProps.getWidth();
         const height = gridProps.getHeight();
-        let coords = new Array(Math.round(width / blockSize));
+        let tileCollection = new Array(Math.round(width / blockSize));
 
-        for (let u = 0; u < coords.length; u++) {
-            coords[u] = new Array(Math.round(height / blockSize));
+        for (let u = 0; u < tileCollection.length; u++) {
+            tileCollection[u] = new Array(Math.round(height / blockSize));
         }
 
         for (let x = 0; x < width / blockSize; x++) {
             for (let y = 0; y < height / blockSize; y++) {
                 const id = _H.uniqid();
                 const cellObj = new Cell(id, x * blockSize, y * blockSize, x, y, "air", null);
-                coords[x][y] = cellObj;
+                tileCollection[x][y] = cellObj;
             }
         }
-        gridProps.setCoords(coords);
+        gridProps.setTiles(tileCollection);
         canvas.width = _G.viewPortWidth;
         canvas.height = _G.viewPortHeight;
-        gridProps.setSceneBuffer();
+        sceneBuffer.setBuffer();
     }
 
     floorMouse(coords) {
@@ -201,7 +79,7 @@ export class Grid {
     addCellByCursor(cursorPos, object) {
         const asset = object.obj.asset;
         const blockSize = gridProps.getBlockSize();
-        const gridCoords = gridProps.getCoords(); // no cellToRender because 1 sprite can be > viewport
+        const gridTiles = gridProps.getTiles(); // no cellToRender because 1 sprite can be > viewport
         const tw = camera.toWorld.bind(camera);
         const ts = camera.toScreen.bind(camera);
         const camCoords = camera.getCoords();
@@ -216,14 +94,14 @@ export class Grid {
             // loops on every cells within the assets width and height and draw them
             for (let y = cursorPos.y; y < ts(maxY - restY + camCoords.y); y += ts(blockSize)) {
                 const floored = this.floorMouse({ x, y });
-                const cell = gridCoords[floored.x / blockSize][floored.y / blockSize];
+                const cell = gridTiles[floored.x / blockSize][floored.y / blockSize];
                 concernedCells.push(cell.getID());
-                const slice = { x: Math.round(tw(x - cursorPos.x)), y: Math.round(tw(y - cursorPos.y)) };
-                cell.setBlockType("wall").setProp(object).setSlice(slice).fillCell();
-                gridProps.updateSceneBuffer(cell, object, slice);
+                const slice = { x: tw(x - cursorPos.x), y: tw(y - cursorPos.y) };
+                sceneBuffer.updateBuffer(cell, object, slice);
             }
         }
-        //console.log("concernedCells", concernedCells.length);
+        //console.log("concernedCells", concernedCells.length, cursorPos.x);
+        renderGrid();
         //object.obj.setCells(concernedCells);
     }
 
@@ -272,6 +150,7 @@ export class Grid {
             gridProps.moveAllRight(1).newColLeft(newCol);
             camera.moveRight(blockSize);
         }
+        sceneBuffer.addSizeUnitToBuffer(side);
         renderGrid();
     }
 
@@ -304,6 +183,7 @@ export class Grid {
             gridProps.moveAllDown(1).newRowTop(newRow);
             camera.moveBottom(blockSize);
         }
+        sceneBuffer.addSizeUnitToBuffer(side);
         renderGrid();
     }
 
@@ -316,6 +196,7 @@ export class Grid {
             gridProps.removeColLeft().moveAllLeft(1);
             camera.moveLeft(blockSize);
         }
+        sceneBuffer.removeSizeUnitToBuffer(side);
         renderGrid();
     }
 
@@ -328,6 +209,7 @@ export class Grid {
             gridProps.removeRowTop().moveAllUp(1);
             camera.moveTop(blockSize);
         }
+        gridProps.removeSizeUnitToBuffer(side);
         renderGrid();
     }
 
@@ -381,45 +263,53 @@ function createMapBorder() {
     if (cameraCoords.x >= 0) {
         // left
         ctx.fillRect(
-            ts(cameraCoords.x) - ts(borderWidth),
-            ts(cameraCoords.y) - ts(borderWidth),
-            ts(borderWidth),
-            ts(gridHeight) + ts(borderWidth) * 2
+            ts(cameraCoords.x - borderWidth),
+            ts(cameraCoords.y - borderWidth),
+            borderWidth,
+            ts(gridHeight + borderWidth) + borderWidth
         );
     }
     if (-cameraCoords.x + tw(vpWidth) >= gridWidth) {
         //right
         ctx.fillRect(
-            ts(cameraCoords.x) + ts(gridWidth),
-            ts(cameraCoords.y) - ts(borderWidth),
-            ts(borderWidth),
-            ts(gridHeight) + ts(borderWidth) * 2
+            ts(cameraCoords.x + gridWidth),
+            ts(cameraCoords.y - borderWidth),
+            borderWidth,
+            ts(gridHeight + borderWidth) + borderWidth
         );
     }
     if (cameraCoords.y >= 0) {
         // top
-        ctx.fillRect(ts(cameraCoords.x), ts(cameraCoords.y) - ts(borderWidth), ts(gridWidth), ts(borderWidth));
+        ctx.fillRect(
+            ts(cameraCoords.x - borderWidth),
+            ts(cameraCoords.y - borderWidth),
+            ts(gridWidth + borderWidth) + borderWidth,
+            borderWidth
+        );
     }
     if (-cameraCoords.y + tw(vpHeight) >= gridHeight) {
         // bottom
-        ctx.fillRect(ts(cameraCoords.x), ts(cameraCoords.y) + ts(gridHeight), ts(gridWidth), ts(borderWidth));
+        ctx.fillRect(
+            ts(cameraCoords.x - borderWidth),
+            ts(cameraCoords.y + gridHeight),
+            ts(gridWidth + borderWidth) + borderWidth,
+            borderWidth
+        );
     }
 }
 
 export function renderGrid() {
-    const cells = camera.getCellsToRender(gridProps.getCoords());
+    console.log("render grid called");
+    camera.setCellsToRender(gridProps.getTiles());
     const tw = camera.toWorld.bind(camera);
-    const ts = camera.toScreen.bind(camera);
     const { vpWidth, vpHeight } = camera.getViewPort();
-    const zoom = camera.getZoom();
-    //console.log("cell rendered : ", cells.length);
-    //const debugCells = debugRenderedCells(cells);
     ctx.clear(true);
-    const sceneBuffer = gridProps.getSceneBuffer();
+
+    const sceneBufferCanvas = sceneBuffer.getBuffer();
     const camCoords = camera.getCoords();
-    console.log(vpWidth, ts(vpWidth), zoom, vpWidth / zoom);
-    ctx.drawImage(sceneBuffer, -camCoords.x, -camCoords.y, tw(vpWidth), tw(vpHeight), 0, 0, vpWidth, vpHeight);
-    //fillAllCells(cells);
+    ctx.imageSmoothingEnabled = false;
+    ctx.globalCompositeOperation = "source-over";
+    ctx.drawImage(sceneBufferCanvas, -camCoords.x, -camCoords.y, tw(vpWidth), tw(vpHeight), 0, 0, vpWidth, vpHeight);
     createMapBorder();
 }
 

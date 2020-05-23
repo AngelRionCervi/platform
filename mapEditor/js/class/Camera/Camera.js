@@ -1,5 +1,5 @@
 import { _G } from "../../lib/globals.js";
-import { Grid, renderGrid, fillAllCells, gridProps } from "./Grid.js";
+import { Grid, renderGrid, fillAllCells, gridProps } from "../grid/Grid.js";
 import { getContext, getCanvas } from "../general/canvasRef.js";
 import { precise, roundTo } from "../../lib/helpers.js";
 
@@ -8,7 +8,7 @@ const canvas = getCanvas();
 
 const gridDiv = document.getElementById("canvas_grid");
 
-export default class Camera {
+class Camera {
     constructor() {
         this.viewPortWidth = _G.viewPortWidth;
         this.viewPortHeight = _G.viewPortHeight;
@@ -17,6 +17,10 @@ export default class Camera {
         this.y = 0;
         this.scaleInc = 1;
         this.zoom = 1;
+        this.zoomStep = 0.8;
+        this.maxZoom = this.zoomStep * 5;
+        this.minZoom = this.zoomStep * 0.1;
+        console.log("camera init");
     }
 
     getCoords() {
@@ -36,11 +40,11 @@ export default class Camera {
     }
 
     toWorld(number) {
-        return number / this.zoom;
+        return Math.floor(number / this.zoom);
     }
 
     toScreen(number) {
-        return number * this.zoom;
+        return Math.floor(number * this.zoom);
     }
 
     setScale({ dir }) {
@@ -60,11 +64,12 @@ export default class Camera {
         }*/
 
         if (dir > 0) {
-            this.scaleInc = 1 * 0.8;
+            this.scaleInc = 1 * this.zoomStep;
         } else {
-            this.scaleInc = 1 / 0.8;
+            this.scaleInc = 1 / this.zoomStep;
         }
-        this.zoom = roundTo(this.zoom * this.scaleInc, 2);
+        const zoom = Math.max(roundTo(this.zoom * this.scaleInc, 2), this.minZoom);
+        this.zoom = Math.min(zoom, this.maxZoom);
 
         //this.viewPortWidth /= this.scaleInc;
         //this.viewPortHeight /= this.scaleInc;
@@ -80,7 +85,7 @@ export default class Camera {
         return this.zoom;
     }
 
-    getCellsToRender(gridCoords) {
+    setCellsToRender(gridCoords) {
         const cellToRender = [];
         const gridWidth = gridProps.getWidth();
         const gridHeight = gridProps.getHeight();
@@ -94,7 +99,8 @@ export default class Camera {
             const n = Math.round((x - this.x) / bs);
             if (n > gridWidth / bs) break;
             const cx = n > 0 ? n - 1 : 0;
-            if (lastCX !== cx) { // prevents multiple occurence of 1st row
+            if (lastCX !== cx) {
+                // prevents multiple occurence of 1st row
                 lastCX = cx;
                 gridCoords[cx].map((cell) => {
                     cell.setOffsetX(this.x);
@@ -121,7 +127,7 @@ export default class Camera {
             }
         }
         gridProps.setRenderedCells(cellToRender);
-        return cellToRender;
+        //return cellToRender;
     }
 
     newPanPoint(curPos) {
@@ -194,3 +200,5 @@ export default class Camera {
         }*/
     }
 }
+
+export default new Camera();

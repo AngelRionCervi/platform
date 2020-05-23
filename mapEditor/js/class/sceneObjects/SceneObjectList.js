@@ -19,7 +19,6 @@ export class SceneObjectList {
         const index = curIDs.indexOf(id);
         if (index !== -1) {
             this.sceneObjects.splice(index, 1);
-            console.log(this.sceneObjects)
             return true;
         } else {
             return false;

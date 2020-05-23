@@ -6,7 +6,8 @@ import { ContextMenu } from "./class/general/ContextMenu.js";
 import { Keyboard } from "./class/keyboardHandling/Keyboard.js";
 import { Project } from "./class/project/userProject.js";
 import { GridInteraction } from "./class/grid/GridInteraction.js";
-import { Grid, renderGrid, camera, gridProps } from "./class/grid/Grid.js";
+import { Grid, renderGrid, gridProps } from "./class/grid/Grid.js";
+import camera from "./class/Camera/Camera.js";
 import { Assets } from "./class/project/Assets.js";
 import { MapDownloader } from "./class/download/MapDownloader.js";
 import { Palette } from "./class/palette/Palette.js";
@@ -196,7 +197,6 @@ function handle_Grid_Left_Click_Drawing(coord) {
         }
     }
     if (!objToDraw) return;
-
     grid.addCellByCursor(coord, objToDraw);
 }
 
@@ -204,7 +204,7 @@ function hanlde_Grid_Right_Click_Drawing(coord) {
     const cell = grid.getCellByCursor(coord);
     const isPropRef = cell.isPropRef();
     const prop = isPropRef && cell.getPropFromRef(); // not good for drawing cause looping on all cells again
-
+    console.log(prop)
     if (!prop) return;
 
     if (prop.type === "gameObject") {
