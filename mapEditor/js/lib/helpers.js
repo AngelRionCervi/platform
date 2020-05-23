@@ -78,6 +78,7 @@ export function roundTo(number, to) {
 
 export function spy(obj, methods, callback) {
     const meths = [methods].flat();
+    const callbacks = [callback].flat();
     const Spy = {
         args: [],
         count: 0,
@@ -91,7 +92,7 @@ export function spy(obj, methods, callback) {
             Spy.count++;
             Spy.args.unshift(args);
             original.call(obj, ...args);
-            callback(...args);
+            callbacks.forEach((cb) => cb(...args));
         };
     }
 

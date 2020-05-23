@@ -1,7 +1,7 @@
 import { getContext } from "../general/canvasRef.js";
 import { gridProps, camera } from "./Grid.js";
 
-const ctx = getContext();
+const baseCtx = getContext();
 
 export class Cell {
     constructor(id, x, y, absX, absY, blockType, blockSize, prop) {
@@ -68,7 +68,8 @@ export class Cell {
         return this;
     }
 
-    clear() {
+    clear(context = null) {
+        const ctx = context ? context : baseCtx;
         const blockSize = gridProps.getBlockSize();
         const zoom = camera.getZoom();
         this.cellFillStyle = "white";
@@ -87,23 +88,23 @@ export class Cell {
         return this;
     }
 
-    reset() {
-        this.clear();
+    reset(ctx = null) {
+        this.clear(ctx);
         this.removeProp();
         this.removePropRef();
         return this;
     }
 
-    fillCell() {
+    fillCell(context = null) {
+        const ctx = context ? context : baseCtx;
         const blockSize = gridProps.getBlockSize();
         const zoom = camera.getZoom();
         ctx.imageSmoothingEnabled = false;
         ctx.globalCompositeOperation = "source-over";
-
         if (this.blockType === "air") {
-            this.reset();
+            this.reset(ctx);
         } else if (this.prop && this.prop.obj && this.slice) {
-            this.clear();
+            this.clear(ctx);
             const asset = this.prop.obj.getAsset();
             const sprite = asset.getSprite();
             ctx.beginPath();
@@ -117,6 +118,33 @@ export class Cell {
                 this.ty() - this.addedBlockH,
                 Math.floor(blockSize * zoom) + this.addedBlockW,
                 Math.floor(blockSize * zoom) + this.addedBlockH
+            );
+            ctx.closePath();
+        }
+        return this;
+    }
+
+    fillCellOnBuffer(ctx) {
+        const blockSize = gridProps.getBlockSize();
+        ctx.imageSmoothingEnabled = false;
+        ctx.globalCompositeOperation = "source-over";
+        if (this.blockType === "air") {
+            this.reset(ctx);
+        } else if (this.prop && this.prop.obj && this.slice) {
+            this.clear(ctx);
+            const asset = this.prop.obj.getAsset();
+            const sprite = asset.getSprite();
+            ctx.beginPath();
+            ctx.drawImage(
+                sprite,
+                this.slice.x,
+                this.slice.y,
+                blockSize,
+                blockSize,
+                this.x,
+                this.y,
+                Math.floor(blockSize),
+                Math.floor(blockSize)
             );
             ctx.closePath();
         }

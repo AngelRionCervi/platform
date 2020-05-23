@@ -11,6 +11,7 @@ export class GridProps {
         this.gridHeight = _G.gridHeight;
         this.blockSize = _G.blockSize;
         this.gridCoords = [];
+        this.sceneBuffer = document.createElement("canvas");
     }
 
     getBlockSize() {
@@ -111,6 +112,21 @@ export class GridProps {
         });
         return this;
     }
+    setSceneBuffer() {
+        this.sceneBuffer.width = this.gridWidth;
+        this.sceneBuffer.height = this.gridHeight;
+        //renderGrid(this.sceneBuffer.getContext("2d"));
+        document.body.appendChild(this.sceneBuffer);
+    }
+    updateSceneBuffer(cell, object, slice) {
+        cell.setBlockType("wall").setProp(object).setSlice(slice).fillCellOnBuffer(this.getSceneBufferCtx());
+    }
+    getSceneBuffer() {
+        return this.sceneBuffer;
+    }
+    getSceneBufferCtx() {
+        return this.getSceneBuffer().getContext('2d');
+    }
 }
 
 export const gridProps = new GridProps();
@@ -120,7 +136,7 @@ const gridNormal = new GridNormalization();
 
 const canvas = getCanvas();
 const ctx = getContext();
-_H.spy(camera, "setScale", renderGrid); // spy for the methods calls of either "increaseZoom" or "decreaseZoom" in camera and exec cb
+_H.spy(camera, "setScale", () => renderGrid()); // spy for the methods calls of either "increaseZoom" or "decreaseZoom" in camera and exec cb
 
 export class Grid {
     constructor() {
@@ -155,6 +171,7 @@ export class Grid {
         gridProps.setCoords(coords);
         canvas.width = _G.viewPortWidth;
         canvas.height = _G.viewPortHeight;
+        gridProps.setSceneBuffer();
     }
 
     floorMouse(coords) {
@@ -197,6 +214,9 @@ export class Grid {
                 concernedCells.push(cell.getID());
                 const slice = { x: Math.round(tw(x - cursorPos.x)), y: Math.round(tw(y - cursorPos.y)) };
                 cell.setBlockType("wall").setProp(object).setSlice(slice).fillCell();
+                gridProps.updateSceneBuffer(cell, object, slice);
+                //cell.setBlockType("wall").setProp(object).setSlice(slice);
+                //gridProps.updateSceneBuffer(cell);
             }
         }
         console.log("concernedCells", concernedCells.length);
@@ -248,7 +268,6 @@ export class Grid {
             gridProps.moveAllRight(1).newColLeft(newCol);
             camera.moveRight(blockSize);
         }
-
         renderGrid();
     }
 
@@ -281,7 +300,6 @@ export class Grid {
             gridProps.moveAllDown(1).newRowTop(newRow);
             camera.moveBottom(blockSize);
         }
-
         renderGrid();
     }
 
@@ -384,19 +402,19 @@ function createMapBorder() {
     }
 }
 
-export function renderGrid() {
+export function renderGrid(context = null) {
     const cells = camera.getCellsToRender(gridProps.getCoords());
     console.log("cell rendered : ", cells.length);
     //const debugCells = debugRenderedCells(cells);
-    ctx.clear(true);
-    fillAllCells(cells);
+    if (!context) ctx.clear(true);
+    fillAllCells(cells, context);
     createMapBorder();
 }
 
-export function fillAllCells(cellsToRender) {
+export function fillAllCells(cellsToRender, context = null) {
     cellsToRender.forEach((cellObj) => {
         if (cellObj.isProp()) {
-            cellObj.fillCell();
+            cellObj.fillCell(context);
         }
     });
 }

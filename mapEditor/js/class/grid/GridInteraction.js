@@ -105,6 +105,7 @@ export class GridInteraction {
         });
 
         grid.addEventListener("wheel", (evt) => {
+            evt.preventDefault();
             const dir = Math.sign(evt.deltaY);
             const curPos = mouse.getCursorPos(evt);
             this.emitter.emit("grid_wheel", { dir, curPos });
