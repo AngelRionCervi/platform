@@ -212,7 +212,8 @@ export class Grid {
         const restY = _H.posOr0(-(gridProps.getHeight() - maxY));
 
         const concernedCells = [];
-        for (let x = cursorPos.x; x < ts(maxX - restX + camCoords.x); x += ts(blockSize)) { // loops on every cells within the assets width and height and draw them
+        for (let x = cursorPos.x; x < ts(maxX - restX + camCoords.x); x += ts(blockSize)) {
+            // loops on every cells within the assets width and height and draw them
             for (let y = cursorPos.y; y < ts(maxY - restY + camCoords.y); y += ts(blockSize)) {
                 const floored = this.floorMouse({ x, y });
                 const cell = gridCoords[floored.x / blockSize][floored.y / blockSize];
@@ -369,12 +370,12 @@ export class Grid {
 function createMapBorder() {
     // visual
     const cameraCoords = camera.getCoords();
-    const viewPort = camera.getViewPort();
-    const zoom = camera.getZoom();
+    const { vpWidth, vpHeight } = camera.getViewPort();
     const gridWidth = gridProps.getWidth();
     const gridHeight = gridProps.getHeight();
     const borderWidth = _G.mapBorderWidth;
     const ts = camera.toScreen.bind(camera);
+    const tw = camera.toWorld.bind(camera);
 
     ctx.fillStyle = _G.mapBordersColor;
     if (cameraCoords.x >= 0) {
@@ -386,7 +387,7 @@ function createMapBorder() {
             ts(gridHeight) + ts(borderWidth) * 2
         );
     }
-    if (-cameraCoords.x + viewPort.width / zoom >= gridWidth) {
+    if (-cameraCoords.x + tw(vpWidth) >= gridWidth) {
         //right
         ctx.fillRect(
             ts(cameraCoords.x) + ts(gridWidth),
@@ -399,7 +400,7 @@ function createMapBorder() {
         // top
         ctx.fillRect(ts(cameraCoords.x), ts(cameraCoords.y) - ts(borderWidth), ts(gridWidth), ts(borderWidth));
     }
-    if (-cameraCoords.y + viewPort.height / zoom >= gridHeight) {
+    if (-cameraCoords.y + tw(vpHeight) >= gridHeight) {
         // bottom
         ctx.fillRect(ts(cameraCoords.x), ts(cameraCoords.y) + ts(gridHeight), ts(gridWidth), ts(borderWidth));
     }
@@ -407,10 +408,18 @@ function createMapBorder() {
 
 export function renderGrid() {
     const cells = camera.getCellsToRender(gridProps.getCoords());
-    console.log("cell rendered : ", cells.length);
+    const tw = camera.toWorld.bind(camera);
+    const ts = camera.toScreen.bind(camera);
+    const { vpWidth, vpHeight } = camera.getViewPort();
+    const zoom = camera.getZoom();
+    //console.log("cell rendered : ", cells.length);
     //const debugCells = debugRenderedCells(cells);
     ctx.clear(true);
-    fillAllCells(cells);
+    const sceneBuffer = gridProps.getSceneBuffer();
+    const camCoords = camera.getCoords();
+    console.log(vpWidth, ts(vpWidth), zoom, vpWidth / zoom);
+    ctx.drawImage(sceneBuffer, -camCoords.x, -camCoords.y, tw(vpWidth), tw(vpHeight), 0, 0, vpWidth, vpHeight);
+    //fillAllCells(cells);
     createMapBorder();
 }
 

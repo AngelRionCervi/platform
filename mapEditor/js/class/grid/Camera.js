@@ -24,7 +24,7 @@ export default class Camera {
     }
 
     getViewPort() {
-        return { width: this.viewPortWidth, height: this.viewPortHeight };
+        return { vpWidth: this.viewPortWidth, vpHeight: this.viewPortHeight };
     }
 
     screenCoordToWorld({ x, y }) {
