@@ -71,11 +71,6 @@ export class Grid {
         return targetCell;
     }
 
-    debugTargetCell(targetCell) {
-        ctx.fillStyle = "red";
-        //ctx.fillRect(targetCell.x, targetCell.y, _G.blockSize, _G.blockSize);
-    }
-
     addCellByCursor(cursorPos, object) {
         const asset = object.obj.asset;
         const blockSize = gridProps.getBlockSize();
@@ -89,20 +84,17 @@ export class Grid {
         const maxY = tw(cursorPos.y + ts(asset.height)) - camCoords.y;
         const restY = _H.posOr0(-(gridProps.getHeight() - maxY));
 
-        const concernedCells = [];
+       // const concernedCells = [];
         for (let x = cursorPos.x; x < ts(maxX - restX + camCoords.x); x += ts(blockSize)) {
-            // loops on every cells within the assets width and height and draw them
             for (let y = cursorPos.y; y < ts(maxY - restY + camCoords.y); y += ts(blockSize)) {
                 const floored = this.floorMouse({ x, y });
                 const cell = gridTiles[floored.x / blockSize][floored.y / blockSize];
-                concernedCells.push(cell.getID());
+                //concernedCells.push(cell.getID());
                 const slice = { x: tw(x - cursorPos.x), y: tw(y - cursorPos.y) };
                 sceneBuffer.updateBuffer(cell, object, slice);
             }
         }
-        //console.log("concernedCells", concernedCells.length, cursorPos.x);
         renderGrid();
-        //object.obj.setCells(concernedCells);
     }
 
     removeCellByCoord(cursorPos) {
@@ -299,7 +291,6 @@ function createMapBorder() {
 }
 
 export function renderGrid() {
-    console.log("render grid called");
     camera.setCellsToRender(gridProps.getTiles());
     const tw = camera.toWorld.bind(camera);
     const { vpWidth, vpHeight } = camera.getViewPort();
