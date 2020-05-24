@@ -1,21 +1,22 @@
 import { gridProps } from "../grid/Grid.js";
 
-class SceneBuffer {
-    constructor() {
-        this.gameObjectBuffer = document.createElement("canvas");
+class CanvasBuffer {
+    constructor(bufferType) {
+        this.bufferType = bufferType;
+        this.buffer = document.createElement("canvas");
+        document.body.appendChild(this.buffer)
     }
     setBuffer() {
-        this.gameObjectBuffer.width = gridProps.gridWidth;
-        this.gameObjectBuffer.height = gridProps.gridHeight;
-        document.body.appendChild(this.gameObjectBuffer);
+        this.buffer.width = gridProps.gridWidth;
+        this.buffer.height = gridProps.gridHeight;
         return this;
     }
     createTempBuffer() {
-        const preResizeCanvas = document.createElement("canvas");
-        preResizeCanvas.width = this.gameObjectBuffer.width;
-        preResizeCanvas.height = this.gameObjectBuffer.height;
-        preResizeCanvas.getContext("2d").drawImage(this.gameObjectBuffer, 0, 0);
-        return preResizeCanvas;
+        const tmpBuffer = document.createElement("canvas");
+        tmpBuffer.width = this.buffer.width;
+        tmpBuffer.height = this.buffer.height;
+        tmpBuffer.getContext("2d").drawImage(this.buffer, 0, 0);
+        return tmpBuffer;
     }
     addSizeUnitToBuffer(side) {
         const preResizeCanvas = this.createTempBuffer();
@@ -23,19 +24,19 @@ class SceneBuffer {
         const bs = gridProps.getBlockSize();
         switch (side) {
             case "right":
-                this.gameObjectBuffer.width += bs;
+                this.buffer.width += bs;
                 bufferCtx.drawImage(preResizeCanvas, 0, 0);
                 break;
             case "left":
-                this.gameObjectBuffer.width += bs;
+                this.buffer.width += bs;
                 bufferCtx.drawImage(preResizeCanvas, bs, 0);
                 break;
             case "bottom":
-                this.gameObjectBuffer.height += bs;
+                this.buffer.height += bs;
                 bufferCtx.drawImage(preResizeCanvas, 0, 0);
                 break;
             case "top":
-                this.gameObjectBuffer.height += bs;
+                this.buffer.height += bs;
                 bufferCtx.drawImage(preResizeCanvas, 0, bs);
                 break;
         }
@@ -47,32 +48,37 @@ class SceneBuffer {
         const bs = gridProps.getBlockSize();
         switch (side) {
             case "right":
-                this.gameObjectBuffer.width -= bs;
+                this.buffer.width -= bs;
                 bufferCtx.drawImage(preResizeCanvas, 0, 0);
                 break;
             case "left":
-                this.gameObjectBuffer.width -= bs;
+                this.buffer.width -= bs;
                 bufferCtx.drawImage(preResizeCanvas, -bs, 0);
                 break;
             case "bottom":
-                this.gameObjectBuffer.height -= bs;
+                this.buffer.height -= bs;
                 bufferCtx.drawImage(preResizeCanvas, 0, 0);
                 break;
             case "top":
-                this.gameObjectBuffer.height -= bs;
+                this.buffer.height -= bs;
                 bufferCtx.drawImage(preResizeCanvas, 0, -bs);
                 break;
         }
     }
     updateBuffer(cell, object, slice) {
-        cell.setBlockType("wall").setGameObject(object).setGameObjectSlice(slice).fillBufferCell("gameObject");
+        if (this.bufferType === "scene") {
+            cell.setBlockType("wall").setProp(object).setSlice(slice).fillBufferCell(this.bufferType);
+        } else if (this.bufferType === "gameObject") {
+            cell.setBlockType("wall").setGameObject(object).setGameObjectSlice(slice).fillBufferCell(this.bufferType);
+        }
     }
     getBuffer() {
-        return this.gameObjectBuffer;
+        return this.buffer;
     }
     getBufferCtx() {
         return this.getBuffer().getContext("2d");
     }
 }
 
-export default new SceneBuffer();
+export const sceneBuffer = new CanvasBuffer("scene");
+export const gameObjectBuffer = new CanvasBuffer("gameObject");

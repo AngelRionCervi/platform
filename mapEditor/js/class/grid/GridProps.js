@@ -1,4 +1,4 @@
-import { _G } from "../../lib/globals.js";
+import { _G } from "../general/globals.js";
 
 export default class GridProps {
     constructor() {

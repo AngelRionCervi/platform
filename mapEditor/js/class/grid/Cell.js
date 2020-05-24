@@ -1,15 +1,12 @@
 import { getContext } from "../general/canvasRef.js";
 import { gridProps } from "./Grid.js";
 import camera from "../Camera/Camera.js";
-import sceneBuffer from "../sceneObjects/SceneBuffer.js";
-import gameObjectBuffer from "../gameObjects/GameObjectBuffer.js"
-const sceneBufferCtx = sceneBuffer.getBufferCtx();
-const gameObjectBufferCtx = gameObjectBuffer.getBufferCtx();
+import {sceneBuffer, gameObjectBuffer} from "../general/CanvasBuffer.js";
 
 const bufferCtxs = {
-    scene: sceneBufferCtx,
-    gameObject: gameObjectBufferCtx,
-}
+    scene: sceneBuffer.getBufferCtx(),
+    gameObject: gameObjectBuffer.getBufferCtx(),
+};
 
 const baseCtx = getContext();
 
@@ -42,7 +39,7 @@ export class Cell {
         return { x: this.x, y: this.y };
     }
 
-    setBlockAddedSize({w, h}) {
+    setBlockAddedSize({ w, h }) {
         this.addedBlockW = w;
         this.addedBlockH = h;
     }
@@ -89,12 +86,17 @@ export class Cell {
             blockSize + this.addedBlockH
         );
         ctx.fillStyle = this.cellFillStyle;
-        this.removeProp();
+        bufferType === "scene" ? this.removeProp() : this.removeGameObject();
         return this;
     }
 
     removeProp() {
         this.prop = null;
+        return this;
+    }
+
+    removeGameObject() {
+        this.gameObject = null;
         return this;
     }
 
@@ -105,57 +107,30 @@ export class Cell {
         return this;
     }
 
-    /*fillCell(context = null) {
-        const ctx = context ? context : baseCtx;
-        const blockSize = gridProps.getBlockSize();
-        const zoom = camera.getZoom();
-        ctx.imageSmoothingEnabled = false;
-        ctx.globalCompositeOperation = "source-over";
-        if (this.blockType === "air") {
-            this.reset(ctx);
-        } else if (this.prop && this.prop.obj && this.slice) {
-            this.clear(ctx);
-            const asset = this.prop.obj.getAsset();
-            const sprite = asset.getSprite();
-            ctx.beginPath();
-            ctx.drawImage(
-                sprite,
-                this.slice.x,
-                this.slice.y,
-                blockSize,
-                blockSize,
-                this.tx() - this.addedBlockW,
-                this.ty() - this.addedBlockH,
-                Math.floor(blockSize * zoom) + this.addedBlockW,
-                Math.floor(blockSize * zoom) + this.addedBlockH
-            );
-            ctx.closePath();
-        }
-        return this;
-    }*/
-
     fillBufferCell(bufferType) {
         const ctx = bufferCtxs[bufferType];
+        const slice = bufferType === "scene" ? this.slice : this.gameObjectSlice;
+        const selectedObj = bufferType === "scene" ? this.prop : this.gameObject;
         const blockSize = gridProps.getBlockSize();
+        const asset = selectedObj.obj.getAsset();
+        const sprite = asset.getSprite();
+
         ctx.imageSmoothingEnabled = false;
         ctx.globalCompositeOperation = "source-over";
-        if (this.prop && this.prop.obj && this.slice) {
-            const asset = this.prop.obj.getAsset();
-            const sprite = asset.getSprite();
-            ctx.beginPath();
-            ctx.drawImage(
-                sprite,
-                this.slice.x,
-                this.slice.y,
-                blockSize,
-                blockSize,
-                this.x - this.addedBlockW,
-                this.y - this.addedBlockH,
-                blockSize + this.addedBlockW,
-                blockSize + this.addedBlockH
-            );
-            ctx.closePath();
-        }
+        ctx.beginPath();
+        ctx.drawImage(
+            sprite,
+            slice.x,
+            slice.y,
+            blockSize,
+            blockSize,
+            this.x - this.addedBlockW,
+            this.y - this.addedBlockH,
+            blockSize + this.addedBlockW,
+            blockSize + this.addedBlockH
+        );
+        ctx.closePath();
+
         return this;
     }
 
@@ -179,37 +154,27 @@ export class Cell {
         return this;
     }
 
-    setPropRef(ref) {
-        this.propRef = ref;
-        return this;
-    }
-
-    removePropRef() {
-        this.propRef = null;
-        return this;
-    }
-
-    getPropRef() {
-        return this.propRef;
-    }
-
     getProp() {
         return this.prop;
+    }
+
+    getGameObject() {
+        return this.gameObject;
     }
 
     isProp() {
         return !!this.prop;
     }
 
-    isPropRef() {
-        return !!this.propRef;
+    isGameObject() {
+        return !!this.gameObject;
     }
 
-    getPropFromRef() {
-        return gridProps
-            .getCoords()
-            .flat()
-            .find((el) => el?.prop?.obj && el.prop.obj.getID() === this.getPropRef())?.prop;
+    getContent() {
+        return {
+            prop: this.isProp() ? this.getProp() : null,
+            gameObject: this.isGameObject() ? this.getGameObject() : null,
+        };
     }
 
     moveRight(times) {

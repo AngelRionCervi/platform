@@ -1,16 +1,14 @@
 import { Cell } from "./Cell.js";
 import { GridNormalization } from "./GridNormalization.js";
 import * as _H from "../../lib/helpers.js";
-import { _G } from "../../lib/globals.js";
+import { _G } from "../general/globals.js";
 import { getCanvas, getContext } from "../general/canvasRef.js";
 import GridProps from "../grid/GridProps.js";
-import sceneBuffer from "../sceneObjects/SceneBuffer.js";
-import gameObjectBuffer from "../gameObjects/GameObjectBuffer.js";
 import camera from "../Camera/Camera.js";
-
-export const gridProps = new GridProps();
+import { sceneBuffer, gameObjectBuffer } from "../general/CanvasBuffer.js";
 
 const gridNormal = new GridNormalization();
+export const gridProps = new GridProps();
 
 const canvas = getCanvas();
 const ctx = getContext();
@@ -85,7 +83,7 @@ export class Grid {
         const maxY = tw(cursorPos.y + ts(asset.height)) - camCoords.y;
         const restY = _H.posOr0(-(gridProps.getHeight() - maxY));
 
-       const concernedCells = [];
+        const concernedCells = [];
         for (let x = cursorPos.x; x < ts(maxX - restX + camCoords.x); x += ts(blockSize)) {
             for (let y = cursorPos.y; y < ts(maxY - restY + camCoords.y); y += ts(blockSize)) {
                 const floored = this.floorMouse({ x, y });
@@ -99,7 +97,6 @@ export class Grid {
                 }
             }
         }
-        console.log(object)
         object.obj.setCells(concernedCells);
         renderGrid();
     }
@@ -298,7 +295,7 @@ function createMapBorder() {
 }
 
 export function renderGrid() {
-    camera.setCellsToRender(gridProps.getTiles());
+    camera.setCellsToInteract(gridProps.getTiles());
     const tw = camera.toWorld.bind(camera);
     const { vpWidth, vpHeight } = camera.getViewPort();
     ctx.clear(true);
@@ -309,7 +306,17 @@ export function renderGrid() {
     ctx.imageSmoothingEnabled = false;
     ctx.globalCompositeOperation = "source-over";
     ctx.drawImage(sceneBufferCanvas, -camCoords.x, -camCoords.y, tw(vpWidth), tw(vpHeight), 0, 0, vpWidth, vpHeight);
-    ctx.drawImage(gameObjectBufferCanvas, -camCoords.x, -camCoords.y, tw(vpWidth), tw(vpHeight), 0, 0, vpWidth, vpHeight);
+    ctx.drawImage(
+        gameObjectBufferCanvas,
+        -camCoords.x,
+        -camCoords.y,
+        tw(vpWidth),
+        tw(vpHeight),
+        0,
+        0,
+        vpWidth,
+        vpHeight
+    );
     createMapBorder();
 }
 

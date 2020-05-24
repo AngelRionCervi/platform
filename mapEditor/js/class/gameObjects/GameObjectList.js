@@ -1,7 +1,7 @@
 import { GameObject } from "/mapEditor/js/class/gameObjects/GameObject.js";
 import { ShowGameObject } from "/mapEditor/js/class/gameObjects/ShowGameObject.js";
 import { DomBuilder } from "../../lib/DomBuilder.js";
-import { _G } from "../../lib/globals.js";
+import { _G } from "../general/globals.js";
 import * as helper from "../../lib/helpers.js";
 const dob = new DomBuilder();
 

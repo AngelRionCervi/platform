@@ -7,7 +7,6 @@ class SceneBuffer {
     setBuffer() {
         this.sceneBuffer.width = gridProps.gridWidth;
         this.sceneBuffer.height = gridProps.gridHeight;
-        document.body.appendChild(this.sceneBuffer);
         return this;
     }
     createTempBuffer() {

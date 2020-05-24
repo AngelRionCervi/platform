@@ -1,4 +1,4 @@
-import { _G } from "../../lib/globals.js";
+import { _G } from "../general/globals.js";
 import { Grid, renderGrid, fillAllCells, gridProps } from "../grid/Grid.js";
 import { getContext, getCanvas } from "../general/canvasRef.js";
 import { precise, roundTo } from "../../lib/helpers.js";
@@ -20,7 +20,6 @@ class Camera {
         this.zoomStep = 0.8;
         this.maxZoom = this.zoomStep * 5;
         this.minZoom = this.zoomStep * 0.1;
-        console.log("camera init");
     }
 
     getCoords() {
@@ -85,8 +84,8 @@ class Camera {
         return this.zoom;
     }
 
-    setCellsToRender(gridCoords) {
-        const cellToRender = [];
+    setCellsToInteract(gridCoords) {
+        const cellToInteract = [];
         const gridWidth = gridProps.getWidth();
         const gridHeight = gridProps.getHeight();
         const zoom = this.getZoom();
@@ -100,7 +99,6 @@ class Camera {
             if (n > gridWidth / bs) break;
             const cx = n > 0 ? n - 1 : 0;
             if (lastCX !== cx) {
-                // prevents multiple occurence of 1st row
                 lastCX = cx;
                 gridCoords[cx].map((cell) => {
                     cell.setOffsetX(this.x);
@@ -122,12 +120,11 @@ class Camera {
                         const addedH = Math.abs(cell.ty() - gridCoords[cx][cy - 1].ty()) - trueBS;
                         cell.setBlockAddedH(addedH);
                     }
-                    cellToRender.push(cell);
+                    cellToInteract.push(cell);
                 }
             }
         }
-        gridProps.setRenderedCells(cellToRender);
-        //return cellToRender;
+        gridProps.setRenderedCells(cellToInteract);
     }
 
     newPanPoint(curPos) {
@@ -186,18 +183,6 @@ class Camera {
 
     moveTop(distance) {
         this.y += distance;
-    }
-
-    watchPos() {
-        //const coords = gridProps.getCoords();
-        //console.log(-this.y + this.viewPortHeight, gridProps.getHeight());
-        /*
-        if (-this.x + this.viewPortWidth < gridProps.getWidth()) {
-            this.x += this.blockSize;
-        }
-        if (-this.y + this.viewPortHeight > gridProps.getHeight()) {
-            this.y += this.blockSize;
-        }*/
     }
 }
 

@@ -1,6 +1,6 @@
 import { SceneObject } from "./SceneObject.js";
 import * as helper from "../../lib/helpers.js";
-import { _G } from "../../lib/globals.js";
+import { _G } from "../general/globals.js";
 
 export class SceneObjectList {
     constructor(interaction) {

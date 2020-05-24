@@ -172,30 +172,19 @@ document.addEventListener('drop', function(e) {
 function handle_Grid_Left_Click_Drawing(coord) {
     let objToDraw = null;
     let bufferType = null;
+    const cell = grid.getCellByCursor(coord);
+    const cellContent = cell.getContent();
+
     if (palette.isAnAssetSelected()) {
         const assetID = palette.getCurrentAssetID();
         const asset = _assets.getByID(assetID);
-        const cell = grid.getCellByCursor(coord);
-
-        if (cell.isProp()) {
-            // can draw over existing tiles if different
-            const cellObj = cell.getProp().obj
-            //const cellAssetID = cellObj.getAsset().getID();
-            const cellObjID = cellObj.getID();
-            sceneObjectList.removeSceneObject(cellObjID);
-        }
         const prop = sceneObjectList.addSceneObject(coord, asset);
         objToDraw = { obj: prop, type: "sceneObject" };
         bufferType = "scene";
     } else if (gameObjectList.isAnObjectSelected()) {
-        /*if (cellAssetID === assetID) {
-            return;
-        } else {
-            // no game object on this tile
-        }*/
+        if (cellContent.gameObject) return;
         const objectID = gameObjectList.getCurrentObjectID();
         const prop = gameObjectList.addGameObjectToScene(coord, objectID);
-        console.log(prop)
         if (prop) {
             objToDraw = { obj: prop, type: "gameObject" };
             bufferType = "gameObject";
@@ -207,21 +196,18 @@ function handle_Grid_Left_Click_Drawing(coord) {
 
 function hanlde_Grid_Right_Click_Drawing(coord) {
     const cell = grid.getCellByCursor(coord);
-    //const isPropRef = cell.isPropRef();
-    const prop = cell.getProp(); // not good for drawing cause looping on all cells again
-    console.log(prop)
-    if (!prop) return;
+    const cellContent = cell.getContent();
+    if (!cellContent) return;
 
-    if (prop.type === "gameObject") {
-        const cellIDs = prop.obj.getCells();
-        console.log(cellIDs)
-        gameObjectList.removeShowGameObject(prop.obj.getUniqID());
-        cellIDs.forEach((cellID) => { // clear all the cells concerned by the game object
+    if (cellContent.gameObject) {
+        const cellIDs = cellContent.gameObject.obj.getCells();
+        gameObjectList.removeShowGameObject(cellContent.gameObject.obj.getUniqID());
+        cellIDs.forEach((cellID) => {
+            // clear all the cells concerned by the game object
             grid.removeCellByID(cellID, "gameObject");
-        })
-    } else {
-        sceneObjectList.removeSceneObject(prop.obj.getID());
+        });
+    } else if (cellContent.prop) {
+        sceneObjectList.removeSceneObject(cellContent.prop.obj.getID());
         grid.removeCellByCoord(coord, "scene");
     }
-    
 }

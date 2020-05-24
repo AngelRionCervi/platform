@@ -1,14 +1,9 @@
-import * as helper from "../../lib/helpers.js";
+import * as _H from "../../lib/helpers.js";
 
 export class GameObject {
     constructor(asset) {
         this.asset = asset;
-        this.id = "o_" + helper.uniqid() + '_' + this.asset.getID();
-        this.cells = null;
-    }
-
-    setCells(cells) {
-        this.cells = cells;
+        this.id = "o_" + _H.uniqid() + '_' + this.asset.getID();
     }
 
     getFileName() {
