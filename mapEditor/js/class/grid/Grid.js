@@ -5,10 +5,10 @@ import { _G } from "../../lib/globals.js";
 import { getCanvas, getContext } from "../general/canvasRef.js";
 import GridProps from "../grid/GridProps.js";
 import sceneBuffer from "../sceneObjects/SceneBuffer.js";
+import gameObjectBuffer from "../gameObjects/GameObjectBuffer.js";
 import camera from "../Camera/Camera.js";
 
 export const gridProps = new GridProps();
-//export const camera = new Camera();
 
 const gridNormal = new GridNormalization();
 
@@ -24,7 +24,7 @@ export class Grid {
 
     getCellByID(id) {
         return gridProps
-            .getRenderedCells()
+            .getTiles()
             .flat()
             .find((el) => el.id === id);
     }
@@ -50,6 +50,7 @@ export class Grid {
         canvas.width = _G.viewPortWidth;
         canvas.height = _G.viewPortHeight;
         sceneBuffer.setBuffer();
+        gameObjectBuffer.setBuffer();
     }
 
     floorMouse(coords) {
@@ -71,7 +72,7 @@ export class Grid {
         return targetCell;
     }
 
-    addCellByCursor(cursorPos, object) {
+    addCellByCursor(cursorPos, object, bufferType) {
         const asset = object.obj.asset;
         const blockSize = gridProps.getBlockSize();
         const gridTiles = gridProps.getTiles(); // no cellToRender because 1 sprite can be > viewport
@@ -84,31 +85,37 @@ export class Grid {
         const maxY = tw(cursorPos.y + ts(asset.height)) - camCoords.y;
         const restY = _H.posOr0(-(gridProps.getHeight() - maxY));
 
-       // const concernedCells = [];
+       const concernedCells = [];
         for (let x = cursorPos.x; x < ts(maxX - restX + camCoords.x); x += ts(blockSize)) {
             for (let y = cursorPos.y; y < ts(maxY - restY + camCoords.y); y += ts(blockSize)) {
                 const floored = this.floorMouse({ x, y });
                 const cell = gridTiles[floored.x / blockSize][floored.y / blockSize];
-                //concernedCells.push(cell.getID());
+                concernedCells.push(cell.getID());
                 const slice = { x: tw(x - cursorPos.x), y: tw(y - cursorPos.y) };
-                sceneBuffer.updateBuffer(cell, object, slice);
+                if (bufferType === "scene") {
+                    sceneBuffer.updateBuffer(cell, object, slice);
+                } else if (bufferType === "gameObject") {
+                    gameObjectBuffer.updateBuffer(cell, object, slice);
+                }
             }
         }
+        console.log(object)
+        object.obj.setCells(concernedCells);
         renderGrid();
     }
 
-    removeCellByCoord(cursorPos) {
+    removeCellByCoord(cursorPos, bufferType) {
         const cell = this.getCellByCursor(cursorPos);
         if (!cell) return;
-        cell.reset();
-        cell.setBlockType("air").fillCell();
+        cell.clearBufferCell(bufferType);
+        renderGrid();
     }
 
-    removeCellByID(id) {
+    removeCellByID(id, bufferType) {
         const cell = this.getCellByID(id);
         if (!cell) return;
-        cell.reset();
-        cell.setBlockType("air").fillCell();
+        cell.clearBufferCell(bufferType);
+        renderGrid();
     }
 
     addCol(side) {
@@ -297,10 +304,12 @@ export function renderGrid() {
     ctx.clear(true);
 
     const sceneBufferCanvas = sceneBuffer.getBuffer();
+    const gameObjectBufferCanvas = gameObjectBuffer.getBuffer();
     const camCoords = camera.getCoords();
     ctx.imageSmoothingEnabled = false;
     ctx.globalCompositeOperation = "source-over";
     ctx.drawImage(sceneBufferCanvas, -camCoords.x, -camCoords.y, tw(vpWidth), tw(vpHeight), 0, 0, vpWidth, vpHeight);
+    ctx.drawImage(gameObjectBufferCanvas, -camCoords.x, -camCoords.y, tw(vpWidth), tw(vpHeight), 0, 0, vpWidth, vpHeight);
     createMapBorder();
 }
 

@@ -11,6 +11,15 @@ export class ShowGameObject {
         };
         this.goID = goID;
         this.uniqid = "ou_" + helper.uniqid();
+        this.cells = null;
+    }
+
+    setCells(cells) {
+        this.cells = cells;
+    }
+
+    getCells() {
+        return this.cells;
     }
 
     getUniqID() {

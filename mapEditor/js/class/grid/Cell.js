@@ -1,8 +1,15 @@
 import { getContext } from "../general/canvasRef.js";
 import { gridProps } from "./Grid.js";
 import camera from "../Camera/Camera.js";
-import sceneBuffer from "../sceneObjects/SceneBuffer.js"
+import sceneBuffer from "../sceneObjects/SceneBuffer.js";
+import gameObjectBuffer from "../gameObjects/GameObjectBuffer.js"
 const sceneBufferCtx = sceneBuffer.getBufferCtx();
+const gameObjectBufferCtx = gameObjectBuffer.getBufferCtx();
+
+const bufferCtxs = {
+    scene: sceneBufferCtx,
+    gameObject: gameObjectBufferCtx,
+}
 
 const baseCtx = getContext();
 
@@ -71,22 +78,8 @@ export class Cell {
         return this;
     }
 
-    clear(context = null) {
-        const ctx = context ? context : baseCtx;
-        const blockSize = gridProps.getBlockSize();
-        const zoom = camera.getZoom();
-        this.cellFillStyle = "white";
-        ctx.clearRect(
-            this.tx() - this.addedBlockW,
-            this.ty() - this.addedBlockH,
-            Math.floor(blockSize * zoom) + this.addedBlockW,
-            Math.floor(blockSize * zoom) + this.addedBlockH
-        );
-        ctx.fillStyle = this.cellFillStyle;
-        return this;
-    }
-
-    clearSceneBufferCell() {
+    clearBufferCell(bufferType) {
+        const ctx = bufferCtxs[bufferType];
         const blockSize = gridProps.getBlockSize();
         this.cellFillStyle = "white";
         ctx.clearRect(
@@ -96,6 +89,7 @@ export class Cell {
             blockSize + this.addedBlockH
         );
         ctx.fillStyle = this.cellFillStyle;
+        this.removeProp();
         return this;
     }
 
@@ -140,16 +134,16 @@ export class Cell {
         return this;
     }*/
 
-    fillSceneBufferCell() {
+    fillBufferCell(bufferType) {
+        const ctx = bufferCtxs[bufferType];
         const blockSize = gridProps.getBlockSize();
-        sceneBufferCtx.imageSmoothingEnabled = false;
-        sceneBufferCtx.globalCompositeOperation = "source-over";
+        ctx.imageSmoothingEnabled = false;
+        ctx.globalCompositeOperation = "source-over";
         if (this.prop && this.prop.obj && this.slice) {
-           // this.clearSceneBufferCell(sceneBufferCtx);
             const asset = this.prop.obj.getAsset();
             const sprite = asset.getSprite();
-            sceneBufferCtx.beginPath();
-            sceneBufferCtx.drawImage(
+            ctx.beginPath();
+            ctx.drawImage(
                 sprite,
                 this.slice.x,
                 this.slice.y,
@@ -160,7 +154,7 @@ export class Cell {
                 blockSize + this.addedBlockW,
                 blockSize + this.addedBlockH
             );
-            sceneBufferCtx.closePath();
+            ctx.closePath();
         }
         return this;
     }
@@ -170,8 +164,18 @@ export class Cell {
         return this;
     }
 
+    setGameObject(gameObject) {
+        this.gameObject = gameObject;
+        return this;
+    }
+
     setSlice(slice) {
         this.slice = slice;
+        return this;
+    }
+
+    setGameObjectSlice(gameObjectSlice) {
+        this.gameObjectSlice = gameObjectSlice;
         return this;
     }
 

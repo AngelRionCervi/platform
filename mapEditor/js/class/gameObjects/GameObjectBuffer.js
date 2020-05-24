@@ -2,19 +2,19 @@ import { gridProps } from "../grid/Grid.js";
 
 class SceneBuffer {
     constructor() {
-        this.sceneBuffer = document.createElement("canvas");
+        this.gameObjectBuffer = document.createElement("canvas");
     }
     setBuffer() {
-        this.sceneBuffer.width = gridProps.gridWidth;
-        this.sceneBuffer.height = gridProps.gridHeight;
-        document.body.appendChild(this.sceneBuffer);
+        this.gameObjectBuffer.width = gridProps.gridWidth;
+        this.gameObjectBuffer.height = gridProps.gridHeight;
+        document.body.appendChild(this.gameObjectBuffer);
         return this;
     }
     createTempBuffer() {
         const preResizeCanvas = document.createElement("canvas");
-        preResizeCanvas.width = this.sceneBuffer.width;
-        preResizeCanvas.height = this.sceneBuffer.height;
-        preResizeCanvas.getContext("2d").drawImage(this.sceneBuffer, 0, 0);
+        preResizeCanvas.width = this.gameObjectBuffer.width;
+        preResizeCanvas.height = this.gameObjectBuffer.height;
+        preResizeCanvas.getContext("2d").drawImage(this.gameObjectBuffer, 0, 0);
         return preResizeCanvas;
     }
     addSizeUnitToBuffer(side) {
@@ -23,19 +23,19 @@ class SceneBuffer {
         const bs = gridProps.getBlockSize();
         switch (side) {
             case "right":
-                this.sceneBuffer.width += bs;
+                this.gameObjectBuffer.width += bs;
                 bufferCtx.drawImage(preResizeCanvas, 0, 0);
                 break;
             case "left":
-                this.sceneBuffer.width += bs;
+                this.gameObjectBuffer.width += bs;
                 bufferCtx.drawImage(preResizeCanvas, bs, 0);
                 break;
             case "bottom":
-                this.sceneBuffer.height += bs;
+                this.gameObjectBuffer.height += bs;
                 bufferCtx.drawImage(preResizeCanvas, 0, 0);
                 break;
             case "top":
-                this.sceneBuffer.height += bs;
+                this.gameObjectBuffer.height += bs;
                 bufferCtx.drawImage(preResizeCanvas, 0, bs);
                 break;
         }
@@ -47,28 +47,28 @@ class SceneBuffer {
         const bs = gridProps.getBlockSize();
         switch (side) {
             case "right":
-                this.sceneBuffer.width -= bs;
+                this.gameObjectBuffer.width -= bs;
                 bufferCtx.drawImage(preResizeCanvas, 0, 0);
                 break;
             case "left":
-                this.sceneBuffer.width -= bs;
+                this.gameObjectBuffer.width -= bs;
                 bufferCtx.drawImage(preResizeCanvas, -bs, 0);
                 break;
             case "bottom":
-                this.sceneBuffer.height -= bs;
+                this.gameObjectBuffer.height -= bs;
                 bufferCtx.drawImage(preResizeCanvas, 0, 0);
                 break;
             case "top":
-                this.sceneBuffer.height -= bs;
+                this.gameObjectBuffer.height -= bs;
                 bufferCtx.drawImage(preResizeCanvas, 0, -bs);
                 break;
         }
     }
     updateBuffer(cell, object, slice) {
-        cell.setBlockType("wall").setProp(object).setSlice(slice).fillBufferCell("scene");
+        cell.setBlockType("wall").setProp(object).setSlice(slice).fillBufferCell("gameObject");
     }
     getBuffer() {
-        return this.sceneBuffer;
+        return this.gameObjectBuffer;
     }
     getBufferCtx() {
         return this.getBuffer().getContext("2d");
