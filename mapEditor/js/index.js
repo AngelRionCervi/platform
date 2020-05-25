@@ -197,6 +197,7 @@ function handle_Grid_Left_Click_Drawing(coord) {
 function hanlde_Grid_Right_Click_Drawing(coord) {
     const cell = grid.getCellByCursor(coord);
     const cellContent = cell.getContent();
+
     if (!cellContent) return;
 
     if (cellContent.gameObject) {

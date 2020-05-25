@@ -20,7 +20,7 @@ class CanvasBuffer {
     }
     addSizeUnitToBuffer(side) {
         const preResizeCanvas = this.createTempBuffer();
-        const bufferCtx = this.getSceneBufferCtx();
+        const bufferCtx = this.getBufferCtx();
         const bs = gridProps.getBlockSize();
         switch (side) {
             case "right":
@@ -44,7 +44,7 @@ class CanvasBuffer {
     }
     removeSizeUnitToBuffer(side) {
         const preResizeCanvas = this.createTempBuffer();
-        const bufferCtx = this.getSceneBufferCtx();
+        const bufferCtx = this.getBufferCtx();
         const bs = gridProps.getBlockSize();
         switch (side) {
             case "right":

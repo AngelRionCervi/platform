@@ -6,6 +6,10 @@ import { getCanvas, getContext } from "../general/canvasRef.js";
 import GridProps from "../grid/GridProps.js";
 import camera from "../Camera/Camera.js";
 import { sceneBuffer, gameObjectBuffer } from "../general/CanvasBuffer.js";
+const buffers = {
+    scene: sceneBuffer,
+    gameObject: gameObjectBuffer
+}
 
 const gridNormal = new GridNormalization();
 export const gridProps = new GridProps();
@@ -90,11 +94,7 @@ export class Grid {
                 const cell = gridTiles[floored.x / blockSize][floored.y / blockSize];
                 concernedCells.push(cell.getID());
                 const slice = { x: tw(x - cursorPos.x), y: tw(y - cursorPos.y) };
-                if (bufferType === "scene") {
-                    sceneBuffer.updateBuffer(cell, object, slice);
-                } else if (bufferType === "gameObject") {
-                    gameObjectBuffer.updateBuffer(cell, object, slice);
-                }
+                buffers[bufferType].updateBuffer(cell, object, slice);
             }
         }
         object.obj.setCells(concernedCells);
@@ -104,14 +104,14 @@ export class Grid {
     removeCellByCoord(cursorPos, bufferType) {
         const cell = this.getCellByCursor(cursorPos);
         if (!cell) return;
-        cell.clearBufferCell(bufferType);
+        cell.clearBufferCell(bufferType, true);
         renderGrid();
     }
 
     removeCellByID(id, bufferType) {
         const cell = this.getCellByID(id);
         if (!cell) return;
-        cell.clearBufferCell(bufferType);
+        cell.clearBufferCell(bufferType, true);
         renderGrid();
     }
 
@@ -205,7 +205,7 @@ export class Grid {
             gridProps.removeRowTop().moveAllUp(1);
             camera.moveTop(blockSize);
         }
-        gridProps.removeSizeUnitToBuffer(side);
+        sceneBuffer.removeSizeUnitToBuffer(side);
         renderGrid();
     }
 

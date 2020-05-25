@@ -1,7 +1,7 @@
 import { getContext } from "../general/canvasRef.js";
 import { gridProps } from "./Grid.js";
 import camera from "../Camera/Camera.js";
-import {sceneBuffer, gameObjectBuffer} from "../general/CanvasBuffer.js";
+import { sceneBuffer, gameObjectBuffer } from "../general/CanvasBuffer.js";
 
 const bufferCtxs = {
     scene: sceneBuffer.getBufferCtx(),
@@ -75,7 +75,7 @@ export class Cell {
         return this;
     }
 
-    clearBufferCell(bufferType) {
+    clearBufferCell(bufferType, clearProp = false) {
         const ctx = bufferCtxs[bufferType];
         const blockSize = gridProps.getBlockSize();
         this.cellFillStyle = "white";
@@ -86,7 +86,7 @@ export class Cell {
             blockSize + this.addedBlockH
         );
         ctx.fillStyle = this.cellFillStyle;
-        bufferType === "scene" ? this.removeProp() : this.removeGameObject();
+        if (clearProp) bufferType === "scene" ? this.removeProp() : this.removeGameObject();
         return this;
     }
 
@@ -117,6 +117,7 @@ export class Cell {
 
         ctx.imageSmoothingEnabled = false;
         ctx.globalCompositeOperation = "source-over";
+        this.clearBufferCell(bufferType, false);
         ctx.beginPath();
         ctx.drawImage(
             sprite,
