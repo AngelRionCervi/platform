@@ -27,8 +27,17 @@ export class Cell {
         this.slice = { x: 0, y: 0 };
         this.addedBlockW = 0;
         this.addedBlockH = 0;
+        this.layerList = [];
         this.tx = () => Math.floor((this.x + this.xOffset) * camera.getZoom());
         this.ty = () => Math.floor((this.y + this.yOffset) * camera.getZoom());
+    }
+
+    addLayerID(bufferID) {
+        this.layerList.unshift(bufferID);
+    }
+
+    removeLayer0() {
+        this.layerList.shift();
     }
 
     getID() {

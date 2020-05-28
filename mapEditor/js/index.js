@@ -16,6 +16,7 @@ import { SceneObjectList } from "./class/sceneObjects/SceneObjectList.js";
 import { SceneObjectListInteraction } from "./class/sceneObjects/SceneObjectListInteraction.js";
 import { GameObjectList } from "./class/gameObjects/GameObjectList.js";
 import { GameObjectListInteraction } from "./class/gameObjects/GameObjectListInteraction.js";
+import { gameObjectBufferList } from "./class/general/CanvasBuffer.js";
 
 const gridInteraction = new GridInteraction();
 const grid = new Grid();
@@ -196,8 +197,11 @@ function handle_Grid_Left_Click_Drawing(coord) {
         if (cellContent.gameObject) return;
         const objectID = gameObjectList.getCurrentObjectID();
         const prop = gameObjectList.addGameObjectToScene(coord, objectID);
+        console.log(prop)
         if (prop) {
-            objToDraw = { obj: prop, type: "gameObject" };
+            const newBufferID = gameObjectBufferList.add(prop.getAsset(), prop.coord);
+            prop.bufferID = newBufferID;
+            objToDraw = { obj: prop, type: "gameObject", bufferID: newBufferID };
             bufferType = "gameObject";
         }
     }
@@ -214,10 +218,12 @@ function handle_Grid_Right_Click_Drawing(coord) {
     if (cellContent.gameObject) {
         const cellIDs = cellContent.gameObject.obj.getCells();
         gameObjectList.removeShowGameObject(cellContent.gameObject.obj.getUniqID());
+        grid.removeCellByID(cell.getID(), "gameObject");
+        /*
         cellIDs.forEach((cellID) => {
             // clear all the cells concerned by the game object
-            grid.removeCellByID(cellID, "gameObject");
-        });
+            grid.removeCellByID(cell.getID(), "gameObject");
+        });*/
     } else if (cellContent.prop) {
         sceneObjectList.removeSceneObject(cellContent.prop.obj.getID());
         grid.removeCellByCoord(coord, "scene");

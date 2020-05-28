@@ -64,8 +64,8 @@ export function roundToPrevMult(n, mult) {
     return Math.ceil((n - mult) / mult) * mult;
 }
 
-export function uniqid() {
-    return "_" + Math.random().toString(36).substr(2, 9);
+export function uniqid(start = '') {
+    return start + "_" + Math.random().toString(36).substr(2, 9);
 }
 
 export function precise(number, precision) {

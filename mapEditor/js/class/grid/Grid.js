@@ -5,7 +5,7 @@ import { _G } from "../general/globals.js";
 import { getCanvas, getContext } from "../general/canvasRef.js";
 import GridProps from "../grid/GridProps.js";
 import camera from "../Camera/Camera.js";
-import { sceneBuffer, gameObjectBuffer } from "../general/CanvasBuffer.js";
+import { sceneBuffer, gameObjectBuffer, gameObjectBufferList } from "../general/CanvasBuffer.js";
 const buffers = {
     scene: sceneBuffer,
     gameObject: gameObjectBuffer
@@ -86,6 +86,16 @@ export class Grid {
         const restX = _H.posOr0(-(gridProps.getWidth() - maxX));
         const maxY = tw(cursorPos.y + ts(asset.height)) - camCoords.y;
         const restY = _H.posOr0(-(gridProps.getHeight() - maxY));
+        
+        if (bufferType !== "scene") {
+            for (let x = cursorPos.x; x < ts(maxX - restX + camCoords.x); x += ts(blockSize)) {
+                for (let y = cursorPos.y; y < ts(maxY - restY + camCoords.y); y += ts(blockSize)) {
+                    const floored = this.floorMouse({ x, y });
+                    const cell = gridTiles[floored.x / blockSize][floored.y / blockSize];
+                    cell.addLayerID(object.obj.bufferID);
+                }
+            }
+        }
 
         const concernedCells = [];
         for (let x = cursorPos.x; x < ts(maxX - restX + camCoords.x); x += ts(blockSize)) {
@@ -111,6 +121,13 @@ export class Grid {
     removeCellByID(id, bufferType) {
         const cell = this.getCellByID(id);
         if (!cell) return;
+        if (bufferType !== "scene") {
+            gameObjectBufferList.remove(cell.layerList[0]);
+            cell.removeLayer0();
+            console.log("removing buffer", cell.layerList[0])
+            renderGrid();
+            return;
+        }
         cell.clearBufferCell(bufferType, true);
         renderGrid();
     }
@@ -299,10 +316,14 @@ export function renderGrid() {
     const tw = camera.toWorld.bind(camera);
     const { vpWidth, vpHeight } = camera.getViewPort();
     ctx.clear(true);
+    
+    gameObjectBufferList.update();
 
     const sceneBufferCanvas = sceneBuffer.getBuffer();
-    const gameObjectBufferCanvas = gameObjectBuffer.getBuffer();
+    const gameObjectBufferCanvas = gameObjectBufferList.getMainBuffer();
     const camCoords = camera.getCoords();
+    
+
     ctx.imageSmoothingEnabled = false;
     ctx.globalCompositeOperation = "source-over";
     ctx.drawImage(sceneBufferCanvas, -camCoords.x, -camCoords.y, tw(vpWidth), tw(vpHeight), 0, 0, vpWidth, vpHeight);
