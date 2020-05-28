@@ -57,7 +57,7 @@ gridInteraction.emitter.on("grid_right_click", ({ detail }) => {
     if (keys.ctrl) {
         return;
     } else {
-        hanlde_Grid_Right_Click_Drawing(detail);
+        handle_Grid_Right_Click_Drawing(detail);
     }
 });
 
@@ -73,7 +73,7 @@ gridInteraction.emitter.on("grid_right_move", ({ detail }) => {
     if (keys.ctrl) {
         return;
     } else {
-        hanlde_Grid_Right_Click_Drawing(detail);
+        handle_Grid_Right_Click_Drawing(detail);
     }
 });
 
@@ -178,9 +178,20 @@ function handle_Grid_Left_Click_Drawing(coord) {
     if (palette.isAnAssetSelected()) {
         const assetID = palette.getCurrentAssetID();
         const asset = _assets.getByID(assetID);
+
+        if (cellContent.prop) {
+            const prop = cellContent.prop.obj;
+            const curAssetID = prop.asset.getID();
+            if (assetID === curAssetID) {
+                return;
+            } else {
+                sceneObjectList.removeSceneObject(prop.getID());
+            }
+        }
         const prop = sceneObjectList.addSceneObject(coord, asset);
         objToDraw = { obj: prop, type: "sceneObject" };
         bufferType = "scene";
+
     } else if (gameObjectList.isAnObjectSelected()) {
         if (cellContent.gameObject) return;
         const objectID = gameObjectList.getCurrentObjectID();
@@ -194,7 +205,7 @@ function handle_Grid_Left_Click_Drawing(coord) {
     grid.addCellByCursor(coord, objToDraw, bufferType);
 }
 
-function hanlde_Grid_Right_Click_Drawing(coord) {
+function handle_Grid_Right_Click_Drawing(coord) {
     const cell = grid.getCellByCursor(coord);
     const cellContent = cell.getContent();
 

@@ -44,9 +44,9 @@ export class GameObjectList {
     removeShowGameObject(id) {
         const curIDs = this.curDisplayed.map((el) => el.getUniqID());
         const index = curIDs.indexOf(id);
-        console.log("currently displayed gameObjects: " + this.curDisplayed.length);
         if (index !== -1) {
             this.curDisplayed.splice(index, 1);
+            console.log("currently displayed gameObjects: " + this.curDisplayed.length);
             return true;
         } else {
             return false;
