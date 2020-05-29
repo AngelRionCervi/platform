@@ -8,8 +8,8 @@ import camera from "../Camera/Camera.js";
 import { sceneBuffer, gameObjectBuffer, gameObjectBufferList } from "../general/CanvasBuffer.js";
 const buffers = {
     scene: sceneBuffer,
-    gameObject: gameObjectBuffer
-}
+    gameObject: gameObjectBuffer,
+};
 
 const gridNormal = new GridNormalization();
 export const gridProps = new GridProps();
@@ -86,15 +86,32 @@ export class Grid {
         const restX = _H.posOr0(-(gridProps.getWidth() - maxX));
         const maxY = tw(cursorPos.y + ts(asset.height)) - camCoords.y;
         const restY = _H.posOr0(-(gridProps.getHeight() - maxY));
-        
+
         if (bufferType !== "scene") {
+            console.log(object);
+            const firstFloor = this.floorMouse({ x: cursorPos.x, y: cursorPos.y });
+            const newBufferID = gameObjectBufferList.add(object.obj.getAsset(), { x: firstFloor.x, y: firstFloor.y });
+            object.obj.bufferID = newBufferID;
+            object.bufferID = newBufferID;
+            const concernedCells = [];
             for (let x = cursorPos.x; x < ts(maxX - restX + camCoords.x); x += ts(blockSize)) {
                 for (let y = cursorPos.y; y < ts(maxY - restY + camCoords.y); y += ts(blockSize)) {
                     const floored = this.floorMouse({ x, y });
                     const cell = gridTiles[floored.x / blockSize][floored.y / blockSize];
+                    concernedCells.push(cell.getID());
+                    const slice = { x: tw(x - cursorPos.x), y: tw(y - cursorPos.y) };
+                    buffers[bufferType].updateBuffer(cell, object, slice);
                     cell.addLayerID(object.obj.bufferID);
+
+                    // debugging
+                    setTimeout(() => {
+                        debugCell(floored.x, floored.y);
+                    }, 0);
                 }
             }
+            object.obj.setCells(concernedCells);
+            renderGrid();
+            return;
         }
 
         const concernedCells = [];
@@ -124,7 +141,7 @@ export class Grid {
         if (bufferType !== "scene") {
             gameObjectBufferList.remove(cell.layerList[0]);
             cell.removeLayer0();
-            console.log("removing buffer", cell.layerList[0])
+            console.log("removing buffer", cell.layerList[0]);
             renderGrid();
             return;
         }
@@ -316,13 +333,12 @@ export function renderGrid() {
     const tw = camera.toWorld.bind(camera);
     const { vpWidth, vpHeight } = camera.getViewPort();
     ctx.clear(true);
-    
+
     gameObjectBufferList.update();
 
     const sceneBufferCanvas = sceneBuffer.getBuffer();
     const gameObjectBufferCanvas = gameObjectBufferList.getMainBuffer();
     const camCoords = camera.getCoords();
-    
 
     ctx.imageSmoothingEnabled = false;
     ctx.globalCompositeOperation = "source-over";
@@ -347,6 +363,13 @@ export function fillAllCells(cellsToRender) {
             cellObj.fillCell();
         }
     });
+}
+
+function debugCell(x, y) {
+    ctx.fillStyle = "red";
+    const ts = camera.toScreen.bind(camera);
+    const blockSize = gridProps.getBlockSize();
+    ctx.fillRect(ts(x), ts(y), ts(blockSize), ts(blockSize));
 }
 
 function debugRenderedCells(cells) {

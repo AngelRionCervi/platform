@@ -199,9 +199,7 @@ function handle_Grid_Left_Click_Drawing(coord) {
         const prop = gameObjectList.addGameObjectToScene(coord, objectID);
         console.log(prop)
         if (prop) {
-            const newBufferID = gameObjectBufferList.add(prop.getAsset(), prop.coord);
-            prop.bufferID = newBufferID;
-            objToDraw = { obj: prop, type: "gameObject", bufferID: newBufferID };
+            objToDraw = { obj: prop, type: "gameObject" };
             bufferType = "gameObject";
         }
     }

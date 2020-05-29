@@ -115,7 +115,7 @@ class GameObjectBufferList {
         const camCoords = camera.getCoords();
         this.mainBuffer.width = gridProps.gridWidth;
         this.mainBuffer.height = gridProps.gridHeight;
-        
+
         this.list.forEach((buffer) => {
             this.getMainBufferCtx().drawImage(buffer.bufferObj.getBuffer(), buffer.coords.x, buffer.coords.y);
         });
