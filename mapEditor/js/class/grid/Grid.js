@@ -7,7 +7,6 @@ import GridProps from "../grid/GridProps.js";
 import camera from "../Camera/Camera.js";
 import { sceneBuffer, gameObjectBufferList } from "../general/CanvasBuffer.js";
 
-
 const gridNormal = new GridNormalization();
 export const gridProps = new GridProps();
 
@@ -70,8 +69,8 @@ export class Grid {
         return targetCell;
     }
 
-    addCellByCursor(cursorPos, object) {
-        const asset = object.obj.asset;
+    addCellByCursor(cursorPos, object, addSceneObject) {
+        const asset = object.type === "sceneObject" ? object.asset : object.obj.asset;
         const blockSize = gridProps.getBlockSize();
         const gridTiles = gridProps.getTiles(); // no cellToRender because 1 sprite can be > viewport
         const tw = camera.toWorld.bind(camera);
@@ -90,16 +89,21 @@ export class Grid {
                 const cell = gridTiles[floored.x / blockSize][floored.y / blockSize];
                 concernedCells.push(cell.getID());
                 const slice = { x: tw(x - cursorPos.x), y: tw(y - cursorPos.y) };
-                sceneBuffer.updateBuffer(cell, object, slice);
+                let o = object;
+                if (object.type === "sceneObject") {
+                    console.log('new scene object')
+                    o = { type: "sceneObject", obj: addSceneObject({ x: floored.x, y: floored.y }, asset, slice) };
+                }
+                sceneBuffer.updateBuffer(cell, o, slice);
             }
         }
-        object.obj.setCells(concernedCells);
 
         if (object.type === "gameObject") {
+            object.obj.setCells(concernedCells);
             const floorCursor = this.floorMouse({ x: cursorPos.x, y: cursorPos.y });
             gameObjectBufferList.add(object.obj, { x: floorCursor.x, y: floorCursor.y });
         }
-        
+
         renderGrid();
     }
 

@@ -66,7 +66,7 @@ gridInteraction.emitter.on("grid_left_move", ({ detail }) => {
     if (keys.ctrl) {
         camera.pan(detail);
     } else {
-        handle_Grid_Left_Click_Drawing(detail);
+        handle_Grid_Left_Click_Drawing(detail, true);
     }
 });
 
@@ -74,7 +74,7 @@ gridInteraction.emitter.on("grid_right_move", ({ detail }) => {
     if (keys.ctrl) {
         return;
     } else {
-        handle_Grid_Right_Click_Drawing(detail);
+        handle_Grid_Right_Click_Drawing(detail, true);
     }
 });
 
@@ -170,9 +170,8 @@ document.addEventListener('drop', function(e) {
 
 // top level handler
 
-function handle_Grid_Left_Click_Drawing(coord) {
+function handle_Grid_Left_Click_Drawing(coord, moving) {
     let objToDraw = null;
-    let bufferType = null;
     const cell = grid.getCellByCursor(coord);
     const cellContent = cell.getContent();
 
@@ -182,29 +181,27 @@ function handle_Grid_Left_Click_Drawing(coord) {
 
         if (cellContent.prop) {
             const prop = cellContent.prop.obj;
-            const curAssetID = prop.asset.getID();
+            sceneObjectList.removeSceneObject(prop.getID());
+            /*const curAssetID = prop.asset.getID();
             if (assetID === curAssetID) {
                 return;
             } else {
                 sceneObjectList.removeSceneObject(prop.getID());
-            }
+            }*/
         }
-        const prop = sceneObjectList.addSceneObject(coord, asset);
-        objToDraw = { obj: prop, type: "sceneObject" };
-        bufferType = "scene";
-    } else if (gameObjectList.isAnObjectSelected()) {
-        
+        //const prop = sceneObjectList.addSceneObject(coord, asset);
+        objToDraw = { asset, type: "sceneObject" };
+    } else if (gameObjectList.isAnObjectSelected() && !moving) {
         //if (cellContent.gameObject) return;
         const objectID = gameObjectList.getCurrentObjectID();
         const prop = gameObjectList.addGameObjectToScene(coord, objectID);
         if (prop) {
-            console.log("add game object")
+            console.log("add game object");
             objToDraw = { obj: prop, type: "gameObject" };
-            bufferType = "gameObject";
         }
     }
     if (!objToDraw) return;
-    grid.addCellByCursor(coord, objToDraw, bufferType);
+    grid.addCellByCursor(coord, objToDraw, sceneObjectList.addSceneObject.bind(sceneObjectList));
 }
 
 function handle_Grid_Right_Click_Drawing(coord) {
