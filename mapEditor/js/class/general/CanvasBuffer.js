@@ -3,8 +3,7 @@ import camera from "../Camera/Camera.js";
 import * as _H from "../../lib/helpers.js";
 
 class CanvasBuffer {
-    constructor(bufferType) {
-        this.bufferType = bufferType;
+    constructor() {
         this.buffer = document.createElement("canvas");
     }
     setBuffer(asset = null) {
@@ -72,10 +71,10 @@ class CanvasBuffer {
         }
     }
     updateBuffer(cell, object, slice) {
-        if (this.bufferType === "scene") {
-            cell.setBlockType("wall").setProp(object).setSlice(slice).fillBufferCell(this.bufferType);
-        } else if (this.bufferType === "gameObject") {
-            cell.setBlockType("wall").setGameObject(object).setGameObjectSlice(slice).fillBufferCell(this.bufferType);
+        if (object.type === "sceneObject") {
+            cell.setBlockType("wall").setProp(object).setSceneObjectSlice(slice).fillBufferCell();
+        } else if (object.type === "gameObject") {
+            cell.setBlockType("wall").setGameObject(object);
         }
     }
     getBuffer() {
@@ -86,13 +85,18 @@ class CanvasBuffer {
     }
 }
 
-export const sceneBuffer = new CanvasBuffer("scene");
-export const gameObjectBuffer = new CanvasBuffer("gameObject");
+export const sceneBuffer = new CanvasBuffer();
+
 
 class GameObjectBufferList {
     constructor() {
         this.list = [];
         this.mainBuffer = document.createElement("canvas");
+        setTimeout(() => {
+            // next callstack
+            this.mainBuffer.width = gridProps.gridWidth;
+            this.mainBuffer.height = gridProps.gridHeight;
+        }, 0);
     }
 
     add(gObj, coord) {
@@ -112,12 +116,6 @@ class GameObjectBufferList {
 
     update() {
         this.getMainBufferCtx().clear(true);
-        const tw = camera.toWorld.bind(camera);
-        const ts = camera.toScreen.bind(camera);
-        const camCoords = camera.getCoords();
-        this.mainBuffer.width = gridProps.gridWidth;
-        this.mainBuffer.height = gridProps.gridHeight;
-
         this.list.forEach((buffer) => {
             this.getMainBufferCtx().drawImage(buffer.bufferObj.getBuffer(), buffer.coord.x, buffer.coord.y);
         });

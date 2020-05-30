@@ -1,14 +1,7 @@
-import { getContext } from "../general/canvasRef.js";
 import { gridProps } from "./Grid.js";
 import camera from "../Camera/Camera.js";
-import { sceneBuffer, gameObjectBuffer } from "../general/CanvasBuffer.js";
+import { sceneBuffer } from "../general/CanvasBuffer.js";
 
-const bufferCtxs = {
-    scene: sceneBuffer.getBufferCtx(),
-    gameObject: gameObjectBuffer.getBufferCtx(),
-};
-
-const baseCtx = getContext();
 
 export class Cell {
     constructor(id, x, y, absX, absY, blockType, prop) {
@@ -84,8 +77,8 @@ export class Cell {
         return this;
     }
 
-    clearBufferCell(bufferType, clearProp = false) {
-        const ctx = bufferCtxs[bufferType];
+    clearBufferCell(clearProp = false) {
+        const ctx = sceneBuffer.getBufferCtx();
         const blockSize = gridProps.getBlockSize();
         this.cellFillStyle = "white";
         ctx.clearRect(
@@ -95,7 +88,7 @@ export class Cell {
             blockSize + this.addedBlockH
         );
         ctx.fillStyle = this.cellFillStyle;
-        if (clearProp) bufferType === "scene" ? this.removeProp() : this.removeGameObject();
+        if (clearProp) this.removeProp();
         return this;
     }
 
@@ -116,22 +109,20 @@ export class Cell {
         return this;
     }
 
-    fillBufferCell(bufferType) {
-        const ctx = bufferCtxs[bufferType];
-        const slice = bufferType === "scene" ? this.slice : this.gameObjectSlice;
-        const selectedObj = bufferType === "scene" ? this.prop : this.gameObject;
+    fillBufferCell() {
+        const ctx = sceneBuffer.getBufferCtx();
         const blockSize = gridProps.getBlockSize();
-        const asset = selectedObj.obj.getAsset();
+        const asset = this.prop.obj.getAsset();
         const sprite = asset.getSprite();
 
         ctx.imageSmoothingEnabled = false;
         ctx.globalCompositeOperation = "source-over";
-        this.clearBufferCell(bufferType, false);
+        this.clearBufferCell(false);
         ctx.beginPath();
         ctx.drawImage(
             sprite,
-            slice.x,
-            slice.y,
+            this.slice.x,
+            this.slice.y,
             blockSize,
             blockSize,
             this.x - this.addedBlockW,
@@ -154,7 +145,7 @@ export class Cell {
         return this;
     }
 
-    setSlice(slice) {
+    setSceneObjectSlice(slice) {
         this.slice = slice;
         return this;
     }

@@ -192,7 +192,6 @@ function handle_Grid_Left_Click_Drawing(coord) {
         const prop = sceneObjectList.addSceneObject(coord, asset);
         objToDraw = { obj: prop, type: "sceneObject" };
         bufferType = "scene";
-
     } else if (gameObjectList.isAnObjectSelected()) {
         //if (cellContent.gameObject) return;
         const objectID = gameObjectList.getCurrentObjectID();
@@ -203,37 +202,20 @@ function handle_Grid_Left_Click_Drawing(coord) {
         }
     }
     if (!objToDraw) return;
-    console.log(gameObjectList.curDisplayed)
     grid.addCellByCursor(coord, objToDraw, bufferType);
 }
 
 function handle_Grid_Right_Click_Drawing(coord) {
-    //console.log(coord)
     const cell = grid.getCellByCursor(coord);
     const cellContent = cell.getContent();
     if (!cellContent) return;
+
     const goBuffer = gameObjectBufferList.getBufferByCoord(coord);
-    //grid.removeGameObject(coord);
-   
 
     if (goBuffer && cellContent.gameObject) {
-        
-        //const cellIDs = cellContent.gameObject.obj.getCells();
-        
         grid.removeGameObject(goBuffer, cellContent.gameObject.obj);
         gameObjectList.removeShowGameObject(goBuffer.showObjID);
-       // gameObjectList.removeShowGameObject(cellContent.gameObject.obj.getUniqID());
-        
-        //grid.removeCellByID(cell.getID(), "gameObject");*/
-        /*
-        cellIDs.forEach((cellID) => {
-            // clear all the cells concerned by the game object
-            const cell = grid.getCellByID(cellID);
-            cell.removeLayer0();
-        });*/
-        
-    } 
-    if (cellContent.prop) {
+    } else if (cellContent.prop) {
         sceneObjectList.removeSceneObject(cellContent.prop.obj.getID());
         grid.removeCellByCoord(coord, "scene");
     }

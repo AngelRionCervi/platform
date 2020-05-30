@@ -5,12 +5,8 @@ import { _G } from "../general/globals.js";
 import { getCanvas, getContext } from "../general/canvasRef.js";
 import GridProps from "../grid/GridProps.js";
 import camera from "../Camera/Camera.js";
-import { sceneBuffer, gameObjectBuffer, gameObjectBufferList } from "../general/CanvasBuffer.js";
+import { sceneBuffer, gameObjectBufferList } from "../general/CanvasBuffer.js";
 
-const buffers = {
-    scene: sceneBuffer,
-    gameObject: gameObjectBuffer,
-};
 
 const gridNormal = new GridNormalization();
 export const gridProps = new GridProps();
@@ -53,7 +49,6 @@ export class Grid {
         canvas.width = _G.viewPortWidth;
         canvas.height = _G.viewPortHeight;
         sceneBuffer.setBuffer();
-        gameObjectBuffer.setBuffer();
     }
 
     floorMouse(coords) {
@@ -75,7 +70,7 @@ export class Grid {
         return targetCell;
     }
 
-    addCellByCursor(cursorPos, object, bufferType) {
+    addCellByCursor(cursorPos, object) {
         const asset = object.obj.asset;
         const blockSize = gridProps.getBlockSize();
         const gridTiles = gridProps.getTiles(); // no cellToRender because 1 sprite can be > viewport
@@ -88,34 +83,6 @@ export class Grid {
         const maxY = tw(cursorPos.y + ts(asset.height)) - camCoords.y;
         const restY = _H.posOr0(-(gridProps.getHeight() - maxY));
 
-        if (bufferType !== "scene") {
-            console.log(object);
-            const firstFloor = this.floorMouse({ x: cursorPos.x, y: cursorPos.y });
-            const newBufferID = gameObjectBufferList.add(object.obj, { x: firstFloor.x, y: firstFloor.y });
-            object.obj.bufferID = newBufferID;
-            object.bufferID = newBufferID;
-            const concernedCells = [];
-            for (let x = cursorPos.x; x < ts(maxX - restX + camCoords.x); x += ts(blockSize)) {
-                for (let y = cursorPos.y; y < ts(maxY - restY + camCoords.y); y += ts(blockSize)) {
-                    const floored = this.floorMouse({ x, y });
-                    const cell = gridTiles[floored.x / blockSize][floored.y / blockSize];
-                    concernedCells.push(cell.getID());
-                    const slice = { x: tw(x - cursorPos.x), y: tw(y - cursorPos.y) };
-                    buffers[bufferType].updateBuffer(cell, object, slice);
-                    cell.addLayerID(object.obj.bufferID);
-
-                    // debugging
-                    /*
-                    setTimeout(() => {
-                        debugCell(floored.x, floored.y);
-                    }, 0);*/
-                }
-            }
-            object.obj.setCells(concernedCells);
-            renderGrid();
-            return;
-        }
-
         const concernedCells = [];
         for (let x = cursorPos.x; x < ts(maxX - restX + camCoords.x); x += ts(blockSize)) {
             for (let y = cursorPos.y; y < ts(maxY - restY + camCoords.y); y += ts(blockSize)) {
@@ -123,11 +90,16 @@ export class Grid {
                 const cell = gridTiles[floored.x / blockSize][floored.y / blockSize];
                 concernedCells.push(cell.getID());
                 const slice = { x: tw(x - cursorPos.x), y: tw(y - cursorPos.y) };
-                buffers[bufferType].updateBuffer(cell, object, slice);
-                addSceneObject({x: floored.x, y: floored.y}, asset);
+                sceneBuffer.updateBuffer(cell, object, slice);
             }
         }
         object.obj.setCells(concernedCells);
+
+        if (object.type === "gameObject") {
+            const floorCursor = this.floorMouse({ x: cursorPos.x, y: cursorPos.y });
+            gameObjectBufferList.add(object.obj, { x: floorCursor.x, y: floorCursor.y });
+        }
+        
         renderGrid();
     }
 
@@ -141,28 +113,13 @@ export class Grid {
     removeCellByID(id, bufferType) {
         const cell = this.getCellByID(id);
         if (!cell) return;
-        if (bufferType !== "scene") {
-            if (cell.layerList.length === 0) return;
-            gameObjectBufferList.remove(cell.layerList[0]);
-            cell.removeLayer0();
-            console.log("removing buffer", cell.layerList, cell);
-            renderGrid();
-            return;
-        }
         cell.clearBufferCell(bufferType, true);
         renderGrid();
     }
 
     removeGameObject(buffer) {
         gameObjectBufferList.remove(buffer.id);
-        
-        /* // non important ?
-        gameObject.getCells().forEach((cellID) => {
-            this.getCellByID(cellID).removeLayer0();
-        })*/
         renderGrid();
-        //console.log(coord)
-        //gameObjectBufferList.getBufferByCoord(coord);
     }
 
     addCol(side) {
