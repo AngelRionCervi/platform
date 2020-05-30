@@ -193,10 +193,12 @@ function handle_Grid_Left_Click_Drawing(coord) {
         objToDraw = { obj: prop, type: "sceneObject" };
         bufferType = "scene";
     } else if (gameObjectList.isAnObjectSelected()) {
+        
         //if (cellContent.gameObject) return;
         const objectID = gameObjectList.getCurrentObjectID();
         const prop = gameObjectList.addGameObjectToScene(coord, objectID);
         if (prop) {
+            console.log("add game object")
             objToDraw = { obj: prop, type: "gameObject" };
             bufferType = "gameObject";
         }

@@ -3,6 +3,7 @@ import { ShowGameObject } from "/mapEditor/js/class/gameObjects/ShowGameObject.j
 import { DomBuilder } from "../../lib/DomBuilder.js";
 import { _G } from "../general/globals.js";
 import * as helper from "../../lib/helpers.js";
+import camera from "../Camera/Camera.js";
 const dob = new DomBuilder();
 
 export class GameObjectList {
@@ -150,9 +151,10 @@ export class GameObjectList {
         return this.gameObjects.map((el) => el.id);
     }
 
-    getByCoord(coord) {
-        const x = helper.roundToPrevMult(coord.x, _G.blockSize);
-        const y = helper.roundToPrevMult(coord.y, _G.blockSize);
+    getByCoord(coords) {
+        const zoom = camera.getZoom();
+        const x = helper.roundToPrevMult(Math.round(coords.x / zoom - camera.x), _G.blockSize);
+        const y = helper.roundToPrevMult(Math.round(coords.y / zoom - camera.y), _G.blockSize);
         return this.curDisplayed.find((el) => x === el.coord.x && y === el.coord.y);
     }
 
