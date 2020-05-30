@@ -95,11 +95,13 @@ class GameObjectBufferList {
         this.mainBuffer = document.createElement("canvas");
     }
 
-    add(asset, coords) {
+    add(gObj, coord) {
         const bufferObj = new CanvasBuffer("gameObject");
+        const asset = gObj.getAsset();
+        const showObjID = gObj.getUniqID();
         bufferObj.setBuffer(asset);
         const id = _H.uniqid("b");
-        this.list.push({ id, bufferObj, coords });
+        this.list.push({ id, showObjID, bufferObj, coord, asset, index: this.list.length - 1 });
         bufferObj.getBufferCtx().drawImage(asset.getSprite(), 0, 0);
         return id;
     }
@@ -117,8 +119,30 @@ class GameObjectBufferList {
         this.mainBuffer.height = gridProps.gridHeight;
 
         this.list.forEach((buffer) => {
-            this.getMainBufferCtx().drawImage(buffer.bufferObj.getBuffer(), buffer.coords.x, buffer.coords.y);
+            this.getMainBufferCtx().drawImage(buffer.bufferObj.getBuffer(), buffer.coord.x, buffer.coord.y);
         });
+    }
+
+    getBufferByCoord(coord) {
+        const tw = camera.toWorld.bind(camera);
+        const wCoord = { x: tw(coord.x), y: tw(coord.y) };
+        let buffer = null;
+        for (let u = 0; u < this.list.length; u++) {
+            const bufferCoord = this.list[u].coord;
+            const assetW = this.list[u].asset.getWidth();
+            const assetH = this.list[u].asset.getHeight();
+            if (
+                wCoord.x >= bufferCoord.x &&
+                wCoord.x <= bufferCoord.x + assetW &&
+                wCoord.y >= bufferCoord.y &&
+                wCoord.y <= bufferCoord.y + assetH
+            ) {
+                if (!buffer || buffer.index < this.list[u].index) {
+                    buffer = this.list[u];
+                }
+            }
+        }
+        return buffer;
     }
 
     getMainBuffer() {

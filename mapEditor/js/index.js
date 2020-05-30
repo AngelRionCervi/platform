@@ -194,35 +194,46 @@ function handle_Grid_Left_Click_Drawing(coord) {
         bufferType = "scene";
 
     } else if (gameObjectList.isAnObjectSelected()) {
-        if (cellContent.gameObject) return;
+        //if (cellContent.gameObject) return;
         const objectID = gameObjectList.getCurrentObjectID();
         const prop = gameObjectList.addGameObjectToScene(coord, objectID);
-        console.log(prop)
         if (prop) {
             objToDraw = { obj: prop, type: "gameObject" };
             bufferType = "gameObject";
         }
     }
     if (!objToDraw) return;
+    console.log(gameObjectList.curDisplayed)
     grid.addCellByCursor(coord, objToDraw, bufferType);
 }
 
 function handle_Grid_Right_Click_Drawing(coord) {
+    //console.log(coord)
     const cell = grid.getCellByCursor(coord);
     const cellContent = cell.getContent();
-
     if (!cellContent) return;
+    const goBuffer = gameObjectBufferList.getBufferByCoord(coord);
+    //grid.removeGameObject(coord);
+   
 
-    if (cellContent.gameObject) {
-        const cellIDs = cellContent.gameObject.obj.getCells();
-        gameObjectList.removeShowGameObject(cellContent.gameObject.obj.getUniqID());
-        grid.removeCellByID(cell.getID(), "gameObject");
+    if (goBuffer && cellContent.gameObject) {
+        
+        //const cellIDs = cellContent.gameObject.obj.getCells();
+        
+        grid.removeGameObject(goBuffer, cellContent.gameObject.obj);
+        gameObjectList.removeShowGameObject(goBuffer.showObjID);
+       // gameObjectList.removeShowGameObject(cellContent.gameObject.obj.getUniqID());
+        
+        //grid.removeCellByID(cell.getID(), "gameObject");*/
         /*
         cellIDs.forEach((cellID) => {
             // clear all the cells concerned by the game object
-            grid.removeCellByID(cell.getID(), "gameObject");
+            const cell = grid.getCellByID(cellID);
+            cell.removeLayer0();
         });*/
-    } else if (cellContent.prop) {
+        
+    } 
+    if (cellContent.prop) {
         sceneObjectList.removeSceneObject(cellContent.prop.obj.getID());
         grid.removeCellByCoord(coord, "scene");
     }
