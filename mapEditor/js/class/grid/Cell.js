@@ -25,14 +25,6 @@ export class Cell {
         this.ty = () => Math.floor((this.y + this.yOffset) * camera.getZoom());
     }
 
-    addLayerID(bufferID) {
-        this.layerList.unshift(bufferID);
-    }
-
-    removeLayer0() {
-        this.layerList.shift();
-    }
-
     getID() {
         return this.id;
     }
@@ -88,7 +80,10 @@ export class Cell {
             blockSize + this.addedBlockH
         );
         ctx.fillStyle = this.cellFillStyle;
-        if (clearProp) this.removeProp();
+        if (clearProp) {
+            this.removeProp();
+            this.removeGameObject();
+        } 
         return this;
     }
 
@@ -147,11 +142,6 @@ export class Cell {
 
     setSceneObjectSlice(slice) {
         this.slice = slice;
-        return this;
-    }
-
-    setGameObjectSlice(gameObjectSlice) {
-        this.gameObjectSlice = gameObjectSlice;
         return this;
     }
 

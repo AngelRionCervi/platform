@@ -103,17 +103,17 @@ export class Grid {
         renderGrid();
     }
 
-    removeCellByCoord(cursorPos, bufferType) {
+    removeCellByCoord(cursorPos) {
         const cell = this.getCellByCursor(cursorPos);
         if (!cell) return;
-        cell.clearBufferCell(bufferType, true);
+        cell.clearBufferCell(true);
         renderGrid();
     }
 
-    removeCellByID(id, bufferType) {
+    removeCellByID(id) {
         const cell = this.getCellByID(id);
         if (!cell) return;
-        cell.clearBufferCell(bufferType, true);
+        cell.clearBufferCell(true);
         renderGrid();
     }
 
