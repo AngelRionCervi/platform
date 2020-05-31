@@ -70,10 +70,10 @@ class CanvasBuffer {
                 break;
         }
     }
-    updateBuffer(cell, object, slice) {
-        if (object.type === "sceneObject") {
+    updateBuffer(cell, object, slice, type) {
+        if (type === "sceneObject") {
             cell.setBlockType("wall").setProp(object).setSceneObjectSlice(slice).fillBufferCell();
-        } else if (object.type === "gameObject") {
+        } else if (type === "gameObject") {
             cell.setBlockType("wall").setGameObject(object);
         }
     }

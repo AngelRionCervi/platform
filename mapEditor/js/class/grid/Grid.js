@@ -69,8 +69,7 @@ export class Grid {
         return targetCell;
     }
 
-    addCellByCursor(cursorPos, object, addSceneObject) {
-        const asset = object.type === "sceneObject" ? object.asset : object.obj.asset;
+    getAddObjectLoopProps(cursorPos, asset) {
         const blockSize = gridProps.getBlockSize();
         const gridTiles = gridProps.getTiles(); // no cellToRender because 1 sprite can be > viewport
         const tw = camera.toWorld.bind(camera);
@@ -82,6 +81,71 @@ export class Grid {
         const maxY = tw(cursorPos.y + ts(asset.height)) - camCoords.y;
         const restY = _H.posOr0(-(gridProps.getHeight() - maxY));
 
+        const floorCursor = this.floorMouse({ x: cursorPos.x, y: cursorPos.y });
+
+        return { blockSize, gridTiles, tw, ts, camCoords, maxX, restX, maxY, restY, floorCursor };
+    }
+
+    setSceneObject(cursorPos, asset, addSceneObjectToList) {
+        const { blockSize, gridTiles, tw, ts, camCoords, maxX, restX, maxY, restY } = this.getAddObjectLoopProps(
+            cursorPos,
+            asset
+        );
+
+        for (let x = cursorPos.x; x < ts(maxX - restX + camCoords.x); x += ts(blockSize)) {
+            for (let y = cursorPos.y; y < ts(maxY - restY + camCoords.y); y += ts(blockSize)) {
+                const floored = this.floorMouse({ x, y });
+                const cell = gridTiles[floored.x / blockSize][floored.y / blockSize];
+                const slice = { x: tw(x - cursorPos.x), y: tw(y - cursorPos.y) };
+                const bufferFeed = addSceneObjectToList({ x: floored.x, y: floored.y }, asset, slice);
+                sceneBuffer.updateBuffer(cell, bufferFeed, slice, "sceneObject");
+            }
+        }
+        renderGrid();
+        return this;
+    }
+
+    setGameObject(cursorPos, objectID, addGameObjectToList) {
+        const prop = addGameObjectToList(cursorPos, objectID);
+        if (!prop) return;
+
+        const {
+            blockSize,
+            gridTiles,
+            tw,
+            ts,
+            camCoords,
+            maxX,
+            restX,
+            maxY,
+            restY,
+            floorCursor,
+        } = this.getAddObjectLoopProps(cursorPos, prop.asset);
+
+        const concernedCells = [];
+        for (let x = cursorPos.x; x < ts(maxX - restX + camCoords.x); x += ts(blockSize)) {
+            for (let y = cursorPos.y; y < ts(maxY - restY + camCoords.y); y += ts(blockSize)) {
+                const floored = this.floorMouse({ x, y });
+                const cell = gridTiles[floored.x / blockSize][floored.y / blockSize];
+                concernedCells.push(cell.getID());
+                const slice = { x: tw(x - cursorPos.x), y: tw(y - cursorPos.y) };
+                sceneBuffer.updateBuffer(cell, prop, slice, "gameObject");
+            }
+        }
+        prop.setCells(concernedCells);
+
+        gameObjectBufferList.add(prop, { x: floorCursor.x, y: floorCursor.y });
+        renderGrid();
+        return this;
+    }
+
+    addCellByCursor(cursorPos, object, addSceneObject) {
+        const asset = object.type === "sceneObject" ? object.asset : object.obj.asset;
+        const { blockSize, gridTiles, tw, ts, camCoords, maxX, restX, maxY, restY } = this.getAddObjectLoopProps(
+            cursorPos,
+            asset
+        );
+
         const concernedCells = [];
         for (let x = cursorPos.x; x < ts(maxX - restX + camCoords.x); x += ts(blockSize)) {
             for (let y = cursorPos.y; y < ts(maxY - restY + camCoords.y); y += ts(blockSize)) {
@@ -91,7 +155,7 @@ export class Grid {
                 const slice = { x: tw(x - cursorPos.x), y: tw(y - cursorPos.y) };
                 let o = object;
                 if (object.type === "sceneObject") {
-                    console.log('new scene object')
+                    console.log("new scene object");
                     o = { type: "sceneObject", obj: addSceneObject({ x: floored.x, y: floored.y }, asset, slice) };
                 }
                 sceneBuffer.updateBuffer(cell, o, slice);

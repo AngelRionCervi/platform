@@ -107,7 +107,7 @@ export class Cell {
     fillBufferCell() {
         const ctx = sceneBuffer.getBufferCtx();
         const blockSize = gridProps.getBlockSize();
-        const asset = this.prop.obj.getAsset();
+        const asset = this.prop.getAsset();
         const sprite = asset.getSprite();
 
         ctx.imageSmoothingEnabled = false;

@@ -171,7 +171,6 @@ document.addEventListener('drop', function(e) {
 // top level handler
 
 function handle_Grid_Left_Click_Drawing(coord, moving) {
-    let objToDraw = null;
     const cell = grid.getCellByCursor(coord);
     const cellContent = cell.getContent();
 
@@ -180,7 +179,7 @@ function handle_Grid_Left_Click_Drawing(coord, moving) {
         const asset = _assets.getByID(assetID);
 
         if (cellContent.prop) {
-            const prop = cellContent.prop.obj;
+            const prop = cellContent.prop;
             sceneObjectList.removeSceneObject(prop.getID());
             /*const curAssetID = prop.asset.getID();
             if (assetID === curAssetID) {
@@ -190,18 +189,13 @@ function handle_Grid_Left_Click_Drawing(coord, moving) {
             }*/
         }
         //const prop = sceneObjectList.addSceneObject(coord, asset);
-        objToDraw = { asset, type: "sceneObject" };
+
+        grid.setSceneObject(coord, asset, sceneObjectList.addSceneObject.bind(sceneObjectList));
     } else if (gameObjectList.isAnObjectSelected() && !moving) {
         //if (cellContent.gameObject) return;
         const objectID = gameObjectList.getCurrentObjectID();
-        const prop = gameObjectList.addGameObjectToScene(coord, objectID);
-        if (prop) {
-            console.log("add game object");
-            objToDraw = { obj: prop, type: "gameObject" };
-        }
+        grid.setGameObject(coord, objectID, gameObjectList.addGameObjectToScene.bind(gameObjectList));
     }
-    if (!objToDraw) return;
-    grid.addCellByCursor(coord, objToDraw, sceneObjectList.addSceneObject.bind(sceneObjectList));
 }
 
 function handle_Grid_Right_Click_Drawing(coord) {
@@ -212,10 +206,10 @@ function handle_Grid_Right_Click_Drawing(coord) {
     const goBuffer = gameObjectBufferList.getBufferByCoord(coord);
 
     if (goBuffer && cellContent.gameObject) {
-        grid.removeGameObject(goBuffer, cellContent.gameObject.obj);
+        grid.removeGameObject(goBuffer, cellContent.objectID);
         gameObjectList.removeShowGameObject(goBuffer.showObjID);
     } else if (cellContent.prop) {
-        sceneObjectList.removeSceneObject(cellContent.prop.obj.getID());
+        sceneObjectList.removeSceneObject(cellContent.prop.getID());
         grid.removeCellByCoord(coord, "scene");
     }
 }
