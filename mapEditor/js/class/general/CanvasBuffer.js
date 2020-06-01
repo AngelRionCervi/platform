@@ -23,53 +23,6 @@ class CanvasBuffer {
         tmpBuffer.getContext("2d").drawImage(this.buffer, 0, 0);
         return tmpBuffer;
     }
-    addSizeUnitToBuffer(side) {
-        const preResizeCanvas = this.createTempBuffer();
-        const bufferCtx = this.getBufferCtx();
-        const bs = gridProps.getBlockSize();
-        switch (side) {
-            case "right":
-                this.buffer.width += bs;
-                bufferCtx.drawImage(preResizeCanvas, 0, 0);
-                break;
-            case "left":
-                this.buffer.width += bs;
-                bufferCtx.drawImage(preResizeCanvas, bs, 0);
-                break;
-            case "bottom":
-                this.buffer.height += bs;
-                bufferCtx.drawImage(preResizeCanvas, 0, 0);
-                break;
-            case "top":
-                this.buffer.height += bs;
-                bufferCtx.drawImage(preResizeCanvas, 0, bs);
-                break;
-        }
-        return this;
-    }
-    removeSizeUnitToBuffer(side) {
-        const preResizeCanvas = this.createTempBuffer();
-        const bufferCtx = this.getBufferCtx();
-        const bs = gridProps.getBlockSize();
-        switch (side) {
-            case "right":
-                this.buffer.width -= bs;
-                bufferCtx.drawImage(preResizeCanvas, 0, 0);
-                break;
-            case "left":
-                this.buffer.width -= bs;
-                bufferCtx.drawImage(preResizeCanvas, -bs, 0);
-                break;
-            case "bottom":
-                this.buffer.height -= bs;
-                bufferCtx.drawImage(preResizeCanvas, 0, 0);
-                break;
-            case "top":
-                this.buffer.height -= bs;
-                bufferCtx.drawImage(preResizeCanvas, 0, -bs);
-                break;
-        }
-    }
     updateBuffer(cell, object, slice, type) {
         if (type === "sceneObject") {
             cell.setBlockType("wall").setProp(object).setSceneObjectSlice(slice).fillBufferCell();

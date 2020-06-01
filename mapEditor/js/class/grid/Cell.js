@@ -162,7 +162,7 @@ export class Cell {
     }
 
     getContent() {
-        return {
+        return (this.isProp() || this.isGameObject()) && {
             prop: this.isProp() ? this.getProp() : null,
             gameObject: this.isGameObject() ? this.getGameObject() : null,
         };

@@ -161,12 +161,7 @@ document.addEventListener("click", (e) => {
     e.preventDefault();
     contextMenu.toggleAllOff();
 });
-/*
-document.addEventListener('drop', function(e) {
-    e.stopPropagation()
-    e.preventDefault();
-    console.log(e)
-})*/
+
 
 // top level handler
 
