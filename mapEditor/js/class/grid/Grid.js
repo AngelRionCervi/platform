@@ -6,6 +6,7 @@ import { getCanvas, getContext } from "../general/canvasRef.js";
 import GridProps from "../grid/GridProps.js";
 import camera from "../Camera/Camera.js";
 import { sceneBuffer, gameObjectBufferList, changeBufferSize } from "../general/CanvasBuffer.js";
+import itemSelection from "../general/itemSelection.js";
 
 const gridNormal = new GridNormalization();
 export const gridProps = new GridProps();
@@ -104,7 +105,6 @@ export class Grid {
                 sceneBuffer.updateBuffer(cell, bufferFeed, slice, "sceneObject");
             }
         }
-        renderGrid();
         return this;
     }
 
@@ -138,7 +138,6 @@ export class Grid {
         prop.setCells(concernedCells);
 
         gameObjectBufferList.add(prop, { x: floorCursor.x, y: floorCursor.y });
-        renderGrid();
         return this;
     }
 
@@ -146,19 +145,16 @@ export class Grid {
         const cell = this.getCellByCursor(cursorPos);
         if (!cell) return;
         cell.clearBufferCell(true);
-        renderGrid();
     }
 
     removeCellByID(id) {
         const cell = this.getCellByID(id);
         if (!cell) return;
         cell.clearBufferCell(true);
-        renderGrid();
     }
 
     removeGameObject(buffer) {
         gameObjectBufferList.remove(buffer.id);
-        renderGrid();
     }
 
     addCol(side) {
@@ -340,6 +336,10 @@ function createMapBorder() {
     }
 }
 
+function displaySelection() {
+   
+}
+
 export function renderGrid() {
     camera.setCellsToInteract(gridProps.getTiles());
     const tw = camera.toWorld.bind(camera);
@@ -367,6 +367,7 @@ export function renderGrid() {
         vpHeight
     );
     createMapBorder();
+    itemSelection.create();
 }
 
 export function fillAllCells(cellsToRender) {

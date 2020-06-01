@@ -1,12 +1,11 @@
 const canvas = document.getElementById("mapEditorCanvas");
 const ctx = canvas.getContext("2d");
 
-import { Emitter } from "/mapEditor/js/lib/Emitter.js";
 import { ContextMenu } from "./class/general/ContextMenu.js";
 import { Keyboard } from "./class/keyboardHandling/Keyboard.js";
 import { Project } from "./class/project/userProject.js";
 import { GridInteraction } from "./class/grid/GridInteraction.js";
-import { Grid, renderGrid, gridProps } from "./class/grid/Grid.js";
+import { Grid, renderGrid } from "./class/grid/Grid.js";
 import camera from "./class/Camera/Camera.js";
 import { Assets } from "./class/project/Assets.js";
 import { MapDownloader } from "./class/download/MapDownloader.js";
@@ -17,6 +16,7 @@ import { SceneObjectListInteraction } from "./class/sceneObjects/SceneObjectList
 import { GameObjectList } from "./class/gameObjects/GameObjectList.js";
 import { GameObjectListInteraction } from "./class/gameObjects/GameObjectListInteraction.js";
 import { gameObjectBufferList } from "./class/general/CanvasBuffer.js";
+import itemSelection from "./class/general/itemSelection.js";
 
 const gridInteraction = new GridInteraction();
 const grid = new Grid();
@@ -166,7 +166,6 @@ document.addEventListener("click", (e) => {
 // top level handler
 
 function handle_Grid_Left_Click_Drawing(coord, moving) {
-
     if (palette.isAnAssetSelected()) {
         const asset = _assets.getByID(palette.getCurrentAssetID());
         grid.setSceneObject(
@@ -175,9 +174,11 @@ function handle_Grid_Left_Click_Drawing(coord, moving) {
             sceneObjectList.addSceneObject.bind(sceneObjectList),
             sceneObjectList.removeSceneObject.bind(sceneObjectList)
         );
+        renderGrid();
     } else if (gameObjectList.isAnObjectSelected() && !moving) {
         const objectID = gameObjectList.getCurrentObjectID();
         grid.setGameObject(coord, objectID, gameObjectList.addGameObjectToScene.bind(gameObjectList));
+        renderGrid();
     }
 }
 
@@ -186,13 +187,23 @@ function handle_Grid_Right_Click_Drawing(coord, moving) {
     const cellContent = cell.getContent();
     if (!cellContent) return;
 
-    const goBuffer = gameObjectBufferList.getBufferByCoord(coord);
+    const gameObjectInst = gameObjectBufferList.getBufferByCoord(coord);
 
-    if (goBuffer && !moving) {
-        grid.removeGameObject(goBuffer, cellContent.objectID);
-        gameObjectList.removeShowGameObject(goBuffer.showObjID);
+    if (gameObjectInst && !moving) {
+        itemSelection.add(gameObjectInst);
+        /*grid.removeGameObject(goBuffer, cellContent.objectID);
+        gameObjectList.removeShowGameObject(goBuffer.showObjID);*/
+        renderGrid();
     } else if (cellContent.prop) {
         sceneObjectList.removeSceneObject(cellContent.prop.getID());
         grid.removeCellByCoord(coord, "scene");
+        renderGrid();
     }
 }
+
+
+const mainLoop = () => setInterval(() => {
+    itemSelection.animate();
+}, 1000/5)
+
+mainLoop();

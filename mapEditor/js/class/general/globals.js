@@ -6,4 +6,6 @@ export const _G = {
     viewPortHeight: 576,
     mapBordersColor: 'red',
     mapBorderWidth: 3,
+    selectionBorderWidth: 1,
+    selectionDashLength: 4
 }

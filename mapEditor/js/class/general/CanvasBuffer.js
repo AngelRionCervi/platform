@@ -46,8 +46,8 @@ class GameObjectBufferList {
         this.mainBuffer = document.createElement("canvas");
         setTimeout(() => {
             // next callstack
-            this.mainBuffer.width = gridProps.gridWidth;
-            this.mainBuffer.height = gridProps.gridHeight;
+            this.mainBuffer.width = gridProps.getWidth();
+            this.mainBuffer.height = gridProps.getHeight();
         }, 0);
     }
 
@@ -57,7 +57,7 @@ class GameObjectBufferList {
         const showObjID = gObj.getUniqID();
         bufferObj.setBuffer(asset);
         const id = _H.uniqid("b");
-        this.list.push({ id, showObjID, bufferObj, coord, asset, index: this.list.length - 1 });
+        this.list.push({ id, showObjID, bufferObj, coord, asset, index: this.list.length });
         bufferObj.getBufferCtx().drawImage(asset.getSprite(), 0, 0);
         return id;
     }
