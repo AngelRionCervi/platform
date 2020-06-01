@@ -171,41 +171,29 @@ document.addEventListener('drop', function(e) {
 // top level handler
 
 function handle_Grid_Left_Click_Drawing(coord, moving) {
-    const cell = grid.getCellByCursor(coord);
-    const cellContent = cell.getContent();
 
     if (palette.isAnAssetSelected()) {
-        const assetID = palette.getCurrentAssetID();
-        const asset = _assets.getByID(assetID);
-
-        if (cellContent.prop) {
-            const prop = cellContent.prop;
-            sceneObjectList.removeSceneObject(prop.getID());
-            /*const curAssetID = prop.asset.getID();
-            if (assetID === curAssetID) {
-                return;
-            } else {
-                sceneObjectList.removeSceneObject(prop.getID());
-            }*/
-        }
-        //const prop = sceneObjectList.addSceneObject(coord, asset);
-
-        grid.setSceneObject(coord, asset, sceneObjectList.addSceneObject.bind(sceneObjectList));
+        const asset = _assets.getByID(palette.getCurrentAssetID());
+        grid.setSceneObject(
+            coord,
+            asset,
+            sceneObjectList.addSceneObject.bind(sceneObjectList),
+            sceneObjectList.removeSceneObject.bind(sceneObjectList)
+        );
     } else if (gameObjectList.isAnObjectSelected() && !moving) {
-        //if (cellContent.gameObject) return;
         const objectID = gameObjectList.getCurrentObjectID();
         grid.setGameObject(coord, objectID, gameObjectList.addGameObjectToScene.bind(gameObjectList));
     }
 }
 
-function handle_Grid_Right_Click_Drawing(coord) {
+function handle_Grid_Right_Click_Drawing(coord, moving) {
     const cell = grid.getCellByCursor(coord);
     const cellContent = cell.getContent();
     if (!cellContent) return;
 
     const goBuffer = gameObjectBufferList.getBufferByCoord(coord);
 
-    if (goBuffer && cellContent.gameObject) {
+    if (goBuffer && !moving) {
         grid.removeGameObject(goBuffer, cellContent.objectID);
         gameObjectList.removeShowGameObject(goBuffer.showObjID);
     } else if (cellContent.prop) {
