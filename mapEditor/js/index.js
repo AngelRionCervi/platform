@@ -192,7 +192,7 @@ function handle_Grid_Right_Click_Drawing(coord, moving) {
     if (!cellContent) return;
 
     const goBuffer = gameObjectBufferList.getBufferByCoord(coord);
-
+    console.log(cellContent, goBuffer)
     if (goBuffer && !moving) {
         grid.removeGameObject(goBuffer, cellContent.objectID);
         gameObjectList.removeShowGameObject(goBuffer.showObjID);

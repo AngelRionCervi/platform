@@ -5,7 +5,7 @@ import { _G } from "../general/globals.js";
 import { getCanvas, getContext } from "../general/canvasRef.js";
 import GridProps from "../grid/GridProps.js";
 import camera from "../Camera/Camera.js";
-import { sceneBuffer, gameObjectBufferList } from "../general/CanvasBuffer.js";
+import { sceneBuffer, gameObjectBufferList, changeBufferSize } from "../general/CanvasBuffer.js";
 
 const gridNormal = new GridNormalization();
 export const gridProps = new GridProps();
@@ -192,7 +192,7 @@ export class Grid {
             gridProps.moveAllRight(1).newColLeft(newCol);
             camera.moveRight(blockSize);
         }
-        sceneBuffer.addSizeUnitToBuffer(side);
+        changeBufferSize(side, "add");
         renderGrid();
     }
 
@@ -225,7 +225,7 @@ export class Grid {
             gridProps.moveAllDown(1).newRowTop(newRow);
             camera.moveBottom(blockSize);
         }
-        sceneBuffer.addSizeUnitToBuffer(side);
+        changeBufferSize(side, "add");
         renderGrid();
     }
 
@@ -238,7 +238,7 @@ export class Grid {
             gridProps.removeColLeft().moveAllLeft(1);
             camera.moveLeft(blockSize);
         }
-        sceneBuffer.removeSizeUnitToBuffer(side);
+        changeBufferSize(side, "remove");
         renderGrid();
     }
 
@@ -251,7 +251,7 @@ export class Grid {
             gridProps.removeRowTop().moveAllUp(1);
             camera.moveTop(blockSize);
         }
-        sceneBuffer.removeSizeUnitToBuffer(side);
+        changeBufferSize(side, "remove");
         renderGrid();
     }
 

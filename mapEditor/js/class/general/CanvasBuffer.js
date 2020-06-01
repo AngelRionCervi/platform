@@ -87,7 +87,6 @@ class CanvasBuffer {
 
 export const sceneBuffer = new CanvasBuffer();
 
-
 class GameObjectBufferList {
     constructor() {
         this.list = [];
@@ -100,7 +99,7 @@ class GameObjectBufferList {
     }
 
     add(gObj, coord) {
-        const bufferObj = new CanvasBuffer("gameObject");
+        const bufferObj = new CanvasBuffer();
         const asset = gObj.getAsset();
         const showObjID = gObj.getUniqID();
         bufferObj.setBuffer(asset);
@@ -123,6 +122,7 @@ class GameObjectBufferList {
 
     getBufferByCoord(coord) {
         const tw = camera.toWorld.bind(camera);
+        const camCoord = camera.getCoords();
         const wCoord = { x: tw(coord.x), y: tw(coord.y) };
         let buffer = null;
         for (let u = 0; u < this.list.length; u++) {
@@ -130,10 +130,10 @@ class GameObjectBufferList {
             const assetW = this.list[u].asset.getWidth();
             const assetH = this.list[u].asset.getHeight();
             if (
-                wCoord.x >= bufferCoord.x &&
-                wCoord.x <= bufferCoord.x + assetW &&
-                wCoord.y >= bufferCoord.y &&
-                wCoord.y <= bufferCoord.y + assetH
+                wCoord.x >= bufferCoord.x + camCoord.x &&
+                wCoord.x <= bufferCoord.x + camCoord.x + assetW &&
+                wCoord.y >= bufferCoord.y + camCoord.y &&
+                wCoord.y <= bufferCoord.y + camCoord.y + assetH
             ) {
                 if (!buffer || buffer.index < this.list[u].index) {
                     buffer = this.list[u];
@@ -150,6 +150,77 @@ class GameObjectBufferList {
     getMainBufferCtx() {
         return this.getMainBuffer().getContext("2d");
     }
+
+    getBuffer() {
+        return this.mainBuffer;
+    }
 }
 
 export const gameObjectBufferList = new GameObjectBufferList();
+
+function getMainBuffers() {
+    return [
+        { buffer: gameObjectBufferList, type: "gameObjects" },
+        { buffer: sceneBuffer, type: "sceneObjects" },
+    ];
+}
+
+function savePreResize(buffer) {
+    const tmpBuffer = document.createElement("canvas");
+    tmpBuffer.width = buffer.width;
+    tmpBuffer.height = buffer.height;
+    tmpBuffer.getContext("2d").drawImage(buffer, 0, 0);
+    return tmpBuffer;
+}
+
+export function changeBufferSize(side, way) {
+    const mainBuffers = getMainBuffers();
+
+    mainBuffers.forEach(({ buffer, type }) => {
+        const bufferEl = buffer.getBuffer();
+        const preResizeCanvas = savePreResize(bufferEl);
+        const bufferCtx = bufferEl.getContext("2d");
+        const bs = way === "add" ? gridProps.getBlockSize() : -gridProps.getBlockSize();
+
+        if (type === "gameObjects") {
+            buffer.list.forEach((goBuffer, index, list) => {
+                switch (side) {
+                    case "left":
+                        goBuffer.coord.x += bs;
+                        break;
+                    case "top":
+                        goBuffer.coord.y += bs;
+                        break;
+                }
+                // delete game object if out of bounds;
+                if (
+                    goBuffer.coord.x + goBuffer.bufferObj.buffer.width <= 0 ||
+                    goBuffer.coord.y + goBuffer.bufferObj.buffer.height <= 0 ||
+                    goBuffer.coord.x >= gridProps.getWidth() ||
+                    goBuffer.coord.y >= gridProps.getHeight()
+                ) {
+                    list.splice(index, 1);
+                }
+            });
+        }
+
+        switch (side) {
+            case "right":
+                bufferEl.width += bs;
+                bufferCtx.drawImage(preResizeCanvas, 0, 0);
+                break;
+            case "left":
+                bufferEl.width += bs;
+                bufferCtx.drawImage(preResizeCanvas, bs, 0);
+                break;
+            case "bottom":
+                bufferEl.height += bs;
+                bufferCtx.drawImage(preResizeCanvas, 0, 0);
+                break;
+            case "top":
+                bufferEl.height += bs;
+                bufferCtx.drawImage(preResizeCanvas, 0, bs);
+                break;
+        }
+    });
+}
