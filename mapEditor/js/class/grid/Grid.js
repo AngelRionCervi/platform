@@ -19,6 +19,9 @@ export class Grid {
     constructor() {
         this.colliderW = 3;
         this.cellFillStyle = "black";
+        this.dragging = false;
+        this.startDragCoord = null;
+        this.sCoords = [];
     }
 
     getCellByID(id) {
@@ -125,7 +128,8 @@ export class Grid {
             floorCursor,
         } = this.getAddObjectLoopProps(cursorPos, prop.asset);
 
-        const concernedCells = [];
+        /*const concernedCells = [];
+        
         for (let x = cursorPos.x; x < ts(maxX - restX + camCoords.x); x += ts(blockSize)) {
             for (let y = cursorPos.y; y < ts(maxY - restY + camCoords.y); y += ts(blockSize)) {
                 const floored = this.floorMouse({ x, y });
@@ -135,7 +139,7 @@ export class Grid {
                 sceneBuffer.updateBuffer(cell, prop, slice, "gameObject");
             }
         }
-        prop.setCells(concernedCells);
+        prop.setCells(concernedCells);*/
 
         gameObjectBufferList.add(prop, { x: floorCursor.x, y: floorCursor.y });
         return this;
@@ -251,6 +255,52 @@ export class Grid {
         renderGrid();
     }
 
+    isDragging() {
+        return this.dragging;
+    }
+
+    startDragging(coord) {
+        this.dragging = true;
+        this.startDragCoord = coord;
+        console.log("startcoord");
+    }
+
+    stopDragging() {
+        this.dragging = false;
+        this.startDragCoord = null;
+    }
+
+    drag(cursorPos, selectedIDs) {
+        if (!this.dragging) return;
+
+        const gameObjects = gameObjectBufferList.getObjectsBuffer(selectedIDs);
+
+        if (this.sCoords.length !== gameObjects.length) {
+            console.log("scoords");
+            //this.startDragCoord = cursorPos
+            this.sCoords = JSON.parse(JSON.stringify(gameObjects.map((el) => el.coord)));
+        }
+
+        const tw = camera.toWorld.bind(camera);
+        const ts = camera.toScreen.bind(camera);
+
+        const curPos = this.floorMouse(cursorPos, gridProps.getBlockSize());
+
+        console.log("start", this.startDragCoord);
+        gameObjects.forEach((go, index) => {
+            //console.log("efqsf", this.startDragCoord.x + this.sCoords[index].x + (cursorPos.x - this.startDragCoord.x))
+            const nX = cursorPos.x + this.startDragCoord.x - this.sCoords[index].x;
+            const nY = cursorPos.y + this.startDragCoord.y - this.sCoords[index].y;
+            //console.log(nX)
+
+            //console.log(this.startDragCoord.x, cursorPos.x, cursorPos.x + this.startDragCoord.x);
+            go.coord.x = nX;
+            go.coord.y = nY;
+        });
+        //gameObjectBufferList.update();
+        console.log(gameObjects, this.sCoords);
+    }
+
     getMap() {
         const nMap = gridNormal.normalize(gridCoords, this.blockSize, canvas);
         const debugBlocks = this.debugBlocks(nMap);
@@ -334,10 +384,6 @@ function createMapBorder() {
             borderWidth
         );
     }
-}
-
-function displaySelection() {
-   
 }
 
 export function renderGrid() {

@@ -27,7 +27,7 @@ class CanvasBuffer {
         if (type === "sceneObject") {
             cell.setBlockType("wall").setProp(object).setSceneObjectSlice(slice).fillBufferCell();
         } else if (type === "gameObject") {
-            cell.setBlockType("wall").setGameObject(object);
+            //cell.setBlockType("wall").setGameObject(object);
         }
     }
     getBuffer() {
@@ -106,6 +106,11 @@ class GameObjectBufferList {
 
     getBuffer() {
         return this.mainBuffer;
+    }
+
+    getObjectsBuffer(ids = null) {
+        if (!ids) return this.list;
+        return this.list.filter((el) => ids.includes(el.id));
     }
 }
 

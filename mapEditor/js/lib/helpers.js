@@ -61,6 +61,7 @@ export function propsRemover(object, props = []) {
 }
 
 export function roundToPrevMult(n, mult) {
+    if (n % mult === 0) return n;
     return Math.ceil((n - mult) / mult) * mult;
 }
 

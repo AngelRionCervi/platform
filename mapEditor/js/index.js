@@ -162,10 +162,11 @@ document.addEventListener("click", (e) => {
     contextMenu.toggleAllOff();
 });
 
-
 // top level handler
 
 function handle_Grid_Left_Click_Drawing(coord, moving) {
+    const gameObjectInst = gameObjectBufferList.getBufferByCoord(coord);
+
     if (palette.isAnAssetSelected()) {
         const asset = _assets.getByID(palette.getCurrentAssetID());
         grid.setSceneObject(
@@ -174,12 +175,32 @@ function handle_Grid_Left_Click_Drawing(coord, moving) {
             sceneObjectList.addSceneObject.bind(sceneObjectList),
             sceneObjectList.removeSceneObject.bind(sceneObjectList)
         );
-        renderGrid();
     } else if (gameObjectList.isAnObjectSelected() && !moving) {
+        if (!_keyboard.act("lShift")) {
+           // itemSelection.unselectAll();
+        }
+
+        if (gameObjectInst) {
+            if (itemSelection.isSelected(gameObjectInst.id)) {
+                //itemSelection.unselect(gameObjectInst.id);
+            } else {
+                itemSelection.add(gameObjectInst);
+            }
+            renderGrid();
+            return;
+        }
+
         const objectID = gameObjectList.getCurrentObjectID();
         grid.setGameObject(coord, objectID, gameObjectList.addGameObjectToScene.bind(gameObjectList));
-        renderGrid();
+    } else if (gameObjectInst && moving && !grid.isDragging()) {
+        console.log("STARTED dragging lol");
+        grid.startDragging(coord)
+    } else if (grid.isDragging()) {
+        console.log("dragging lol");
+        grid.drag(coord, itemSelection.getSelectedIDs());
     }
+
+    renderGrid();
 }
 
 function handle_Grid_Right_Click_Drawing(coord, moving) {
@@ -190,20 +211,23 @@ function handle_Grid_Right_Click_Drawing(coord, moving) {
     const gameObjectInst = gameObjectBufferList.getBufferByCoord(coord);
 
     if (gameObjectInst && !moving) {
-        itemSelection.add(gameObjectInst);
-        /*grid.removeGameObject(goBuffer, cellContent.objectID);
-        gameObjectList.removeShowGameObject(goBuffer.showObjID);*/
-        renderGrid();
+        if (!itemSelection.isSelected(gameObjectInst.id)) {
+            itemSelection.unselectAll();
+            itemSelection.add(gameObjectInst);
+        }
+
     } else if (cellContent.prop) {
         sceneObjectList.removeSceneObject(cellContent.prop.getID());
         grid.removeCellByCoord(coord, "scene");
-        renderGrid();
+        
     }
+
+    renderGrid();
 }
 
-
-const mainLoop = () => setInterval(() => {
-    itemSelection.animate();
-}, 1000/5)
+const mainLoop = () =>
+    setInterval(() => {
+        itemSelection.animate();
+    }, 1000 / 10);
 
 mainLoop();

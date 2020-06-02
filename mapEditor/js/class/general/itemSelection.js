@@ -19,6 +19,7 @@ class ItemSelection {
             coord: gameObjectInst.coord,
             width: gameObjectInst.bufferObj.buffer.width,
             height: gameObjectInst.bufferObj.buffer.height,
+            goInstID: gameObjectInst.id,
             rendered: false,
         });
     }
@@ -41,7 +42,7 @@ class ItemSelection {
 
             bufferCtx.strokeStyle = "white";
             bufferCtx.lineWidth = borderWidth;
-            bufferCtx.setLineDash([dashLen, dashLen*2]);
+            bufferCtx.setLineDash([dashLen, dashLen * 2]);
             bufferCtx.lineDashOffset = this.anIndex;
             bufferCtx.strokeRect(0, 0, buffer.width, buffer.height);
 
@@ -58,13 +59,32 @@ class ItemSelection {
     }
 
     animate() {
-        this.anIndex += 1;
+        this.anIndex++;
         if (this.anIndex >= this.anFrames) this.anIndex = 0;
         this.render();
     }
 
+    isSelected(id) {
+        return this.list.some((el) => el.goInstID === id);
+    }
+
+    unselect(id) {
+        this.list.splice(
+            this.list.findIndex((el) => el.goInstID === id),
+            1
+        );
+    }
+
+    unselectAll() {
+        this.list.splice(0, this.list.length);
+    }
+
     getList() {
         return this.list;
+    }
+
+    getSelectedIDs() {
+        return this.list.map((el) => el.goInstID);
     }
 }
 
