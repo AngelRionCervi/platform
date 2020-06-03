@@ -108,6 +108,11 @@ class GameObjectBufferList {
         return this.mainBuffer;
     }
 
+    setCoord(id, coord) {
+        const buffer = this.list.find(el => el.id === id);
+        buffer.coord = coord;
+    }
+
     getObjectsBuffer(ids = null) {
         if (!ids) return this.list;
         return this.list.filter((el) => ids.includes(el.id));

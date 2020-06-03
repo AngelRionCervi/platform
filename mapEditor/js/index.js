@@ -99,6 +99,10 @@ gridInteraction.emitter.on("remove_col", ({ detail }) => {
     grid.removeCol(detail);
 });
 
+gridInteraction.emitter.on("grid_left_mouse_up", ({ detail }) => {
+    grid.stopDragging();
+});
+
 gridInteraction.emitter.on("dl_map", () => {
     const rndmName = "map_" + Date.now() + Math.random();
     mapDownloader.downloadMap(map, rndmName);
@@ -176,25 +180,24 @@ function handle_Grid_Left_Click_Drawing(coord, moving) {
             sceneObjectList.removeSceneObject.bind(sceneObjectList)
         );
     } else if (gameObjectList.isAnObjectSelected() && !moving) {
-        if (!_keyboard.act("lShift")) {
-           // itemSelection.unselectAll();
-        }
-
         if (gameObjectInst) {
-            if (itemSelection.isSelected(gameObjectInst.id)) {
-                //itemSelection.unselect(gameObjectInst.id);
+            if (itemSelection.isSelected(gameObjectInst.id) && !_keyboard.act("lShift")) {
+                itemSelection.unselect(gameObjectInst.id);
             } else {
                 itemSelection.add(gameObjectInst);
             }
             renderGrid();
             return;
+        } 
+        if (!_keyboard.act("lShift")) {
+            itemSelection.unselectAll();
         }
 
         const objectID = gameObjectList.getCurrentObjectID();
         grid.setGameObject(coord, objectID, gameObjectList.addGameObjectToScene.bind(gameObjectList));
     } else if (gameObjectInst && moving && !grid.isDragging()) {
         console.log("STARTED dragging lol");
-        grid.startDragging(coord)
+        grid.startDragging(coord, itemSelection.getSelectedIDs());
     } else if (grid.isDragging()) {
         console.log("dragging lol");
         grid.drag(coord, itemSelection.getSelectedIDs());
@@ -206,20 +209,19 @@ function handle_Grid_Left_Click_Drawing(coord, moving) {
 function handle_Grid_Right_Click_Drawing(coord, moving) {
     const cell = grid.getCellByCursor(coord);
     const cellContent = cell.getContent();
-    if (!cellContent) return;
 
     const gameObjectInst = gameObjectBufferList.getBufferByCoord(coord);
 
     if (gameObjectInst && !moving) {
         if (!itemSelection.isSelected(gameObjectInst.id)) {
-            itemSelection.unselectAll();
+            if (!_keyboard.act("lShift")) {
+                itemSelection.unselectAll();
+            }
             itemSelection.add(gameObjectInst);
         }
-
     } else if (cellContent.prop) {
         sceneObjectList.removeSceneObject(cellContent.prop.getID());
         grid.removeCellByCoord(coord, "scene");
-        
     }
 
     renderGrid();

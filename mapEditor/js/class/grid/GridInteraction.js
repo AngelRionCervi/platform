@@ -83,10 +83,12 @@ export class GridInteraction {
 
         grid.addEventListener("mouseup", (evt) => {
             evt.preventDefault();
-
+            const cursorPos = mouse.getCursorPos(evt);
+            
             switch (evt.button) {
                 case 0:
                     this.drawing = false;
+                    this.emitter.emit("grid_left_mouse_up", cursorPos);
                     break;
                 case 2:
                     this.erasing = false;

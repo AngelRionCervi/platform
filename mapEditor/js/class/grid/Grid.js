@@ -21,7 +21,7 @@ export class Grid {
         this.cellFillStyle = "black";
         this.dragging = false;
         this.startDragCoord = null;
-        this.sCoords = [];
+        this.objDragOrigins = null;
     }
 
     getCellByID(id) {
@@ -259,46 +259,31 @@ export class Grid {
         return this.dragging;
     }
 
-    startDragging(coord) {
+    startDragging(coord, selectedIDs) {
         this.dragging = true;
         this.startDragCoord = coord;
-        console.log("startcoord");
+        const gameObjects = gameObjectBufferList.getObjectsBuffer(selectedIDs);
+        this.objDragOrigins = JSON.parse(JSON.stringify(gameObjects.map((el) => el.coord)));
     }
 
     stopDragging() {
+        if (!this.dragging) return;
         this.dragging = false;
         this.startDragCoord = null;
+        this.objDragOrigins = null;
     }
 
     drag(cursorPos, selectedIDs) {
-        if (!this.dragging) return;
-
+        if (!this.dragging || !this.objDragOrigins || !this.startDragCoord) return;
         const gameObjects = gameObjectBufferList.getObjectsBuffer(selectedIDs);
-
-        if (this.sCoords.length !== gameObjects.length) {
-            console.log("scoords");
-            //this.startDragCoord = cursorPos
-            this.sCoords = JSON.parse(JSON.stringify(gameObjects.map((el) => el.coord)));
-        }
-
         const tw = camera.toWorld.bind(camera);
-        const ts = camera.toScreen.bind(camera);
 
-        const curPos = this.floorMouse(cursorPos, gridProps.getBlockSize());
-
-        console.log("start", this.startDragCoord);
         gameObjects.forEach((go, index) => {
-            //console.log("efqsf", this.startDragCoord.x + this.sCoords[index].x + (cursorPos.x - this.startDragCoord.x))
-            const nX = cursorPos.x + this.startDragCoord.x - this.sCoords[index].x;
-            const nY = cursorPos.y + this.startDragCoord.y - this.sCoords[index].y;
-            //console.log(nX)
-
-            //console.log(this.startDragCoord.x, cursorPos.x, cursorPos.x + this.startDragCoord.x);
+            const nX = this.objDragOrigins[index].x - tw(this.startDragCoord.x) + tw(cursorPos.x);
+            const nY = this.objDragOrigins[index].y - tw(this.startDragCoord.y) + tw(cursorPos.y);
             go.coord.x = nX;
             go.coord.y = nY;
         });
-        //gameObjectBufferList.update();
-        console.log(gameObjects, this.sCoords);
     }
 
     getMap() {
