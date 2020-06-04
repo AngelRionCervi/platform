@@ -82,8 +82,8 @@ export class GameObjectList {
         if (name.length > 20) {
             name = name.slice(0, 20) + "...";
         }
-        const nameNode = dob.createNode("div", "game-object-name", null, name);
-        const imageNode = dob.createNode("img", "game-object-img");
+        const nameNode = dob.createNode("div", "game-object-name", null, name).done();
+        const imageNode = dob.createNode("img", "game-object-img").done();
         imageNode.src = object.getAsset().getSpritePath();
         const leftListener = {
             type: "click",
@@ -101,7 +101,7 @@ export class GameObjectList {
             "go_" + object.getID(),
             [imageNode, nameNode],
             [leftListener, contextListener]
-        );
+        ).done();
         this.domEl.appendChild(objectEl);
     }
 

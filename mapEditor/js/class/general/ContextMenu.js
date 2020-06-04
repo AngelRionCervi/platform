@@ -80,12 +80,12 @@ export class ContextMenu {
                 null,
                 optionsJSON[key].inner,
                 listener
-            );
+            ).done();
             options.push(optionNode);
         });
 
-        const list = dob.createNode(listJSON.tag, listJSON.class, null, options);
-        const menu = dob.createNode(menuJSON.tag, menuJSON.class, menuJSON.id, list);
+        const list = dob.createNode(listJSON.tag, listJSON.class, null, options).done();
+        const menu = dob.createNode(menuJSON.tag, menuJSON.class, menuJSON.id, list).done();
 
         return menu;
     }

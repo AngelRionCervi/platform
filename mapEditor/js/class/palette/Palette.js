@@ -107,8 +107,8 @@ export class Palette {
     }
 
     getDirectoryEl(dirName, assets, fullPath) {
-        const nameNode = dob.createNode("div", "directory-name", null, "/" + dirName);
-        const imageNode = dob.createNode("img", "directory-img");
+        const nameNode = dob.createNode("div", "directory-name", null, "/" + dirName).done();
+        const imageNode = dob.createNode("img", "directory-img").done();
         imageNode.src = "./images/palette/directory.png";
         const listener = {
             type: "click",
@@ -116,7 +116,7 @@ export class Palette {
             args: [assets, dirName + "/", fullPath],
             event: false,
         };
-        const el = dob.createNode("div", "palette-folder", null, [imageNode, nameNode], listener);
+        const el = dob.createNode("div", "palette-folder", null, [imageNode, nameNode], listener).done();
 
         return el;
     }
@@ -128,8 +128,8 @@ export class Palette {
         } else {
             name = asset.name;
         }
-        const nameNode = dob.createNode("div", "directory-name", null, name);
-        const imageNode = dob.createNode("img", "palette-img");
+        const nameNode = dob.createNode("div", "directory-name", null, name).done();
+        const imageNode = dob.createNode("img", "palette-img").done();
         imageNode.src = asset.path;
         const leftListener = {
             type: "click",
@@ -147,7 +147,7 @@ export class Palette {
             null,
             [imageNode, nameNode],
             [leftListener, contextListener]
-        );
+        ).done();
 
         return paletteCellEl;
     }

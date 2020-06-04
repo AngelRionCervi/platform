@@ -196,10 +196,10 @@ function handle_Grid_Left_Click_Drawing(coord, moving) {
         const objectID = gameObjectList.getCurrentObjectID();
         grid.setGameObject(coord, objectID, gameObjectList.addGameObjectToScene.bind(gameObjectList));
     } else if (gameObjectInst && moving && !grid.isDragging()) {
-        console.log("STARTED dragging lol");
+        console.log("STARTED dragging");
         grid.startDragging(coord, itemSelection.getSelectedIDs());
     } else if (grid.isDragging()) {
-        console.log("dragging lol");
+        console.log("dragging");
         grid.drag(coord, itemSelection.getSelectedIDs());
     }
 
