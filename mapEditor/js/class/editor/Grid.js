@@ -142,40 +142,29 @@ export class Grid {
 
     floodFill(cursorPos, asset, addSceneObjectToList, removeSceneObjectOfList) {
         console.log(cursorPos, asset);
-        const targetAsset = this.getCellByCursor({ x: cursorPos.x, y: cursorPos.y })?.prop?.asset?.name
-            ? this.getCellByCursor({ x: cursorPos.x, y: cursorPos.y })?.prop?.asset?.name
-            : "lul";
+        const targetCell =  this.getCellByCursor(cursorPos);
+        const targetAsset = targetCell.prop ? targetCell.prop.asset.name : null;
         console.log("target cell", targetAsset);
 
         const blockSize = gridProps.getBlockSize();
         const width = gridProps.getWidth();
         const height = gridProps.getHeight();
         const tiles = gridProps.getTiles();
-        console.log({ width, height });
+        const tw = camera.toWorld.bind(camera);
+        const ts = camera.toScreen.bind(camera);
+
+        const wBlockSize = ts(blockSize);
 
         flood(cursorPos.x, cursorPos.y, asset.name, this);
 
         function getAsset(x, y) {
             console.log("getAsset", x, y);
             if (x < 0 || y < 0 || x >= width / blockSize || y >= height / blockSize) {
-                return "lul";
+                return "endOfMap";
             } else {
                 console.log("TILE", tiles[x][y]?.prop?.asset?.name);
-                return tiles[x][y]?.prop?.asset?.name ? tiles[x][y].prop.asset.name : "lul";
+                return tiles[x][y].prop ? tiles[x][y].prop.asset.name : null;
             }
-        }
-
-        function setAsset(imageData, x, y, color) {
-            const offset = (y * imageData.width + x) * 4;
-            imageData.data[offset + 0] = color[0];
-            imageData.data[offset + 1] = color[1];
-            imageData.data[offset + 2] = color[2];
-            imageData.data[offset + 3] = color[0];
-        }
-
-        function cellMatch(a, b) {
-            console.log("cell match", a, b);
-            return a === b;
         }
 
         function flood(x, y, fillAsset, _this) {
@@ -186,22 +175,21 @@ export class Grid {
             // const targetColor = getAsset(imageData, x, y);
 
             // check we are actually filling a different color
-            if (!cellMatch(targetAsset, fillAsset)) {
+            if (targetAsset !== fillAsset) {
                 const cellsToCheck = [x, y];
                 while (cellsToCheck.length > 0) {
                     const y = cellsToCheck.pop();
                     const x = cellsToCheck.pop();
-
-                    const currentAsset = getAsset(Math.floor(x / blockSize), Math.floor(y / blockSize));
-                    if (cellMatch(targetAsset, currentAsset)) {
+                    console.log(x, y)
+                    const currentAsset = getAsset(tw(x / blockSize), tw(y / blockSize));
+                    if (targetAsset === currentAsset && currentAsset !== "endOfMap") {
                         //setAsset(imageData, x, y, fillCell);
-                        console.log({ x, y }, { targetAsset, currentAsset });
-                        _this.setSceneObject({ x, y }, asset, addSceneObjectToList, removeSceneObjectOfList);
+                        _this.setSceneObject({ x: x, y: y }, asset, addSceneObjectToList, removeSceneObjectOfList);
 
-                        cellsToCheck.push(x + blockSize, y);
-                        cellsToCheck.push(x - blockSize, y);
-                        cellsToCheck.push(x, y + blockSize);
-                        cellsToCheck.push(x, y - blockSize);
+                        cellsToCheck.push(x + wBlockSize, y);
+                        cellsToCheck.push(x - wBlockSize, y);
+                        //cellsToCheck.push(x, y + wBlockSize);
+                        //cellsToCheck.push(x, y - wBlockSize);
                     }
                 }
 
