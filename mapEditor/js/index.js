@@ -1,11 +1,13 @@
 const canvas = document.getElementById("mapEditorCanvas");
 const ctx = canvas.getContext("2d");
 
+import editor from "./class/editor/Editor.js";
+import tools from "./class/tools/Tools.js";
 import { ContextMenu } from "./class/general/ContextMenu.js";
 import { Keyboard } from "./class/keyboardHandling/Keyboard.js";
 import { Project } from "./class/project/userProject.js";
-import { GridInteraction } from "./class/grid/GridInteraction.js";
-import { Grid, renderGrid } from "./class/grid/Grid.js";
+import { GridInteraction } from "./class/editor/GridInteraction.js";
+import { Grid, renderGrid } from "./class/editor/Grid.js";
 import camera from "./class/Camera/Camera.js";
 import { Assets } from "./class/project/Assets.js";
 import { MapDownloader } from "./class/download/MapDownloader.js";
@@ -18,9 +20,9 @@ import { GameObjectListInteraction } from "./class/gameObjects/GameObjectListInt
 import { gameObjectBufferList } from "./class/general/CanvasBuffer.js";
 import itemSelection from "./class/general/itemSelection.js";
 
+
 const gridInteraction = new GridInteraction();
 const grid = new Grid();
-
 const _keyboard = new Keyboard();
 const paletteInteraction = new PaletteInteraction();
 const palette = new Palette(paletteInteraction);
@@ -173,12 +175,22 @@ function handle_Grid_Left_Click_Drawing(coord, moving) {
 
     if (palette.isAnAssetSelected()) {
         const asset = _assets.getByID(palette.getCurrentAssetID());
-        grid.setSceneObject(
-            coord,
-            asset,
-            sceneObjectList.addSceneObject.bind(sceneObjectList),
-            sceneObjectList.removeSceneObject.bind(sceneObjectList)
-        );
+        if (tools.getSelected() === "bucket") {
+            grid.floodFill(
+                coord,
+                asset,
+                sceneObjectList.addSceneObject.bind(sceneObjectList),
+                sceneObjectList.removeSceneObject.bind(sceneObjectList)
+            );
+        } else {
+            grid.setSceneObject(
+                coord,
+                asset,
+                sceneObjectList.addSceneObject.bind(sceneObjectList),
+                sceneObjectList.removeSceneObject.bind(sceneObjectList)
+            );
+        }
+        
     } else if (gameObjectList.isAnObjectSelected() && !moving) {
         if (gameObjectInst) {
             if (itemSelection.isSelected(gameObjectInst.id) && !_keyboard.act("lShift")) {

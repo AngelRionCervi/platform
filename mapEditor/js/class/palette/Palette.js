@@ -10,6 +10,10 @@ export class Palette {
         this.authorizedExensions = ["png", "jpg"];
         this.assets;
         this.paletteContainer = document.getElementById("palette_container");
+        this.paletteWindow = justAnotherWin.add(
+            { x: 0, y: 0, width: 100, height: window.innerHeight, name: "paletteWindow" },
+            this.paletteContainer
+        );
         this.currentAssetID = null;
 
         this.dirInfo = {
@@ -101,6 +105,7 @@ export class Palette {
     }
 
     removePaletteEls() {
+        //if (!this.paletteContainer.firstElementChild) return;
         while (this.paletteContainer.firstElementChild) {
             this.paletteContainer.firstElementChild.remove();
         }
@@ -116,7 +121,7 @@ export class Palette {
             args: [assets, dirName + "/", fullPath],
             event: false,
         };
-        const el = dob.createNode("div", "palette-folder", null, [imageNode, nameNode], listener).done();
+        const el = dob.createNode("div", "palette-cell", null, [imageNode, nameNode], listener).done();
 
         return el;
     }
@@ -141,13 +146,9 @@ export class Palette {
             callback: this.interaction.handlePaletteContextClick.bind(this.interaction),
             args: [asset],
         };
-        const paletteCellEl = dob.createNode(
-            "div",
-            "palette-cell",
-            null,
-            [imageNode, nameNode],
-            [leftListener, contextListener]
-        ).done();
+        const paletteCellEl = dob
+            .createNode("div", "palette-cell", null, [imageNode, nameNode], [leftListener, contextListener])
+            .done();
 
         return paletteCellEl;
     }

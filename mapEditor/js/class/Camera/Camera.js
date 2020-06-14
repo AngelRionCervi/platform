@@ -1,5 +1,5 @@
 import { _G } from "../general/globals.js";
-import { Grid, renderGrid, fillAllCells, gridProps } from "../grid/Grid.js";
+import { Grid, renderGrid, fillAllCells, gridProps } from "../editor/Grid.js";
 import { getContext, getCanvas } from "../general/canvasRef.js";
 import { precise, roundTo } from "../../lib/helpers.js";
 

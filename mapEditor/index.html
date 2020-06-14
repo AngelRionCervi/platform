@@ -4,20 +4,17 @@
 <head>
     <title></title>
     <link href="/mapEditor/css/main.css" type="text/css" rel="stylesheet">
+    <script defer type="text/javascript" src="js/lib/justAnotherWin.js"></script>
     <script defer type="module" src="js/index.js"></script>
 </head>
 
 <body>
     <button id="directory_back_button"> <--- </button>
     <div class="main-container">
-        
         <div id="palette_container" class="palette-container">
-            
             <div id="palette_drop" class="palette-drop">drop assets here</div>
         </div>
         <div id="scene_container" class="scene-container">
-            <canvas id="mapEditorCanvas" style="border: 1px solid black; border-top: none"></canvas>
-            <div id="canvas_grid" class="canvas-grid"></div>
             <button id="dl_map_btn">download json</button>
             <button id="add_row_top_btn">add row top</button>
             <button id="add_row_bottom_btn">add row bottom</button>

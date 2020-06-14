@@ -1,4 +1,4 @@
-import { gridProps } from "../grid/Grid.js";
+import { gridProps } from "../editor/Grid.js";
 import camera from "../Camera/Camera.js";
 import * as _H from "../../lib/helpers.js";
 

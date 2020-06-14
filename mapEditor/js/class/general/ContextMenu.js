@@ -103,6 +103,7 @@ export class ContextMenu {
         htmlNode.style.position = "absolute";
         htmlNode.style.left = `${coord.x}px`;
         htmlNode.style.top = `${coord.y}px`;
+        htmlNode.style.zIndex = 9999;
 
         document.body.appendChild(htmlNode);
         this.contextMenuStates[nodeVar] = htmlNode.id;

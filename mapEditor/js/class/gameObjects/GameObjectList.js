@@ -9,7 +9,14 @@ const dob = new DomBuilder();
 export class GameObjectList {
     constructor(interaction) {
         this.interaction = interaction;
-        this.domEl = document.getElementById("game_objects_container");
+        this.listContainer = document.getElementById("game_objects_container");
+        this.listWindow = justAnotherWin.add({
+            x: 100,
+            y: window.innerHeight - 300,
+            width: window.innerWidth - 200,
+            height: 300,
+            name: "entitiesWindow"
+        }, this.listContainer);
         this.prevObjectsIDs = [];
         this.curDisplayed = [];
         this.gameObjects = [];
@@ -95,14 +102,16 @@ export class GameObjectList {
             callback: this.interaction.handleGameObjectContextClick.bind(this.interaction),
             args: [object],
         };
-        const objectEl = dob.createNode(
-            "div",
-            "game-object-cell",
-            "go_" + object.getID(),
-            [imageNode, nameNode],
-            [leftListener, contextListener]
-        ).done();
-        this.domEl.appendChild(objectEl);
+        const objectEl = dob
+            .createNode(
+                "div",
+                "game-object-cell",
+                "go_" + object.getID(),
+                [imageNode, nameNode],
+                [leftListener, contextListener]
+            )
+            .done();
+        this.listContainer.appendChild(objectEl);
     }
 
     removeDomNode(id) {
