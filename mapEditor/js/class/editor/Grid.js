@@ -106,6 +106,33 @@ export class Grid {
         return this;
     }
 
+    setSceneObjectToCell(cell, asset, addSceneObjectToList, removeSceneObjectOfList) {
+        const tsc = camera.toScreen.bind(camera);
+        const camPos = camera.getCoords();
+        const cursorPos = { x: tsc(cell.x + camPos.x, true), y: tsc(cell.y + camPos.y, true) };
+
+        const { blockSize, gridTiles, tw, ts, camCoords, maxX, restX, maxY, restY } = this.getAddObjectLoopProps(
+            cursorPos,
+            asset
+        );
+
+        console.log("adding scene object", cursorPos.x, ts(maxX - restX + camCoords.x));
+
+        for (let x = cursorPos.x; x < ts(maxX - restX + camCoords.x); x += ts(blockSize)) {
+            for (let y = cursorPos.y; y < ts(maxY - restY + camCoords.y); y += ts(blockSize)) {
+                const floored = this.floorMouse({ x, y });
+                const cell = gridTiles[floored.x / blockSize][floored.y / blockSize];
+                if (cell.isProp()) {
+                    removeSceneObjectOfList(cell.getProp().getID());
+                }
+                const slice = { x: tw(x - cursorPos.x), y: tw(y - cursorPos.y) };
+                const bufferFeed = addSceneObjectToList({ x: floored.x, y: floored.y }, asset, slice);
+                sceneBuffer.updateBuffer(cell, bufferFeed, slice, "sceneObject");
+            }
+        }
+        return this;
+    }
+
     setGameObject(cursorPos, objectID, addGameObjectToList) {
         const prop = addGameObjectToList(cursorPos, objectID);
         if (!prop) return;
@@ -141,59 +168,36 @@ export class Grid {
     }
 
     floodFill(cursorPos, asset, addSceneObjectToList, removeSceneObjectOfList) {
-        console.log(cursorPos, asset);
-        const targetCell =  this.getCellByCursor(cursorPos);
+        const targetCell = this.getCellByCursor(cursorPos);
         const targetAsset = targetCell.prop ? targetCell.prop.asset.name : null;
-        console.log("target cell", targetAsset);
-
-        const blockSize = gridProps.getBlockSize();
-        const width = gridProps.getWidth();
-        const height = gridProps.getHeight();
         const tiles = gridProps.getTiles();
+        const blockSize = gridProps.getBlockSize();
         const tw = camera.toWorld.bind(camera);
         const ts = camera.toScreen.bind(camera);
+        console.log(asset);
 
-        const wBlockSize = ts(blockSize);
-
-        flood(cursorPos.x, cursorPos.y, asset.name, this);
-
-        function getAsset(x, y) {
-            console.log("getAsset", x, y);
-            if (x < 0 || y < 0 || x >= width / blockSize || y >= height / blockSize) {
-                return "endOfMap";
-            } else {
-                console.log("TILE", tiles[x][y]?.prop?.asset?.name);
-                return tiles[x][y].prop ? tiles[x][y].prop.asset.name : null;
-            }
-        }
-
-        function flood(x, y, fillAsset, _this) {
-            // read the pixels in the canvas
-            //const imageData = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height);
-
-            // get the color we're filling
-            // const targetColor = getAsset(imageData, x, y);
-
-            // check we are actually filling a different color
-            if (targetAsset !== fillAsset) {
-                const cellsToCheck = [x, y];
-                while (cellsToCheck.length > 0) {
-                    const y = cellsToCheck.pop();
-                    const x = cellsToCheck.pop();
-                    console.log(x, y)
-                    const currentAsset = getAsset(tw(x / blockSize), tw(y / blockSize));
-                    if (targetAsset === currentAsset && currentAsset !== "endOfMap") {
-                        //setAsset(imageData, x, y, fillCell);
-                        _this.setSceneObject({ x: x, y: y }, asset, addSceneObjectToList, removeSceneObjectOfList);
-
-                        cellsToCheck.push(x + wBlockSize, y);
-                        cellsToCheck.push(x - wBlockSize, y);
-                        //cellsToCheck.push(x, y + wBlockSize);
-                        //cellsToCheck.push(x, y - wBlockSize);
+        // read the cells on the grid
+        // get the sprite we want to add
+        // check we are actually filling a different sprite
+        if (targetAsset !== asset.name) {
+            const cellsToCheck = [targetCell];
+            while (cellsToCheck.length > 0) {
+                const lastCell = cellsToCheck.pop();
+                if (targetAsset === (lastCell.prop ? lastCell.prop.asset.name : null)) {
+                    this.setSceneObjectToCell(lastCell, asset, addSceneObjectToList, removeSceneObjectOfList);
+                    if (tiles[lastCell.absX + Math.ceil(asset.width / blockSize)]) {
+                        cellsToCheck.push(tiles[lastCell.absX + Math.ceil(asset.width / blockSize)][lastCell.absY]);
+                    }
+                    if (tiles[lastCell.absX - Math.ceil(asset.width / blockSize)]) {
+                        cellsToCheck.push(tiles[lastCell.absX - Math.ceil(asset.width / blockSize)][lastCell.absY]);
+                    }
+                    if (tiles[lastCell.absX][lastCell.absY + Math.ceil(asset.height / blockSize)]) {
+                        cellsToCheck.push(tiles[lastCell.absX][lastCell.absY + Math.ceil(asset.height / blockSize)]);
+                    }
+                    if (tiles[lastCell.absX][lastCell.absY - Math.ceil(asset.height / blockSize)]) {
+                        cellsToCheck.push(tiles[lastCell.absX][lastCell.absY - Math.ceil(asset.height / blockSize)]);
                     }
                 }
-
-                // ctx.putImageData(imageData, 0, 0);
             }
         }
     }

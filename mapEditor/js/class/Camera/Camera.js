@@ -38,11 +38,13 @@ class Camera {
         return { sx: x * this.zoom, sy: y * this.zoom };
     }
 
-    toWorld(number) {
+    toWorld(number, ceil = null) {
+        if (ceil) return Math.ceil(number / this.zoom);
         return Math.floor(number / this.zoom);
     }
 
-    toScreen(number) {
+    toScreen(number, ceil = null) {
+        if (ceil) return Math.ceil(number * this.zoom);
         return Math.floor(number * this.zoom);
     }
 
