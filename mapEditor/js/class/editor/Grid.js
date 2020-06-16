@@ -117,8 +117,37 @@ export class Grid {
             sampleHeight,
         } = this.getAddObjectLoopProps(cursorPos, asset);
 
-        console.log("adding scene object", cursorPos.x, ts(maxX - restX + camCoords.x));
+        //console.log("adding scene object", cursorPos.x, ts(maxX - restX + camCoords.x));
+        const floored = this.floorMouse({ x: cursorPos.x, y: cursorPos.y });
+        const clickedCell = this.getCellByCursor(cursorPos);
+        console.log(clickedCell.absX, clickedCell.absY);
 
+        for (let x = clickedCell.absX; x < sampleWidth + clickedCell.absX; x++) {
+            for (let y = clickedCell.absY; y < sampleHeight + clickedCell.absY; y++) {
+                if (gridTiles[x] && gridTiles[x][y]) {
+                    const cell = gridTiles[x][y];
+                    if (cell.isProp()) {
+                        removeSceneObjectOfList(cell.getProp().getID());
+                    }
+                    //const floored = this.floorMouse({ x: x * blockSize, y: y * blockSize });
+
+                    const slice = {
+                        x: ts(_H.roundToPrevMult(x * blockSize - cursorPos.x, blockSize)),
+                        y: ts(_H.roundToPrevMult(y * blockSize - cursorPos.y, blockSize)),
+                    };
+                 
+                    const bufferFeed = addSceneObjectToList({ x: x * blockSize, y: y * blockSize }, asset, slice);
+                    sceneBuffer.updateBuffer(
+                        cell,
+                        bufferFeed,
+                        slice,
+                        { w: sampleWidth, h: sampleHeight },
+                        "sceneObject"
+                    );
+                }
+            }
+        }
+        /*
         for (let x = cursorPos.x; x < ts(maxX - restX + camCoords.x); x += ts(blockSize)) {
             for (let y = cursorPos.y; y < ts(maxY - restY + camCoords.y); y += ts(blockSize)) {
                 const floored = this.floorMouse({ x, y });
@@ -130,7 +159,7 @@ export class Grid {
                 const bufferFeed = addSceneObjectToList({ x: floored.x, y: floored.y }, asset, slice);
                 sceneBuffer.updateBuffer(cell, bufferFeed, slice, {w: sampleWidth, h: sampleHeight}, "sceneObject");
             }
-        }
+        }*/
         return this;
     }
 
