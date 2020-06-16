@@ -60,6 +60,11 @@ export function propsRemover(object, props = []) {
         }, {});
 }
 
+export function roundToNextMult2(n, mult) {
+    if (n % mult === 0) return n;
+    return Math.ceil(n / mult) * mult;
+}
+
 export function roundToPrevMult(n, mult) {
     if (n % mult === 0) return n;
     return Math.ceil((n - mult) / mult) * mult;
@@ -72,7 +77,7 @@ export function roundToNextMult(n, mult) {
 
 export function roundToNearestMult(n, mult) {
     if (n % mult === 0) return n;
-    return Math.round((n) / mult) * mult; 
+    return Math.round(n / mult) * mult; 
 }
 
 export function uniqid(start = '') {

@@ -103,48 +103,34 @@ export class Grid {
     }
 
     setSceneObject(cursorPos, asset, addSceneObjectToList, removeSceneObjectOfList) {
-        const {
-            blockSize,
-            gridTiles,
-            tw,
-            ts,
-            camCoords,
-            maxX,
-            restX,
-            maxY,
-            restY,
-            sampleWidth,
-            sampleHeight,
-        } = this.getAddObjectLoopProps(cursorPos, asset);
+        const { blockSize, gridTiles, tw, camCoords, sampleWidth, sampleHeight } = this.getAddObjectLoopProps(
+            cursorPos,
+            asset
+        );
 
         //console.log("adding scene object", cursorPos.x, ts(maxX - restX + camCoords.x));
-        const floored = this.floorMouse({ x: cursorPos.x, y: cursorPos.y });
         const clickedCell = this.getCellByCursor(cursorPos);
-        console.log(clickedCell.absX, clickedCell.absY);
 
         for (let x = clickedCell.absX; x < sampleWidth + clickedCell.absX; x++) {
             for (let y = clickedCell.absY; y < sampleHeight + clickedCell.absY; y++) {
-                if (gridTiles[x] && gridTiles[x][y]) {
-                    const cell = gridTiles[x][y];
-                    if (cell.isProp()) {
-                        removeSceneObjectOfList(cell.getProp().getID());
-                    }
-                    //const floored = this.floorMouse({ x: x * blockSize, y: y * blockSize });
 
-                    const slice = {
-                        x: ts(_H.roundToPrevMult(x * blockSize - cursorPos.x, blockSize)),
-                        y: ts(_H.roundToPrevMult(y * blockSize - cursorPos.y, blockSize)),
-                    };
-                 
-                    const bufferFeed = addSceneObjectToList({ x: x * blockSize, y: y * blockSize }, asset, slice);
-                    sceneBuffer.updateBuffer(
-                        cell,
-                        bufferFeed,
-                        slice,
-                        { w: sampleWidth, h: sampleHeight },
-                        "sceneObject"
-                    );
+                if (!gridTiles[x] || !gridTiles[x][y]) continue;
+
+                const cell = gridTiles[x][y];
+                if (cell.isProp()) {
+                    removeSceneObjectOfList(cell.getProp().getID());
                 }
+
+                const sliceX = _H.roundToNextMult2(x * blockSize - tw(cursorPos.x) + camCoords.x, blockSize);
+                const sliceY = _H.roundToNextMult2(y * blockSize - tw(cursorPos.y) + camCoords.y, blockSize);
+
+                const slice = {
+                    x: sliceX - sliceX * ((sampleWidth * blockSize) / asset.width - 1),
+                    y: sliceY - sliceY * ((sampleHeight * blockSize) / asset.height - 1),
+                };
+
+                const bufferFeed = addSceneObjectToList({ x: x * blockSize, y: y * blockSize }, asset, slice);
+                sceneBuffer.updateBuffer(cell, bufferFeed, slice, { w: sampleWidth, h: sampleHeight }, "sceneObject");
             }
         }
         /*
@@ -231,7 +217,6 @@ export class Grid {
         const blockSize = gridProps.getBlockSize();
         const tw = camera.toWorld.bind(camera);
         const ts = camera.toScreen.bind(camera);
-        console.log(asset);
 
         // read the cells on the grid
         // get the sprite we want to add
