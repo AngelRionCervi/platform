@@ -2,7 +2,6 @@ import { gridProps } from "./Grid.js";
 import camera from "../Camera/Camera.js";
 import { sceneBuffer } from "../general/CanvasBuffer.js";
 
-
 export class Cell {
     constructor(id, x, y, absX, absY, blockType, prop) {
         this.id = id;
@@ -20,6 +19,8 @@ export class Cell {
         this.slice = { x: 0, y: 0 };
         this.addedBlockW = 0;
         this.addedBlockH = 0;
+        this.sliceRealWidth = 0;
+        this.sliceRealHeight = 0;
         this.layerList = [];
         this.tx = () => Math.floor((this.x + this.xOffset) * camera.getZoom());
         this.ty = () => Math.floor((this.y + this.yOffset) * camera.getZoom());
@@ -33,17 +34,26 @@ export class Cell {
         return { x: this.x, y: this.y };
     }
 
+    setRealSliceSize({ w, h }) {
+        this.sliceRealWidth = w;
+        this.sliceRealHeight = h;
+        return this;
+    }
+
     setBlockAddedSize({ w, h }) {
         this.addedBlockW = w;
         this.addedBlockH = h;
+        return this;
     }
 
     setBlockAddedW(number) {
         this.addedBlockW = number;
+        return this;
     }
 
     setBlockAddedH(number) {
         this.addedBlockH = number;
+        return this;
     }
 
     setCoords(x, y) {
@@ -83,7 +93,7 @@ export class Cell {
         if (clearProp) {
             this.removeProp();
             this.removeGameObject();
-        } 
+        }
         return this;
     }
 
@@ -123,7 +133,7 @@ export class Cell {
             this.x - this.addedBlockW,
             this.y - this.addedBlockH,
             blockSize + this.addedBlockW,
-            blockSize + this.addedBlockH
+            blockSize + this.addedBlockH,
         );
         ctx.closePath();
 
@@ -162,10 +172,12 @@ export class Cell {
     }
 
     getContent() {
-        return (this.isProp() || this.isGameObject()) && {
-            prop: this.isProp() ? this.getProp() : null,
-            gameObject: this.isGameObject() ? this.getGameObject() : null,
-        };
+        return (
+            (this.isProp() || this.isGameObject()) && {
+                prop: this.isProp() ? this.getProp() : null,
+                gameObject: this.isGameObject() ? this.getGameObject() : null,
+            }
+        );
     }
 
     moveRight(times) {

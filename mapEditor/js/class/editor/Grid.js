@@ -73,21 +73,49 @@ export class Grid {
         const ts = camera.toScreen.bind(camera);
         const camCoords = camera.getCoords();
 
-        const maxX = tw(cursorPos.x + ts(asset.width)) - camCoords.x;
+        const adjWidth = _H.roundToNearestMult(asset.width, blockSize);
+        const adjHeight = _H.roundToNearestMult(asset.height, blockSize);
+        const sampleWidth = adjWidth / blockSize;
+        const sampleHeight = adjHeight / blockSize;
+        console.log({ adjWidth, adjHeight, sampleWidth, sampleHeight });
+
+        const maxX = tw(cursorPos.x + ts(adjWidth)) - camCoords.x;
         const restX = _H.posOr0(-(gridProps.getWidth() - maxX));
-        const maxY = tw(cursorPos.y + ts(asset.height)) - camCoords.y;
+        const maxY = tw(cursorPos.y + ts(adjHeight)) - camCoords.y;
         const restY = _H.posOr0(-(gridProps.getHeight() - maxY));
 
         const floorCursor = this.floorMouse({ x: cursorPos.x, y: cursorPos.y });
 
-        return { blockSize, gridTiles, tw, ts, camCoords, maxX, restX, maxY, restY, floorCursor };
+        return {
+            blockSize,
+            gridTiles,
+            tw,
+            ts,
+            camCoords,
+            maxX,
+            restX,
+            maxY,
+            restY,
+            floorCursor,
+            sampleWidth,
+            sampleHeight,
+        };
     }
 
     setSceneObject(cursorPos, asset, addSceneObjectToList, removeSceneObjectOfList) {
-        const { blockSize, gridTiles, tw, ts, camCoords, maxX, restX, maxY, restY } = this.getAddObjectLoopProps(
-            cursorPos,
-            asset
-        );
+        const {
+            blockSize,
+            gridTiles,
+            tw,
+            ts,
+            camCoords,
+            maxX,
+            restX,
+            maxY,
+            restY,
+            sampleWidth,
+            sampleHeight,
+        } = this.getAddObjectLoopProps(cursorPos, asset);
 
         console.log("adding scene object", cursorPos.x, ts(maxX - restX + camCoords.x));
 
@@ -100,7 +128,7 @@ export class Grid {
                 }
                 const slice = { x: tw(x - cursorPos.x), y: tw(y - cursorPos.y) };
                 const bufferFeed = addSceneObjectToList({ x: floored.x, y: floored.y }, asset, slice);
-                sceneBuffer.updateBuffer(cell, bufferFeed, slice, "sceneObject");
+                sceneBuffer.updateBuffer(cell, bufferFeed, slice, {w: sampleWidth, h: sampleHeight}, "sceneObject");
             }
         }
         return this;

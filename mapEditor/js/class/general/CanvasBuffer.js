@@ -23,9 +23,9 @@ class CanvasBuffer {
         tmpBuffer.getContext("2d").drawImage(this.buffer, 0, 0);
         return tmpBuffer;
     }
-    updateBuffer(cell, object, slice, type) {
+    updateBuffer(cell, object, slice, sliceSize, type) {
         if (type === "sceneObject") {
-            cell.setBlockType("wall").setProp(object).setSceneObjectSlice(slice).fillBufferCell();
+            cell.setBlockType("wall").setProp(object).setSceneObjectSlice(slice).setRealSliceSize(sliceSize).fillBufferCell();
         } else if (type === "gameObject") {
             //cell.setBlockType("wall").setGameObject(object);
         }

@@ -19,7 +19,7 @@ class Camera {
         this.zoom = 1;
         this.zoomStep = 0.8;
         this.maxZoom = this.zoomStep * 5;
-        this.minZoom = this.zoomStep * 0.1;
+        this.minZoom = this.zoomStep * 0.2;
     }
 
     getCoords() {
@@ -49,33 +49,14 @@ class Camera {
     }
 
     setScale({ dir }) {
-        /*
-        if (this.scaleTrack > 0 && dir > 0) {
-            this.scaleTrack -= 10;
-            this.scaleInc = 0.9;
-        }
-
-        if (this.scaleTrack < 100 && dir < 0) {
-            this.scaleTrack += 10;
-            this.scaleInc = 1.1;
-        }
-
-        if (this.scaleTrack <= 0 || this.scaleTrack >= 100) {
-            this.scaleInc = 1;
-        }*/
-
         if (dir > 0) {
             this.scaleInc = 1 * this.zoomStep;
         } else {
             this.scaleInc = 1 / this.zoomStep;
         }
-        const zoom = Math.max(roundTo(this.zoom * this.scaleInc, 2), this.minZoom);
+        const zoom = Math.max(roundTo(this.zoom * this.scaleInc, 10), this.minZoom);
         this.zoom = Math.min(zoom, this.maxZoom);
-
-        //this.viewPortWidth /= this.scaleInc;
-        //this.viewPortHeight /= this.scaleInc;
-        //this.x = this.x + curPos.x / this.scaleInc - curPos.x;
-        //this.y = this.y + curPos.y / this.scaleInc - curPos.y;
+        return this;
     }
 
     getScale() {
@@ -92,8 +73,11 @@ class Camera {
         const gridHeight = gridProps.getHeight();
         const zoom = this.getZoom();
         const bs = gridProps.getBlockSize();
-        const trueBS = Math.floor(bs * zoom);
+        
         const tw = this.toWorld.bind(this);
+        const ts = this.toScreen.bind(this);
+        console.log("zoom", zoom)
+        const trueBS = ts(bs);
 
         let lastCX;
         for (let x = this.x > 0 ? this.x : -bs; x < Math.round(tw(this.viewPortWidth) + bs); x += bs) {

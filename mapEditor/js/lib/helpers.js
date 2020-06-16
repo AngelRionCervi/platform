@@ -65,6 +65,16 @@ export function roundToPrevMult(n, mult) {
     return Math.ceil((n - mult) / mult) * mult;
 }
 
+export function roundToNextMult(n, mult) {
+    if (n % mult === 0) return n;
+    return Math.floor((n - mult) / mult) * mult; 
+}
+
+export function roundToNearestMult(n, mult) {
+    if (n % mult === 0) return n;
+    return Math.round((n) / mult) * mult; 
+}
+
 export function uniqid(start = '') {
     return start + "_" + Math.random().toString(36).substr(2, 9);
 }
@@ -74,7 +84,7 @@ export function precise(number, precision) {
 }
 
 export function roundTo(number, to) {
-    return Number(number.toFixed(to));
+    return Math.round((number + Number.EPSILON) * 10**to) / 10**to
 }
 
 export function posOr0(number) {
