@@ -186,11 +186,12 @@ export class Grid {
             const cellsToCheck = [targetCell];
             while (cellsToCheck.length > 0) {
                 const lastCell = cellsToCheck.pop();
-                const testCells = [];
                 const lastCellProp = lastCell.prop ? lastCell.prop.asset.name : null;
                 if (targetAsset === lastCellProp) {
-                    const offsetX2 = lastCell.absX + (asset.trueWidth / blockSize) * 2;
-                    const offsetX = lastCell.absX + asset.trueWidth / blockSize
+                    const offsetX = lastCell.absX + asset.trueWidth / blockSize;
+                    const offsetX2 = lastCell.absX - asset.trueWidth / blockSize;
+                    const offsetX2T2 = lastCell.absX - (asset.trueWidth / blockSize)*2;
+
                     if (
                         tiles[offsetX] &&
                         !tiles[offsetX][lastCell.absY].isProp()
@@ -204,15 +205,32 @@ export class Grid {
                             const newCell = tiles[start + u][lastCell.absY];
                             const slice = { sx: u * blockSize, sy: 0 };
 
-                            testCells.push(newCell);
-
                             this.drawOneCell(newCell, asset, slice);
                             u++;
                         }
                         console.log(start, tiles[start]);
                     }
+/*
+                    if (
+                        tiles[offsetX2] &&
+                        !tiles[offsetX2][lastCell.absY].isProp()
+                    ) {
+                        cellsToCheck.push(tiles[offsetX2][lastCell.absY]);
+                        this.setSceneObject(tiles[offsetX2][lastCell.absY], asset, addSceneObjectToList, removeSceneObjectOfList);
+                    } else {
+                        const c = tiles[offsetX2][lastCell.absY]
+                        const start = c.absX;
+                        let u = 0;
+                        while (tiles[start - u] && !(tiles[start - u] && tiles[start - u][lastCell.absY].isProp())) {
+                            const newCell = tiles[start - u][lastCell.absY];
+                            const slice = { sx: u * blockSize, sy: 0 };
+
+                            this.drawOneCell(newCell, asset, slice);
+                            u++;
+                        }
+                        console.log(start, tiles[start]);
+                    }*/
                     
-                    console.log("testCells", testCells);
                     /*
                     if (tiles[lastCell.absX - asset.trueWidth / blockSize]) {
                         cellsToCheck.push(tiles[lastCell.absX - asset.trueWidth / blockSize][lastCell.absY]);
