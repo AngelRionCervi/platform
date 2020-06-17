@@ -122,7 +122,7 @@ export class Cell {
 
         ctx.imageSmoothingEnabled = false;
         ctx.globalCompositeOperation = "source-over";
-        //this.clearBufferCell(false);
+        this.clearBufferCell(false);
         ctx.beginPath();
         ctx.drawImage(
             sprite,

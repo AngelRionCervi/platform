@@ -25,10 +25,39 @@ class CanvasBuffer {
     }
     updateBuffer(cell, object, slice, sliceSize, type) {
         if (type === "sceneObject") {
-            cell.setBlockType("wall").setProp(object).setSceneObjectSlice(slice).setRealSliceSize(sliceSize).fillBufferCell();
+            cell.setBlockType("wall")
+                .setProp(object)
+                .setSceneObjectSlice(slice)
+                .setRealSliceSize(sliceSize)
+                .fillBufferCell();
         } else if (type === "gameObject") {
             //cell.setBlockType("wall").setGameObject(object);
         }
+    }
+    updateBuffer2(coord, asset, type) {
+        if (type === "sceneObject") {
+            this.getBufferCtx().drawImage(
+                asset.getSprite(),
+                coord.x,
+                coord.y,
+                asset.trueWidth,
+                asset.trueHeight
+            );
+        } else if (type === "gameObject") {
+            //cell.setBlockType("wall").setGameObject(object);
+        }
+    }
+    clearTile(coord, blockSize) {
+        this.setFillStyle("white");
+        this.getBufferCtx().fillRect(
+            coord.x,
+            coord.y,
+            blockSize,
+            blockSize
+        );
+    }
+    setFillStyle(style) {
+        this.getBufferCtx().fillStyle = style;
     }
     getBuffer() {
         return this.buffer;
@@ -109,7 +138,7 @@ class GameObjectBufferList {
     }
 
     setCoord(id, coord) {
-        const buffer = this.list.find(el => el.id === id);
+        const buffer = this.list.find((el) => el.id === id);
         buffer.coord = coord;
     }
 

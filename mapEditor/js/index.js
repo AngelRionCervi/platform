@@ -231,8 +231,8 @@ function handle_Grid_Right_Click_Drawing(coord, moving) {
             }
             itemSelection.add(gameObjectInst);
         }
-    } else if (cellContent.prop) {
-        sceneObjectList.removeSceneObject(cellContent.prop.getID());
+    } else {
+        //sceneObjectList.removeSceneObject(cellContent.prop.getID());
         grid.removeCellByCoord(coord, "scene");
     }
 

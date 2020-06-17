@@ -77,14 +77,13 @@ export class Grid {
         const adjHeight = _H.roundToNearestMult(asset.height, blockSize);
         const sampleWidth = adjWidth / blockSize;
         const sampleHeight = adjHeight / blockSize;
-        console.log({ adjWidth, adjHeight, sampleWidth, sampleHeight });
 
         const maxX = tw(cursorPos.x + ts(adjWidth)) - camCoords.x;
         const restX = _H.posOr0(-(gridProps.getWidth() - maxX));
         const maxY = tw(cursorPos.y + ts(adjHeight)) - camCoords.y;
         const restY = _H.posOr0(-(gridProps.getHeight() - maxY));
 
-        const floorCursor = this.floorMouse({ x: cursorPos.x, y: cursorPos.y });
+        const floorCursor = this.floorMouse(cursorPos);
 
         return {
             blockSize,
@@ -102,77 +101,37 @@ export class Grid {
         };
     }
 
-    setSceneObject(cursorPos, asset, addSceneObjectToList, removeSceneObjectOfList) {
-        const { blockSize, gridTiles, tw, camCoords, sampleWidth, sampleHeight } = this.getAddObjectLoopProps(
-            cursorPos,
-            asset
+    setSceneObject(cellOrCursor, asset, addSceneObjectToList, removeSceneObjectOfList) {
+        const gridTiles = gridProps.getTiles();
+        const blockSize = gridProps.getBlockSize();
+
+        //console.log("adding scene object", cellOrCursor.x, ts(maxX - restX + camCoords.x));
+        const clickedCell = cellOrCursor instanceof Cell ? cellOrCursor : this.getCellByCursor(cellOrCursor);
+        sceneBuffer.updateBuffer2(
+            { x: clickedCell.absX * blockSize, y: clickedCell.absY * blockSize },
+            asset,
+            "sceneObject"
         );
 
-        //console.log("adding scene object", cursorPos.x, ts(maxX - restX + camCoords.x));
-        const clickedCell = this.getCellByCursor(cursorPos);
-
-        for (let x = clickedCell.absX; x < sampleWidth + clickedCell.absX; x++) {
-            for (let y = clickedCell.absY; y < sampleHeight + clickedCell.absY; y++) {
-
-                if (!gridTiles[x] || !gridTiles[x][y]) continue;
-
+        for (let x = clickedCell.absX; x < asset.trueWidth / blockSize + clickedCell.absX; x++) {
+            const sliceX = x * blockSize;
+            for (let y = clickedCell.absY; y < asset.trueHeight / blockSize + clickedCell.absY; y++) {
+                if (!gridTiles?.[x]?.[y]) continue; // à optimiser
+                const sliceY = y * blockSize;
+                const slice = {
+                    x: sliceX,
+                    y: sliceY,
+                    absX: sliceX - clickedCell.x,
+                    absY: sliceY - clickedCell.y,
+                };
                 const cell = gridTiles[x][y];
                 if (cell.isProp()) {
                     removeSceneObjectOfList(cell.getProp().getID());
                 }
-
-                const sliceX = _H.roundToNextMult2(x * blockSize - tw(cursorPos.x) + camCoords.x, blockSize);
-                const sliceY = _H.roundToNextMult2(y * blockSize - tw(cursorPos.y) + camCoords.y, blockSize);
-
-                const slice = {
-                    x: sliceX - sliceX * ((sampleWidth * blockSize) / asset.width - 1),
-                    y: sliceY - sliceY * ((sampleHeight * blockSize) / asset.height - 1),
-                };
-
-                const bufferFeed = addSceneObjectToList({ x: x * blockSize, y: y * blockSize }, asset, slice);
-                sceneBuffer.updateBuffer(cell, bufferFeed, slice, { w: sampleWidth, h: sampleHeight }, "sceneObject");
+                cell.setProp(addSceneObjectToList({ x: sliceX, y: sliceY }, asset, slice));
             }
         }
-        /*
-        for (let x = cursorPos.x; x < ts(maxX - restX + camCoords.x); x += ts(blockSize)) {
-            for (let y = cursorPos.y; y < ts(maxY - restY + camCoords.y); y += ts(blockSize)) {
-                const floored = this.floorMouse({ x, y });
-                const cell = gridTiles[floored.x / blockSize][floored.y / blockSize];
-                if (cell.isProp()) {
-                    removeSceneObjectOfList(cell.getProp().getID());
-                }
-                const slice = { x: tw(x - cursorPos.x), y: tw(y - cursorPos.y) };
-                const bufferFeed = addSceneObjectToList({ x: floored.x, y: floored.y }, asset, slice);
-                sceneBuffer.updateBuffer(cell, bufferFeed, slice, {w: sampleWidth, h: sampleHeight}, "sceneObject");
-            }
-        }*/
-        return this;
-    }
-
-    setSceneObjectToCell(cell, asset, addSceneObjectToList, removeSceneObjectOfList) {
-        const tsc = camera.toScreen.bind(camera);
-        const camPos = camera.getCoords();
-        const cursorPos = { x: tsc(cell.x + camPos.x, true), y: tsc(cell.y + camPos.y, true) };
-
-        const { blockSize, gridTiles, tw, ts, camCoords, maxX, restX, maxY, restY } = this.getAddObjectLoopProps(
-            cursorPos,
-            asset
-        );
-
-        console.log("adding scene object", cursorPos.x, ts(maxX - restX + camCoords.x));
-
-        for (let x = cursorPos.x; x < ts(maxX - restX + camCoords.x); x += ts(blockSize)) {
-            for (let y = cursorPos.y; y < ts(maxY - restY + camCoords.y); y += ts(blockSize)) {
-                const floored = this.floorMouse({ x, y });
-                const cell = gridTiles[floored.x / blockSize][floored.y / blockSize];
-                if (cell.isProp()) {
-                    removeSceneObjectOfList(cell.getProp().getID());
-                }
-                const slice = { x: tw(x - cursorPos.x), y: tw(y - cursorPos.y) };
-                const bufferFeed = addSceneObjectToList({ x: floored.x, y: floored.y }, asset, slice);
-                sceneBuffer.updateBuffer(cell, bufferFeed, slice, "sceneObject");
-            }
-        }
+        
         return this;
     }
 
@@ -226,18 +185,18 @@ export class Grid {
             while (cellsToCheck.length > 0) {
                 const lastCell = cellsToCheck.pop();
                 if (targetAsset === (lastCell.prop ? lastCell.prop.asset.name : null)) {
-                    this.setSceneObjectToCell(lastCell, asset, addSceneObjectToList, removeSceneObjectOfList);
-                    if (tiles[lastCell.absX + Math.ceil(asset.width / blockSize)]) {
-                        cellsToCheck.push(tiles[lastCell.absX + Math.ceil(asset.width / blockSize)][lastCell.absY]);
+                    this.setSceneObject(lastCell, asset, addSceneObjectToList, removeSceneObjectOfList);
+                    if (tiles[lastCell.absX + asset.trueWidth / blockSize]) {
+                        cellsToCheck.push(tiles[lastCell.absX + asset.trueWidth / blockSize][lastCell.absY]);
                     }
-                    if (tiles[lastCell.absX - Math.ceil(asset.width / blockSize)]) {
-                        cellsToCheck.push(tiles[lastCell.absX - Math.ceil(asset.width / blockSize)][lastCell.absY]);
+                    if (tiles[lastCell.absX - asset.trueWidth / blockSize]) {
+                        cellsToCheck.push(tiles[lastCell.absX - asset.trueWidth / blockSize][lastCell.absY]);
                     }
-                    if (tiles[lastCell.absX][lastCell.absY + Math.ceil(asset.height / blockSize)]) {
-                        cellsToCheck.push(tiles[lastCell.absX][lastCell.absY + Math.ceil(asset.height / blockSize)]);
+                    if (tiles[lastCell.absX][lastCell.absY + asset.trueHeight / blockSize]) {
+                        cellsToCheck.push(tiles[lastCell.absX][lastCell.absY + asset.trueHeight / blockSize]);
                     }
-                    if (tiles[lastCell.absX][lastCell.absY - Math.ceil(asset.height / blockSize)]) {
-                        cellsToCheck.push(tiles[lastCell.absX][lastCell.absY - Math.ceil(asset.height / blockSize)]);
+                    if (tiles[lastCell.absX][lastCell.absY - asset.trueHeight / blockSize]) {
+                        cellsToCheck.push(tiles[lastCell.absX][lastCell.absY - asset.trueHeight / blockSize]);
                     }
                 }
             }
@@ -245,9 +204,9 @@ export class Grid {
     }
 
     removeCellByCoord(cursorPos) {
-        const cell = this.getCellByCursor(cursorPos);
-        if (!cell) return;
-        cell.clearBufferCell(true);
+        const cell = this.getCellByCursor(cursorPos)
+        sceneBuffer.clearTile({x: cell.x, y: cell.y}, gridProps.getBlockSize());
+        cell.removeProp();
     }
 
     removeCellByID(id) {

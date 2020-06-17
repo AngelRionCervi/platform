@@ -3,8 +3,8 @@ import { _G } from "../general/globals.js";
 
 export class SceneObject {
     constructor(coord, asset, slice) {
-        this.asset = asset;
         this.slice = slice;
+        this.asset = asset;
         this.cells = null;
         this.coord = {
             x: coord.x,
@@ -16,6 +16,10 @@ export class SceneObject {
     setCells(cells) {
         this.cells = cells;
         return this;
+    }
+
+    getSlice() {
+        return this.slice;
     }
 
     getCells() {

@@ -1,3 +1,6 @@
+import * as _H from "../../lib/helpers.js";
+import { gridProps } from "../editor/Grid.js";
+
 export class Asset {
     constructor() {
         this.sprite;
@@ -11,9 +14,12 @@ export class Asset {
 
     async build(info) {
         const { sprite, width, height } = await this.loadImage(info.path);
+        const blockSize = gridProps.getBlockSize();
         this.sprite = sprite;
         this.width = width;
         this.height = height;
+        this.trueWidth = _H.roundToNearestMult(width, blockSize);
+        this.trueHeight = _H.roundToNearestMult(height, blockSize);
         this.path = info.path;
         this.name = info.name;
         this.folder = info.folder;
