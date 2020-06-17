@@ -36,13 +36,33 @@ class CanvasBuffer {
     }
     updateBuffer2(coord, asset, type) {
         if (type === "sceneObject") {
-            this.getBufferCtx().drawImage(
-                asset.getSprite(),
-                coord.x,
-                coord.y,
-                asset.trueWidth,
-                asset.trueHeight
-            );
+            if ("sx" in coord) {
+                console.log("DRAWING CUT", coord)
+                /*
+                this.getBufferCtx().fillStyle= "red"
+                this.getBufferCtx().fillRect(10, 10, 10, 10);*/
+                
+                this.getBufferCtx().drawImage(
+                    asset.getSprite(),
+                    coord.sx,
+                    coord.sy,
+                    32,
+                    32,
+                    coord.x,
+                    coord.y,
+                    32,
+                    32
+                );
+            } else {
+                console.log("DRAWING NORMAL", coord)
+                this.getBufferCtx().drawImage(
+                    asset.getSprite(),
+                    coord.x,
+                    coord.y,
+                    asset.trueWidth,
+                    asset.trueHeight
+                );
+            }
         } else if (type === "gameObject") {
             //cell.setBlockType("wall").setGameObject(object);
         }

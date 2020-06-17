@@ -107,11 +107,7 @@ export class Grid {
 
         //console.log("adding scene object", cellOrCursor.x, ts(maxX - restX + camCoords.x));
         const clickedCell = cellOrCursor instanceof Cell ? cellOrCursor : this.getCellByCursor(cellOrCursor);
-        sceneBuffer.updateBuffer2(
-            { x: clickedCell.absX * blockSize, y: clickedCell.absY * blockSize },
-            asset,
-            "sceneObject"
-        );
+        sceneBuffer.updateBuffer2({ x: clickedCell.x, y: clickedCell.y }, asset, "sceneObject");
 
         for (let x = clickedCell.absX; x < asset.trueWidth / blockSize + clickedCell.absX; x++) {
             const sliceX = x * blockSize;
@@ -131,8 +127,14 @@ export class Grid {
                 cell.setProp(addSceneObjectToList({ x: sliceX, y: sliceY }, asset, slice));
             }
         }
-        
         return this;
+    }
+
+    drawOneCell(cell, asset, slice) {
+        const gridTiles = gridProps.getTiles();
+        const blockSize = gridProps.getBlockSize();
+
+        sceneBuffer.updateBuffer2({ x: cell.x, y: cell.y, sx: slice.sx, sy: slice.sy }, asset, "sceneObject");
     }
 
     setGameObject(cursorPos, objectID, addGameObjectToList) {
@@ -176,7 +178,7 @@ export class Grid {
         const blockSize = gridProps.getBlockSize();
         const tw = camera.toWorld.bind(camera);
         const ts = camera.toScreen.bind(camera);
-
+        console.log("target Asset", targetAsset);
         // read the cells on the grid
         // get the sprite we want to add
         // check we are actually filling a different sprite
@@ -184,11 +186,34 @@ export class Grid {
             const cellsToCheck = [targetCell];
             while (cellsToCheck.length > 0) {
                 const lastCell = cellsToCheck.pop();
-                if (targetAsset === (lastCell.prop ? lastCell.prop.asset.name : null)) {
-                    this.setSceneObject(lastCell, asset, addSceneObjectToList, removeSceneObjectOfList);
-                    if (tiles[lastCell.absX + asset.trueWidth / blockSize]) {
-                        cellsToCheck.push(tiles[lastCell.absX + asset.trueWidth / blockSize][lastCell.absY]);
+                const testCells = [];
+                const lastCellProp = lastCell.prop ? lastCell.prop.asset.name : null;
+                if (targetAsset === lastCellProp) {
+                    const offsetX2 = lastCell.absX + (asset.trueWidth / blockSize) * 2;
+                    const offsetX = lastCell.absX + asset.trueWidth / blockSize
+                    if (
+                        tiles[offsetX] &&
+                        !tiles[offsetX][lastCell.absY].isProp()
+                    ) {
+                        cellsToCheck.push(tiles[offsetX][lastCell.absY]);
+                        this.setSceneObject(lastCell, asset, addSceneObjectToList, removeSceneObjectOfList);
+                    } else {
+                        const start = lastCell.absX;
+                        let u = 0;
+                        while (tiles[start + u] && !(tiles[start + u] && tiles[start + u][lastCell.absY].isProp())) {
+                            const newCell = tiles[start + u][lastCell.absY];
+                            const slice = { sx: u * blockSize, sy: 0 };
+
+                            testCells.push(newCell);
+
+                            this.drawOneCell(newCell, asset, slice);
+                            u++;
+                        }
+                        console.log(start, tiles[start]);
                     }
+                    
+                    console.log("testCells", testCells);
+                    /*
                     if (tiles[lastCell.absX - asset.trueWidth / blockSize]) {
                         cellsToCheck.push(tiles[lastCell.absX - asset.trueWidth / blockSize][lastCell.absY]);
                     }
@@ -197,15 +222,15 @@ export class Grid {
                     }
                     if (tiles[lastCell.absX][lastCell.absY - asset.trueHeight / blockSize]) {
                         cellsToCheck.push(tiles[lastCell.absX][lastCell.absY - asset.trueHeight / blockSize]);
-                    }
+                    }*/
                 }
             }
         }
     }
 
     removeCellByCoord(cursorPos) {
-        const cell = this.getCellByCursor(cursorPos)
-        sceneBuffer.clearTile({x: cell.x, y: cell.y}, gridProps.getBlockSize());
+        const cell = this.getCellByCursor(cursorPos);
+        sceneBuffer.clearTile({ x: cell.x, y: cell.y }, gridProps.getBlockSize());
         cell.removeProp();
     }
 
@@ -475,10 +500,12 @@ export function fillAllCells(cellsToRender) {
 }
 
 function debugCell(x, y) {
-    ctx.fillStyle = "red";
-    const ts = camera.toScreen.bind(camera);
-    const blockSize = gridProps.getBlockSize();
-    ctx.fillRect(ts(x), ts(y), ts(blockSize), ts(blockSize));
+    setTimeout(() => {
+        ctx.fillStyle = "red";
+        const ts = camera.toScreen.bind(camera);
+        const blockSize = gridProps.getBlockSize();
+        ctx.fillRect(ts(x), ts(y), ts(blockSize), ts(blockSize));
+    }, 0);
 }
 
 function debugRenderedCells(cells) {
