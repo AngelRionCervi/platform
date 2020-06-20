@@ -34,34 +34,25 @@ class CanvasBuffer {
             //cell.setBlockType("wall").setGameObject(object);
         }
     }
-    updateBuffer2(coord, asset, type) {
+    updateBuffer2(coord, asset, slice = null, type) {
         if (type === "sceneObject") {
-            if ("sx" in coord) {
-                console.log("DRAWING CUT", coord)
-                /*
-                this.getBufferCtx().fillStyle= "red"
-                this.getBufferCtx().fillRect(10, 10, 10, 10);*/
-                
+            if (slice) {
+                const blockSize = gridProps.getBlockSize();
+
                 this.getBufferCtx().drawImage(
                     asset.getSprite(),
-                    coord.sx,
-                    coord.sy,
-                    32,
-                    32,
-                    coord.x,
-                    coord.y,
-                    32,
-                    32
+                    slice.sx - slice.sx * (asset.trueWidth / asset.width - 1),
+                    slice.sy - slice.sy * (asset.trueHeight / asset.height - 1),
+                    blockSize,
+                    blockSize,
+                    slice.x,
+                    slice.y,
+                    blockSize,
+                    blockSize
                 );
             } else {
-                console.log("DRAWING NORMAL", coord)
-                this.getBufferCtx().drawImage(
-                    asset.getSprite(),
-                    coord.x,
-                    coord.y,
-                    asset.trueWidth,
-                    asset.trueHeight
-                );
+                console.log("DRAWING NORMAL", coord);
+                this.getBufferCtx().drawImage(asset.getSprite(), coord.x, coord.y, asset.trueWidth, asset.trueHeight);
             }
         } else if (type === "gameObject") {
             //cell.setBlockType("wall").setGameObject(object);
@@ -69,12 +60,7 @@ class CanvasBuffer {
     }
     clearTile(coord, blockSize) {
         this.setFillStyle("white");
-        this.getBufferCtx().fillRect(
-            coord.x,
-            coord.y,
-            blockSize,
-            blockSize
-        );
+        this.getBufferCtx().fillRect(coord.x, coord.y, blockSize, blockSize);
     }
     setFillStyle(style) {
         this.getBufferCtx().fillStyle = style;

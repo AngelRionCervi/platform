@@ -101,13 +101,12 @@ export class Grid {
         };
     }
 
-    setSceneObject(cellOrCursor, asset, addSceneObjectToList, removeSceneObjectOfList) {
+    setSceneObject(cellOrCursor, asset, addSceneObjectToList, removeSceneObjectOfList, slice = null) {
         const gridTiles = gridProps.getTiles();
         const blockSize = gridProps.getBlockSize();
-
-        //console.log("adding scene object", cellOrCursor.x, ts(maxX - restX + camCoords.x));
         const clickedCell = cellOrCursor instanceof Cell ? cellOrCursor : this.getCellByCursor(cellOrCursor);
-        sceneBuffer.updateBuffer2({ x: clickedCell.x, y: clickedCell.y }, asset, "sceneObject");
+
+        sceneBuffer.updateBuffer2({ x: clickedCell.x, y: clickedCell.y }, asset, slice, "sceneObject");
 
         for (let x = clickedCell.absX; x < asset.trueWidth / blockSize + clickedCell.absX; x++) {
             const sliceX = x * blockSize;
@@ -130,11 +129,14 @@ export class Grid {
         return this;
     }
 
-    drawOneCell(cell, asset, slice) {
-        const gridTiles = gridProps.getTiles();
-        const blockSize = gridProps.getBlockSize();
-
-        sceneBuffer.updateBuffer2({ x: cell.x, y: cell.y, sx: slice.sx, sy: slice.sy }, asset, "sceneObject");
+    setSceneObjectOnUniqCell(cellOrCursor, asset, addSceneObjectToList, removeSceneObjectOfList, slice = null) {
+        const clickedCell = cellOrCursor instanceof Cell ? cellOrCursor : this.getCellByCursor(cellOrCursor);
+        if (clickedCell.isProp()) {
+            removeSceneObjectOfList(clickedCell.getProp().getID());
+        }
+        sceneBuffer.updateBuffer2({ x: clickedCell.x, y: clickedCell.y }, asset, slice, "sceneObject");
+        clickedCell.setProp(addSceneObjectToList({ x: clickedCell.x, y: clickedCell.y }, asset));
+        return this;
     }
 
     setGameObject(cursorPos, objectID, addGameObjectToList) {
@@ -171,76 +173,73 @@ export class Grid {
         return this;
     }
 
-    floodFill(cursorPos, asset, addSceneObjectToList, removeSceneObjectOfList) {
+    floodFill(cursorPos, asset, addSceneObjectToList, removeSceneObjectOfList) { // 2 freaking days
         const targetCell = this.getCellByCursor(cursorPos);
-        const targetAsset = targetCell.prop ? targetCell.prop.asset.name : null;
         const tiles = gridProps.getTiles();
         const blockSize = gridProps.getBlockSize();
-        const tw = camera.toWorld.bind(camera);
-        const ts = camera.toScreen.bind(camera);
-        console.log("target Asset", targetAsset);
-        // read the cells on the grid
-        // get the sprite we want to add
-        // check we are actually filling a different sprite
+        const targetAsset = targetCell.prop ? targetCell.prop.asset.name : null;
+
         if (targetAsset !== asset.name) {
-            const cellsToCheck = [targetCell];
+            const cellsToCheck = [
+                {
+                    tile: targetCell,
+                    slice: { sx: 0, sy: 0, x: targetCell.absX * blockSize, y: targetCell.absY * blockSize },
+                },
+            ];
             while (cellsToCheck.length > 0) {
-                const lastCell = cellsToCheck.pop();
+                const lastObj = cellsToCheck.shift();
+                const lastCell = lastObj.tile;
+                const oldSlice = lastObj.slice;
                 const lastCellProp = lastCell.prop ? lastCell.prop.asset.name : null;
+
                 if (targetAsset === lastCellProp) {
-                    const offsetX = lastCell.absX + asset.trueWidth / blockSize;
-                    const offsetX2 = lastCell.absX - asset.trueWidth / blockSize;
-                    const offsetX2T2 = lastCell.absX - (asset.trueWidth / blockSize)*2;
+                    this.setSceneObjectOnUniqCell(lastCell, asset, addSceneObjectToList, removeSceneObjectOfList, oldSlice);
 
-                    if (
-                        tiles[offsetX] &&
-                        !tiles[offsetX][lastCell.absY].isProp()
-                    ) {
-                        cellsToCheck.push(tiles[offsetX][lastCell.absY]);
-                        this.setSceneObject(lastCell, asset, addSceneObjectToList, removeSceneObjectOfList);
-                    } else {
-                        const start = lastCell.absX;
-                        let u = 0;
-                        while (tiles[start + u] && !(tiles[start + u] && tiles[start + u][lastCell.absY].isProp())) {
-                            const newCell = tiles[start + u][lastCell.absY];
-                            const slice = { sx: u * blockSize, sy: 0 };
-
-                            this.drawOneCell(newCell, asset, slice);
-                            u++;
-                        }
-                        console.log(start, tiles[start]);
+                    if (tiles[lastCell.absX + 1] && !tiles[lastCell.absX + 1][lastCell.absY].isProp()) {
+                        let sx = oldSlice.sx + blockSize;
+                        if (sx >= asset.trueWidth) sx = 0;
+                        const newSlice = {
+                            sx,
+                            sy: oldSlice.sy,
+                            x: oldSlice.x + blockSize,
+                            y: oldSlice.y,
+                        };
+                        cellsToCheck.push({ tile: tiles[lastCell.absX + 1][lastCell.absY], slice: newSlice });
                     }
-/*
-                    if (
-                        tiles[offsetX2] &&
-                        !tiles[offsetX2][lastCell.absY].isProp()
-                    ) {
-                        cellsToCheck.push(tiles[offsetX2][lastCell.absY]);
-                        this.setSceneObject(tiles[offsetX2][lastCell.absY], asset, addSceneObjectToList, removeSceneObjectOfList);
-                    } else {
-                        const c = tiles[offsetX2][lastCell.absY]
-                        const start = c.absX;
-                        let u = 0;
-                        while (tiles[start - u] && !(tiles[start - u] && tiles[start - u][lastCell.absY].isProp())) {
-                            const newCell = tiles[start - u][lastCell.absY];
-                            const slice = { sx: u * blockSize, sy: 0 };
-
-                            this.drawOneCell(newCell, asset, slice);
-                            u++;
-                        }
-                        console.log(start, tiles[start]);
-                    }*/
-                    
-                    /*
-                    if (tiles[lastCell.absX - asset.trueWidth / blockSize]) {
-                        cellsToCheck.push(tiles[lastCell.absX - asset.trueWidth / blockSize][lastCell.absY]);
+                    if (tiles[lastCell.absX - 1] && !tiles[lastCell.absX - 1][lastCell.absY].isProp()) {
+                        let sx = oldSlice.sx - blockSize;
+                        if (sx <= 0) sx = asset.trueWidth - blockSize;
+                        const newSlice = {
+                            sx,
+                            sy: oldSlice.sy,
+                            x: oldSlice.x - blockSize,
+                            y: oldSlice.y,
+                        };
+                        cellsToCheck.push({ tile: tiles[lastCell.absX - 1][lastCell.absY], slice: newSlice });
                     }
-                    if (tiles[lastCell.absX][lastCell.absY + asset.trueHeight / blockSize]) {
-                        cellsToCheck.push(tiles[lastCell.absX][lastCell.absY + asset.trueHeight / blockSize]);
+                    if (tiles[lastCell.absX][lastCell.absY + 1] && !tiles[lastCell.absX][lastCell.absY + 1].isProp()) {
+                        let sy = oldSlice.sy + blockSize;
+                        if (sy >= asset.trueHeight) sy = 0;
+                        const newSlice = {
+                            sx: oldSlice.sx,
+                            sy,
+                            x: oldSlice.x,
+                            y: oldSlice.y + blockSize,
+                        };
+                        cellsToCheck.push({ tile: tiles[lastCell.absX][lastCell.absY + 1], slice: newSlice });
                     }
-                    if (tiles[lastCell.absX][lastCell.absY - asset.trueHeight / blockSize]) {
-                        cellsToCheck.push(tiles[lastCell.absX][lastCell.absY - asset.trueHeight / blockSize]);
-                    }*/
+                    if (tiles[lastCell.absX][lastCell.absY - 1] && !tiles[lastCell.absX][lastCell.absY - 1].isProp()) {
+                        let sy = oldSlice.sy - blockSize;
+                        if (sy <= 0) sy = asset.trueHeight - blockSize;
+                        const newSlice = {
+                            sx: oldSlice.sx,
+                            sy,
+                            x: oldSlice.x,
+                            y: oldSlice.y - blockSize,
+                        };
+                        cellsToCheck.push({ tile: tiles[lastCell.absX][lastCell.absY - 1], slice: newSlice });
+                    }
+                    console.log("LEENNENE", cellsToCheck.length)
                 }
             }
         }
