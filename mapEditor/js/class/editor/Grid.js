@@ -178,7 +178,7 @@ export class Grid {
         const tiles = gridProps.getTiles();
         const blockSize = gridProps.getBlockSize();
         const targetAsset = targetCell.prop ? targetCell.prop.asset.name : null;
-
+        console.log(tiles)
         if (targetAsset !== asset.name) {
             const cellsToCheck = [
                 {
@@ -190,12 +190,12 @@ export class Grid {
                 const lastObj = cellsToCheck.shift();
                 const lastCell = lastObj.tile;
                 const oldSlice = lastObj.slice;
-                const lastCellProp = lastCell.prop ? lastCell.prop.asset.name : null;
+                const lastCellProp = lastCell.isProp() ? lastCell.prop.asset.name : null;
 
                 if (targetAsset === lastCellProp) {
                     this.setSceneObjectOnUniqCell(lastCell, asset, addSceneObjectToList, removeSceneObjectOfList, oldSlice);
 
-                    if (tiles[lastCell.absX + 1] && !tiles[lastCell.absX + 1][lastCell.absY].isProp()) {
+                    if (tiles[lastCell.absX + 1]) {
                         let sx = oldSlice.sx + blockSize;
                         if (sx >= asset.trueWidth) sx = 0;
                         const newSlice = {
@@ -206,7 +206,7 @@ export class Grid {
                         };
                         cellsToCheck.push({ tile: tiles[lastCell.absX + 1][lastCell.absY], slice: newSlice });
                     }
-                    if (tiles[lastCell.absX - 1] && !tiles[lastCell.absX - 1][lastCell.absY].isProp()) {
+                    if (tiles[lastCell.absX - 1]) {
                         let sx = oldSlice.sx - blockSize;
                         if (sx <= 0) sx = asset.trueWidth - blockSize;
                         const newSlice = {
@@ -217,7 +217,7 @@ export class Grid {
                         };
                         cellsToCheck.push({ tile: tiles[lastCell.absX - 1][lastCell.absY], slice: newSlice });
                     }
-                    if (tiles[lastCell.absX][lastCell.absY + 1] && !tiles[lastCell.absX][lastCell.absY + 1].isProp()) {
+                    if (tiles[lastCell.absX][lastCell.absY + 1]) {
                         let sy = oldSlice.sy + blockSize;
                         if (sy >= asset.trueHeight) sy = 0;
                         const newSlice = {
@@ -228,7 +228,7 @@ export class Grid {
                         };
                         cellsToCheck.push({ tile: tiles[lastCell.absX][lastCell.absY + 1], slice: newSlice });
                     }
-                    if (tiles[lastCell.absX][lastCell.absY - 1] && !tiles[lastCell.absX][lastCell.absY - 1].isProp()) {
+                    if (tiles[lastCell.absX][lastCell.absY - 1]) {
                         let sy = oldSlice.sy - blockSize;
                         if (sy <= 0) sy = asset.trueHeight - blockSize;
                         const newSlice = {
@@ -239,7 +239,6 @@ export class Grid {
                         };
                         cellsToCheck.push({ tile: tiles[lastCell.absX][lastCell.absY - 1], slice: newSlice });
                     }
-                    console.log("LEENNENE", cellsToCheck.length)
                 }
             }
         }

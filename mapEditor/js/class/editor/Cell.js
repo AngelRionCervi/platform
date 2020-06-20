@@ -57,8 +57,11 @@ export class Cell {
     }
 
     setCoords(x, y) {
+        const bs = gridProps.getBlockSize()
         this.x = x;
         this.y = y;
+        this.absX = x / bs;
+        this.absY = y / bs;
     }
 
     setOffsets(x, y) {
