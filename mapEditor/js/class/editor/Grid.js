@@ -178,7 +178,6 @@ export class Grid {
         const tiles = gridProps.getTiles();
         const blockSize = gridProps.getBlockSize();
         const targetAsset = targetCell.prop ? targetCell.prop.asset.name : null;
-        console.log(tiles)
         if (targetAsset !== asset.name) {
             const cellsToCheck = [
                 {
