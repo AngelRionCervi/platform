@@ -177,7 +177,7 @@ export class Grid {
         const targetCell = this.getCellByCursor(cursorPos);
         const tiles = gridProps.getTiles();
         const blockSize = gridProps.getBlockSize();
-        const targetAsset = targetCell.prop ? targetCell.prop.asset.name : null;
+        const targetAsset = targetCell.isProp() ? targetCell.getProp().asset.name : null;
         if (targetAsset !== asset.name) {
             const cellsToCheck = [
                 {
@@ -189,7 +189,7 @@ export class Grid {
                 const lastObj = cellsToCheck.shift();
                 const lastCell = lastObj.tile;
                 const oldSlice = lastObj.slice;
-                const lastCellProp = lastCell.isProp() ? lastCell.prop.asset.name : null;
+                const lastCellProp = lastCell.isProp() ? lastCell.getProp().asset.name : null;
 
                 if (targetAsset === lastCellProp) {
                     this.setSceneObjectOnUniqCell(lastCell, asset, addSceneObjectToList, removeSceneObjectOfList, oldSlice);
