@@ -1,6 +1,6 @@
 import { _G } from "../general/globals.js";
 
-export default class GridProps {
+class GridProps {
     constructor() {
         this.gridWidth = _G.gridWidth;
         this.gridHeight = _G.gridHeight;
@@ -108,3 +108,5 @@ export default class GridProps {
         return this;
     }
 }
+
+export default new GridProps();

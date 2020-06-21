@@ -1,10 +1,14 @@
 import { DomBuilder } from "../../lib/DomBuilder.js";
+import layout from "../editor/EditorLayout.js";
 const dob = new DomBuilder();
 
 class Tools {
     constructor() {
         this.container = dob.createNode("div", "tools-container", "tools_container").done();
-        this.toolsWindow = justAnotherWin.add({ x: window.innerWidth-100, y: 0, width: 100, height: 500 }, this.container);
+        this.toolsWindow = justAnotherWin.add(
+            { x: layout.tools.x, y: layout.tools.y, width: layout.tools.width, height: layout.tools.height },
+            this.container
+        );
         this.toolsModel = [
             { name: "brush", icon: "B", onSelect: () => this.toggleTool("brush") },
             { name: "bucket", icon: "Q", onSelect: () => this.toggleTool("bucket") },

@@ -11,13 +11,11 @@ export class Keyboard {
     }
 
     listen() {
-        document.addEventListener("keydown", (e) => {
-            e.preventDefault();
+        document.addEventListener("keydown", (e) => {;
             this.keys[this.getRef(e.keyCode)] = true;
             this.emitKeys();
         });
         document.addEventListener("keyup", (e) => {
-            e.preventDefault();
             this.keys[this.getRef(e.keyCode)] = false;
             this.emitKeys();
         });
@@ -35,7 +33,7 @@ export class Keyboard {
     }
 
     act(key) {
-        return this.keys[key];
+        return !!this.keys[key];
     }
 
     emitKeys() {

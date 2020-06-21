@@ -3,13 +3,12 @@ import { GridNormalization } from "./GridNormalization.js";
 import * as _H from "../../lib/helpers.js";
 import { _G } from "../general/globals.js";
 import { getCanvas, getContext } from "../general/canvasRef.js";
-import GridProps from "./GridProps.js";
+import gridProps from "./GridProps.js";
 import camera from "../Camera/Camera.js";
 import { sceneBuffer, gameObjectBufferList, changeBufferSize } from "../general/CanvasBuffer.js";
 import itemSelection from "../general/itemSelection.js";
 
 const gridNormal = new GridNormalization();
-export const gridProps = new GridProps();
 
 const canvas = getCanvas();
 const ctx = getContext();

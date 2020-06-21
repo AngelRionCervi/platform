@@ -4,6 +4,7 @@ import { DomBuilder } from "../../lib/DomBuilder.js";
 import { _G } from "../general/globals.js";
 import * as helper from "../../lib/helpers.js";
 import camera from "../Camera/Camera.js";
+import layout from "../editor/EditorLayout.js";
 const dob = new DomBuilder();
 
 export class GameObjectList {
@@ -11,10 +12,10 @@ export class GameObjectList {
         this.interaction = interaction;
         this.listContainer = document.getElementById("game_objects_container");
         this.listWindow = justAnotherWin.add({
-            x: 100,
-            y: window.innerHeight - 300,
-            width: window.innerWidth - 200,
-            height: 300,
+            x: layout.entities.x,
+            y: layout.entities.y,
+            width: layout.entities.width,
+            height: layout.entities.height,
             name: "entitiesWindow"
         }, this.listContainer);
         this.prevObjectsIDs = [];

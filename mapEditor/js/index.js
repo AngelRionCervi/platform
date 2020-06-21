@@ -164,7 +164,7 @@ fetch("http://localhost:5000/getAssets")
     });
 
 document.addEventListener("click", (e) => {
-    e.preventDefault();
+    //e.preventDefault();
     contextMenu.toggleAllOff();
 });
 

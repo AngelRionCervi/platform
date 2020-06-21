@@ -76,11 +76,20 @@ export class DomBuilder {
         return this;
     }
 
+    addCustomAttr2(customAttr, node = null) {
+        customAttr = new Map(Object.entries(customAttr));
+        for (const [key, val] of customAttr) {
+            const el = node ? node : this.element;
+            el.setAttribute(key, val);
+        }
+        return this;
+    }
+
     createListener(l, node = null) {
         if (!l.hasOwnProperty("args")) l.args = [];
         const el = node ? node : this.element;
         el.addEventListener(l.type, (e) => {
-            e.preventDefault();
+            //e.preventDefault();
             if (l.hasOwnProperty("event") && !l.event) {
                 l.callback(...l.args);
             } else {
@@ -88,6 +97,12 @@ export class DomBuilder {
             }
             return false;
         });
+        return this;
+    }
+
+    onChange(callback, node = null) {
+        const el = node ? node : this.element;
+        el.addEventListener("input", callback);
         return this;
     }
 

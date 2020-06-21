@@ -2,6 +2,8 @@ import * as plshelp from "../../lib/helpers.js";
 import { DomBuilder } from "../../lib/DomBuilder.js";
 const dob = new DomBuilder();
 
+import layout from "../editor/EditorLayout.js";
+
 export class Palette {
     constructor(interaction) {
         this.interaction = interaction;
@@ -10,8 +12,14 @@ export class Palette {
         this.authorizedExensions = ["png", "jpg"];
         this.assets;
         this.paletteContainer = document.getElementById("palette_container");
-        this.paletteWindow = justAnotherWin.add(
-            { x: 0, y: 0, width: 100, height: window.innerHeight, name: "paletteWindow" },
+        justAnotherWin.add(
+            {
+                x: layout.palette.x,
+                y: layout.palette.y,
+                width: layout.palette.width,
+                height: layout.palette.height,
+                name: "paletteWindow",
+            },
             this.paletteContainer
         );
         this.currentAssetID = null;

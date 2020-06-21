@@ -1,4 +1,4 @@
-import { gridProps } from "./Grid.js";
+import gridProps from "./GridProps.js";
 import camera from "../Camera/Camera.js";
 import { sceneBuffer } from "../general/CanvasBuffer.js";
 

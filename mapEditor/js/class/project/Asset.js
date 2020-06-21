@@ -1,5 +1,5 @@
 import * as _H from "../../lib/helpers.js";
-import { gridProps } from "../editor/Grid.js";
+import gridProps from "../editor/GridProps.js";
 
 export class Asset {
     constructor() {

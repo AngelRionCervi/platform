@@ -1,5 +1,5 @@
 import { _G } from "../general/globals.js";
-import { gridProps } from "../editor/Grid.js";
+import gridProps from "../editor/GridProps.js";
 import camera from "../Camera/Camera.js";
 import { getCanvas, getContext } from "../general/canvasRef.js";
 

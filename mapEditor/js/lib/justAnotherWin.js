@@ -306,8 +306,6 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
         if (!l.hasOwnProperty("args")) l.args = [];
         var el = node ? node : this.element;
         el.addEventListener(l.type, function (e) {
-          e.preventDefault();
-
           if (l.hasOwnProperty("event") && !l.event) {
             l.callback.apply(l, _toConsumableArray(l.args));
           } else {

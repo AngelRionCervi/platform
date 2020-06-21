@@ -64,7 +64,7 @@ export class GridInteraction {
 
     gridListeners() {
         grid.addEventListener("mousedown", (evt) => {
-            evt.preventDefault();
+            //evt.preventDefault();
             const cursorPos = mouse.getCursorPos(evt);
 
             switch (evt.button) {
@@ -82,7 +82,7 @@ export class GridInteraction {
         });
 
         grid.addEventListener("mouseup", (evt) => {
-            evt.preventDefault();
+            //evt.preventDefault();
             const cursorPos = mouse.getCursorPos(evt);
             
             switch (evt.button) {
@@ -107,7 +107,7 @@ export class GridInteraction {
         });
 
         grid.addEventListener("wheel", (evt) => {
-            evt.preventDefault();
+            //evt.preventDefault();
             const dir = Math.sign(evt.deltaY);
             const curPos = mouse.getCursorPos(evt);
             this.emitter.emit("grid_wheel", { dir, curPos });
