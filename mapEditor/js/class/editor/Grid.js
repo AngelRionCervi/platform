@@ -7,12 +7,15 @@ import gridProps from "./GridProps.js";
 import camera from "../Camera/Camera.js";
 import { sceneBuffer, gameObjectBufferList, changeBufferSize } from "../general/CanvasBuffer.js";
 import itemSelection from "../general/itemSelection.js";
+import HelperGrid from "./HelperGrid.js";
 
+const helperGrid = new HelperGrid();
 const gridNormal = new GridNormalization();
 
 const canvas = getCanvas();
 const ctx = getContext();
-_H.spy(camera, "setScale", () => renderGrid()); // spy for the methods calls of either "increaseZoom" or "decreaseZoom" in camera and exec cb
+
+_H.spy(camera, "setScale", [() => helperGrid.build(), () => renderGrid()]); // spy for the methods calls of either "increaseZoom" or "decreaseZoom" in camera and exec cb
 
 export class Grid {
     constructor() {
@@ -44,6 +47,8 @@ export class Grid {
         canvas.width = _G.viewPortWidth;
         canvas.height = _G.viewPortHeight;
         sceneBuffer.setBuffer();
+        camera.setCellsToInteract(gridProps.getTiles());
+        helperGrid.build();
     }
 
     floorMouse(coords) {
@@ -57,8 +62,7 @@ export class Grid {
     getCellByCursor(cursorPos, coords = null) {
         const { x, y } = this.floorMouse(cursorPos);
         if (coords) {
-            const targetCell = coords.find((n) => n.x === x && n.y === y);
-            return targetCell;
+            return coords.find((n) => n.x === x && n.y === y);
         }
         const flatCoord = gridProps.getRenderedCells().flat();
         const targetCell = flatCoord.find((n) => n.x === x && n.y === y);
@@ -172,7 +176,8 @@ export class Grid {
         return this;
     }
 
-    floodFill(cursorPos, asset, addSceneObjectToList, removeSceneObjectOfList) { // 2 freaking days
+    floodFill(cursorPos, asset, addSceneObjectToList, removeSceneObjectOfList) {
+        // 2 freaking days
         const targetCell = this.getCellByCursor(cursorPos);
         const tiles = gridProps.getTiles();
         const blockSize = gridProps.getBlockSize();
@@ -191,7 +196,13 @@ export class Grid {
                 const lastCellProp = lastCell.isProp() ? lastCell.getProp().asset.name : null;
 
                 if (targetAsset === lastCellProp) {
-                    this.setSceneObjectOnUniqCell(lastCell, asset, addSceneObjectToList, removeSceneObjectOfList, oldSlice);
+                    this.setSceneObjectOnUniqCell(
+                        lastCell,
+                        asset,
+                        addSceneObjectToList,
+                        removeSceneObjectOfList,
+                        oldSlice
+                    );
 
                     if (tiles[lastCell.absX + 1]) {
                         let sx = oldSlice.sx + blockSize;
@@ -352,6 +363,21 @@ export class Grid {
         renderGrid();
     }
 
+    resizeGrid({ width, height }) {
+        const curWidth = gridProps.getAbsWidth();
+        const curHeight = gridProps.getAbsHeight();
+
+        const wInc = width - curWidth;
+        const hInc = height - curHeight;
+
+        for (let u = 0; u < Math.abs(wInc); u++) {
+            wInc < 0 ? this.removeCol("right") : this.addCol("right");
+        }
+        for (let u = 0; u < Math.abs(hInc); u++) {
+            hInc < 0 ? this.removeRow("bottom") : this.addRow("bottom");
+        }
+    }
+
     isDragging() {
         return this.dragging;
     }
@@ -482,13 +508,16 @@ export function renderGrid() {
     ctx.clear(true);
 
     gameObjectBufferList.update();
+    helperGrid.build();
 
     const sceneBufferCanvas = sceneBuffer.getBuffer();
     const gameObjectBufferCanvas = gameObjectBufferList.getMainBuffer();
     const camCoords = camera.getCoords();
 
+    const helperGridBuffer = helperGrid.getBuffer();
+
     ctx.imageSmoothingEnabled = false;
-    ctx.globalCompositeOperation = "source-over";
+    //ctx.globalCompositeOperation = "source-over";
     ctx.drawImage(sceneBufferCanvas, -camCoords.x, -camCoords.y, tw(vpWidth), tw(vpHeight), 0, 0, vpWidth, vpHeight);
     ctx.drawImage(
         gameObjectBufferCanvas,
@@ -501,6 +530,7 @@ export function renderGrid() {
         vpWidth,
         vpHeight
     );
+    ctx.drawImage(helperGridBuffer, 0, 0, vpWidth, vpHeight)
     createMapBorder();
     itemSelection.create();
 }

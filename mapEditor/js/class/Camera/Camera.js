@@ -1,11 +1,8 @@
 import { _G } from "../general/globals.js";
-import { Grid, renderGrid, fillAllCells } from "../editor/Grid.js";
+import { renderGrid } from "../editor/Grid.js";
 import gridProps from "../editor/GridProps.js";
-import { getContext, getCanvas } from "../general/canvasRef.js";
-import { precise, roundTo } from "../../lib/helpers.js";
-
-const ctx = getContext();
-const canvas = getCanvas();
+import { roundTo, loadImages } from "../../lib/helpers.js";
+import gridCells from "../../lib/gridCells.js";
 
 const gridDiv = document.getElementById("canvas_grid");
 
@@ -18,6 +15,7 @@ class Camera {
         this.y = 0;
         this.scaleInc = 1;
         this.zoom = 1;
+        this.zoomIndex = 0;
         this.zoomStep = 0.8;
         this.maxZoom = this.zoomStep * 5;
         this.minZoom = this.zoomStep * 0.2;
@@ -55,8 +53,19 @@ class Camera {
         } else {
             this.scaleInc = 1 / this.zoomStep;
         }
-        const zoom = Math.max(roundTo(this.zoom * this.scaleInc, 10), this.minZoom);
-        this.zoom = Math.min(zoom, this.maxZoom);
+
+        const zoomCheck1 = Math.max(roundTo(this.zoom * this.scaleInc, 10), this.minZoom);
+        const zoomCheck2 = Math.min(zoomCheck1, this.maxZoom);
+
+        if (zoomCheck2 > this.zoom) {
+            this.zoomIndex++;
+        } else if (zoomCheck2 < this.zoom) {
+            this.zoomIndex--;
+        }
+
+        this.zoom = zoomCheck2;
+        //gridDiv.style.backgroundImage = `url(${gridCells[`cell_${this.zoomIndex}`]})`;
+        gridDiv.style.backgroundPosition = `${this.x * this.zoom}px ${this.y * this.zoom}px`;
         return this;
     }
 
@@ -68,16 +77,17 @@ class Camera {
         return this.zoom;
     }
 
+    getZoomIndex() {
+        return this.zoomIndex;
+    }
+
     setCellsToInteract(gridCoords) {
         const cellToInteract = [];
         const gridWidth = gridProps.getWidth();
         const gridHeight = gridProps.getHeight();
-        const zoom = this.getZoom();
         const bs = gridProps.getBlockSize();
-        
         const tw = this.toWorld.bind(this);
         const ts = this.toScreen.bind(this);
-        console.log("zoom", zoom)
         const trueBS = ts(bs);
 
         let lastCX;
@@ -87,6 +97,7 @@ class Camera {
             const cx = n > 0 ? n - 1 : 0;
             if (lastCX !== cx) {
                 lastCX = cx;
+                /*
                 gridCoords[cx].map((cell) => {
                     cell.setOffsetX(this.x);
                 });
@@ -95,18 +106,19 @@ class Camera {
                     gridCoords[cx].map((cell) => {
                         cell.setBlockAddedW(addedW);
                     });
-                }
+                }*/
                 for (let y = this.y > 0 ? this.y : -bs; y < Math.round(tw(this.viewPortHeight) + bs); y += bs) {
                     const m = Math.round((y - this.y) / bs);
                     if (m >= gridHeight / bs) break;
 
                     const cy = m > 0 ? m : 0;
                     const cell = gridCoords[cx][cy];
+                    /*
                     cell.setOffsetY(this.y);
                     if (cy > 0) {
                         const addedH = Math.abs(cell.ty() - gridCoords[cx][cy - 1].ty()) - trueBS;
                         cell.setBlockAddedH(addedH);
-                    }
+                    }*/
                     cellToInteract.push(cell);
                 }
             }
@@ -124,7 +136,7 @@ class Camera {
         this.x = Math.round(-this.toWorld(this.panOrigin.x - curPos.x));
         this.y = Math.round(-this.toWorld(this.panOrigin.y - curPos.y));
 
-        /* //can't pan bayonf the map
+        /* //can't pan bayond the map
         if (
             this.x > 0 ||
             this.y > 0 ||
@@ -146,8 +158,6 @@ class Camera {
 
             this.newPanPoint(curPos);
         }*/
-        const bs = gridProps.getBlockSize();
-        //gridDiv.style.backgroundSize = `${bs * this.zoom}px`;
         gridDiv.style.backgroundPosition = `${this.x * this.zoom}px ${this.y * this.zoom}px`;
         renderGrid();
     }

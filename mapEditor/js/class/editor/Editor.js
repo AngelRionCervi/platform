@@ -1,10 +1,12 @@
 import gridProps from "./GridProps.js";
+import { Emitter } from "../../lib/Emitter.js";
 import { DomBuilder } from "../../lib/DomBuilder.js";
 import layout from "./EditorLayout.js";
 const dob = new DomBuilder();
 
 class Editor {
     constructor() {
+        this.emitter = new Emitter();
         this.canvas = this.buildCanvas();
         this.params = this.buildParams();
         justAnotherWin.add(
@@ -17,10 +19,9 @@ class Editor {
             },
             dob.enclose([this.canvas, this.params], "editor-container").done()
         );
-        console.log(gridProps);
         this.state = {
-            gridWidth: gridProps.getWidth(),
-            gridHeight: gridProps.getHeight(),
+            gridWidth: gridProps.getAbsWidth(),
+            gridHeight: gridProps.getAbsHeight(),
         };
     }
 
@@ -34,22 +35,34 @@ class Editor {
     }
 
     buildParams() {
-        const listeners = {
-            gridWidth: { type: "click", callback: () => this.changeGridWidth() },
-            gridHeight: { type: "click", callback: () => this.changeGridHeight() },
-        };
-
         const gridWidthField = dob
             .createNode("input", "params-input")
             .addCustomAttr2({ type: "text" })
             .onChange((evt) => this.setGridWidth(evt))
             .done();
 
-        const gridWidthBtn = dob.createNode("button", "params-button", null, "ok", listeners.gridWidth).done();
+        const setSizeBtn = dob
+            .createNode("button", "params-button", null, "ok")
+            .onClick(() => this.callResize())
+            .done();
+
+        const gridHeightField = dob
+            .createNode("input", "params-input")
+            .addCustomAttr2({ type: "text" })
+            .onChange((evt) => this.setGridHeight(evt))
+            .done();
+
+        const widthLabel = dob.createNode("p", "params-label", null, "width : ").done();
+        const heightLabel = dob.createNode("p", "params-label", null, "height : ").done();
+
+        const gridWidthEl = dob.enclose([widthLabel, gridWidthField], "params-label-input").done();
+        const gridHeightEl = dob.enclose([heightLabel, gridHeightField], "params-label-input").done();
 
         const paramsContainer = dob
-            .createNode("div", "params-container", "params_container", [gridWidthField, gridWidthBtn])
-            .addInlineStyle({ backgroundColor: "white" })
+            .createNode("div", "params-container", "params_container", [
+                dob.enclose([gridWidthEl, gridHeightEl]).done(),
+                setSizeBtn,
+            ])
             .done();
 
         return paramsContainer;
@@ -59,15 +72,19 @@ class Editor {
         const newWidth = parseInt(evt.target.value);
         if (isNaN(newWidth) || this.state.gridWidth === newWidth) return;
         this.state.gridWidth = newWidth;
-        console.log("set grid width", newWidth);
     }
 
-    changeGridWidth() {
-        if (gridProps.getWidth() === this.state.gridWidth) return;
-        gridProps.setWidth(this.state.gridWidth * gridProps.getBlockSize());
-        // change the size btn style with a loop
-        console.log(gridProps.getWidth());
-        console.log("change grid width", this.state.gridWidth);
+    setGridHeight(evt) {
+        const newHeight = parseInt(evt.target.value);
+        if (isNaN(newHeight) || this.state.gridHeight === newHeight) return;
+        this.state.gridHeight = newHeight;
+    }
+
+    callResize() {
+        if (gridProps.getAbsWidth() === this.state.gridWidth && gridProps.getAbsHeight() === this.state.gridHeight) {
+            return;
+        }
+        this.emitter.emit("gridResize", { width: this.state.gridWidth, height: this.state.gridHeight });
     }
 }
 

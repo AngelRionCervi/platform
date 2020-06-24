@@ -153,6 +153,11 @@ gameObjectListInteraction.emitter.on("game_object_context_toggle", ({ detail }) 
     contextMenu.toggle("gameObjectContextMenu", detail.coord, detail.object);
 });
 
+editor.emitter.on("gridResize", ({ detail }) => {
+    console.log(detail)
+    grid.resizeGrid(detail);
+})
+
 fetch("http://localhost:5000/getAssets")
     .then((res) => {
         return res.json();

@@ -30,6 +30,12 @@ class GridProps {
     getHeight() {
         return this.gridHeight;
     }
+    getAbsWidth() {
+        return this.gridWidth / this.blockSize;
+    }
+    getAbsHeight() {
+        return this.gridHeight / this.blockSize;
+    }
     setTiles(tiles) {
         this.gridTiles = tiles;
         return this;

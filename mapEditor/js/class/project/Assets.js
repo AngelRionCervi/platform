@@ -21,6 +21,6 @@ export class Assets {
     }
 
     checksReady() {
-        if (!this.areReady) throw new Error('no assets loaded')
+        if (!this.areReady) throw new Error('Assets not loaded')
     }
 }

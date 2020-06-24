@@ -38,7 +38,6 @@ class CanvasBuffer {
         if (type === "sceneObject") {
             if (slice) {
                 const blockSize = gridProps.getBlockSize();
-
                 this.getBufferCtx().drawImage(
                     asset.getSprite(),
                     slice.sx - slice.sx * (asset.trueWidth / asset.width - 1),
@@ -51,7 +50,6 @@ class CanvasBuffer {
                     blockSize
                 );
             } else {
-                console.log("DRAWING NORMAL", coord);
                 this.getBufferCtx().drawImage(asset.getSprite(), coord.x, coord.y, asset.trueWidth, asset.trueHeight);
             }
         } else if (type === "gameObject") {

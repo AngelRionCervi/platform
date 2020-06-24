@@ -106,6 +106,12 @@ export class DomBuilder {
         return this;
     }
 
+    onClick(callback, node = null) {
+        const el = node ? node : this.element;
+        el.addEventListener("click", callback);
+        return this;
+    }
+
     done() {
         return this.element;
     }

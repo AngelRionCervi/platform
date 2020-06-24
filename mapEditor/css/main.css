@@ -118,10 +118,10 @@ body {
     position: absolute;
     top: 1px;
     left: 1px;
-    width: 1024px;
-    height: 576px;
+    width: 1200px;
+    height: 650px;
     background-position: 0px 0px;
-    /*background-image: url('../images/grid/grid96.png')*/
+    /*background-image: url('../images/grid/cell_0.png');*/
 }
 
 .tool-cell {
@@ -130,4 +130,17 @@ body {
 
 .tool-selected {
     border: 2px solid blue;
+}
+
+.params-label {
+    margin: 0;
+}
+
+.params-label-input {
+    margin-top: 7px;
+    display: flex;
+}
+
+.params-button {
+    margin-top: 7px;
 }

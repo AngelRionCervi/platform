@@ -37,19 +37,20 @@ String.prototype.indexesOf = function (str) {
     return result;
 };
 
-CanvasRenderingContext2D.prototype.clear = 
-  CanvasRenderingContext2D.prototype.clear || function (preserveTransform) {
-    if (preserveTransform) {
-      this.save();
-      this.setTransform(1, 0, 0, 1, 0, 0);
-    }
+CanvasRenderingContext2D.prototype.clear =
+    CanvasRenderingContext2D.prototype.clear ||
+    function (preserveTransform) {
+        if (preserveTransform) {
+            this.save();
+            this.setTransform(1, 0, 0, 1, 0, 0);
+        }
 
-    this.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-    if (preserveTransform) {
-      this.restore();
-    }           
-};
+        if (preserveTransform) {
+            this.restore();
+        }
+    };
 
 export function propsRemover(object, props = []) {
     return Object.keys(object)
@@ -72,15 +73,15 @@ export function roundToPrevMult(n, mult) {
 
 export function roundToNextMult(n, mult) {
     if (n % mult === 0) return n;
-    return Math.floor((n - mult) / mult) * mult; 
+    return Math.floor((n - mult) / mult) * mult;
 }
 
 export function roundToNearestMult(n, mult) {
     if (n % mult === 0) return n;
-    return Math.round(n / mult) * mult; 
+    return Math.round(n / mult) * mult;
 }
 
-export function uniqid(start = '') {
+export function uniqid(start = "") {
     return start + "_" + Math.random().toString(36).substr(2, 9);
 }
 
@@ -89,7 +90,7 @@ export function precise(number, precision) {
 }
 
 export function roundTo(number, to) {
-    return Math.round((number + Number.EPSILON) * 10**to) / 10**to
+    return Math.round((number + Number.EPSILON) * 10 ** to) / 10 ** to;
 }
 
 export function posOr0(number) {
@@ -119,4 +120,25 @@ export function spy(obj, methods, callback) {
     return Spy;
 }
 
-
+export async function loadImages(imageSrcs) {
+    return await Promise.all(
+        imageSrcs.map(async (src) => {
+            return await new Promise((resolve) => {
+                const buffer = document.createElement("canvas");
+                const image = new Image();
+                image.src = src;
+                image.addEventListener("load", (evt) => {
+                    buffer.width = image.naturalWidth;
+                    buffer.height = image.naturalHeight;
+                    buffer.getContext("2d").drawImage(image, 0, 0);
+                    resolve({
+                        sprite: buffer,
+                        b64: getDataUrl(evt.currentTarget),
+                        width: buffer.width,
+                        height: buffer.height,
+                    });
+                });
+            });
+        })
+    );
+}
