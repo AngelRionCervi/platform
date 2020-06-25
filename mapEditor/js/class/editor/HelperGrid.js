@@ -24,18 +24,16 @@ export default class HelperGrid {
         this.ctx.setLineDash(_G.gridDashes);
 
         for (let u = 0, len = xs.length; u < len; u++) {
-            const cellX = camCoord.x + xs[u];
             this.ctx.beginPath();
-            this.ctx.moveTo(0.5 + ts(cellX), ts(camCoord.y));
-            this.ctx.lineTo(0.5 + ts(cellX), ts(camCoord.y + gh));
+            this.ctx.moveTo(0.5 + ts(camCoord.x + xs[u]), ts(camCoord.y));
+            this.ctx.lineTo(0.5 + ts(camCoord.x + xs[u]), ts(camCoord.y + gh));
             this.ctx.stroke();
         }
 
         for (let u = 0, len = ys.length; u < len; u++) {
-            const cellY = camCoord.y + ys[u];
             this.ctx.beginPath();
-            this.ctx.moveTo(ts(camCoord.x), 0.5 + ts(cellY));
-            this.ctx.lineTo(ts(camCoord.x + gw), 0.5 + ts(cellY));
+            this.ctx.moveTo(ts(camCoord.x), 0.5 + ts(camCoord.y + ys[u]));
+            this.ctx.lineTo(ts(camCoord.x + gw), 0.5 + ts(camCoord.y + ys[u]));
             this.ctx.stroke();
         }
     }
