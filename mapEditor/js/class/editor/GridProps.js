@@ -30,6 +30,9 @@ class GridProps {
     getHeight() {
         return this.gridHeight;
     }
+    getDim() {
+        return { gw: this.gridWidth, gh: this.gridHeight };
+    }
     getAbsWidth() {
         return this.gridWidth / this.blockSize;
     }

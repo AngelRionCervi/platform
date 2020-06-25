@@ -20,7 +20,6 @@ export class SceneObjectList {
 
         if (index !== -1) {
             this.sceneObjects.splice(index, 1);
-            console.log("currently displayed sceneObjects: " + this.sceneObjects.length);
             return true;
         } else {
             return false;

@@ -1,9 +1,8 @@
 import gridProps from "./GridProps.js";
 import camera from "../Camera/Camera.js";
+import { _G } from "../general/globals.js";
 
-const bs = gridProps.getBlockSize();
 const { vpWidth, vpHeight } = camera.getViewPort();
-const tw = camera.toWorld.bind(camera);
 const ts = camera.toScreen.bind(camera);
 
 export default class HelperGrid {
@@ -15,22 +14,28 @@ export default class HelperGrid {
     }
 
     build() {
-        const index = camera.getZoomIndex();
         const camCoord = camera.getCoords();
-        const flatCells = gridProps.getRenderedCells().flat();
+        const flatCells = gridProps.getRenderedCells();
+        const xs = flatCells.map((row) => row[0].x);
+        const ys = flatCells[0].map((col) => col.y);
+        const { gw, gh } = gridProps.getDim();
 
         this.ctx.clear(true);
-        this.ctx.setLineDash([2, 4]);
+        this.ctx.setLineDash(_G.gridDashes);
 
-        this.ctx.strokeStyle = "rgba(105, 105, 105, 0.6)";
-        for (let u = 0, len = flatCells.length; u < len; u++) {
-            const cellX = camCoord.x + flatCells[u].x;
-            const cellY = camCoord.y + flatCells[u].y;
-
+        for (let u = 0, len = xs.length; u < len; u++) {
+            const cellX = camCoord.x + xs[u];
             this.ctx.beginPath();
-            this.ctx.moveTo(0.5 + ts(cellX), 0.5 + ts(cellY));
-            this.ctx.lineTo(0.5 + ts(cellX + bs), 0.5 + ts(cellY));
-            this.ctx.lineTo(0.5 + ts(cellX + bs), 0.5 + ts(cellY + bs));
+            this.ctx.moveTo(0.5 + ts(cellX), ts(camCoord.y));
+            this.ctx.lineTo(0.5 + ts(cellX), ts(camCoord.y + gh));
+            this.ctx.stroke();
+        }
+
+        for (let u = 0, len = ys.length; u < len; u++) {
+            const cellY = camCoord.y + ys[u];
+            this.ctx.beginPath();
+            this.ctx.moveTo(ts(camCoord.x), 0.5 + ts(cellY));
+            this.ctx.lineTo(ts(camCoord.x + gw), 0.5 + ts(cellY));
             this.ctx.stroke();
         }
     }

@@ -7,5 +7,6 @@ export const _G = {
     mapBordersColor: 'red',
     mapBorderWidth: 3,
     selectionBorderWidth: 1,
-    selectionDashLength: 4
+    selectionDashLength: 4,
+    gridDashes: [2, 4],
 }

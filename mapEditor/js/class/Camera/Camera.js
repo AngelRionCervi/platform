@@ -107,6 +107,7 @@ class Camera {
                         cell.setBlockAddedW(addedW);
                     });
                 }*/
+                cellToInteract[cx] = [];
                 for (let y = this.y > 0 ? this.y : -bs; y < Math.round(tw(this.viewPortHeight) + bs); y += bs) {
                     const m = Math.round((y - this.y) / bs);
                     if (m >= gridHeight / bs) break;
@@ -119,11 +120,14 @@ class Camera {
                         const addedH = Math.abs(cell.ty() - gridCoords[cx][cy - 1].ty()) - trueBS;
                         cell.setBlockAddedH(addedH);
                     }*/
-                    cellToInteract.push(cell);
+                    //if (!cellToInteract[cx] || !cellToInteract[cx][cy]) continue;
+                   // console.log(cx, cy)
+                    cellToInteract[cx][cy] = cell;
                 }
             }
+            cellToInteract[cx] = cellToInteract[cx].filter(n => n)
         }
-        gridProps.setRenderedCells(cellToInteract);
+        gridProps.setRenderedCells(cellToInteract.filter(n => n));
     }
 
     newPanPoint(curPos) {
