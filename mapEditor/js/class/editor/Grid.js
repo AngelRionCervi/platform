@@ -2,15 +2,17 @@ import { Cell } from "./Cell.js";
 import { GridNormalization } from "./GridNormalization.js";
 import * as _H from "../../lib/helpers.js";
 import { _G } from "../general/globals.js";
-import { getCanvas, getContext } from "../general/canvasRef.js";
+import { getCanvas, getContext, app, container } from "../general/canvasRef.js";
 import gridProps from "./GridProps.js";
 import camera from "../Camera/Camera.js";
 import { sceneBuffer, gameObjectBufferList, changeBufferSize } from "../general/CanvasBuffer.js";
 import itemSelection from "../general/itemSelection.js";
 import HelperGrid from "./HelperGrid.js";
+import PixiDrawing from "../../lib/PixiDrawing.js";
 
 const helperGrid = new HelperGrid();
 const gridNormal = new GridNormalization();
+const pixiDrawing = new PixiDrawing(app);
 
 const canvas = getCanvas();
 const ctx = getContext();
@@ -505,7 +507,7 @@ export function renderGrid() {
     camera.setCellsToInteract(gridProps.getTiles());
     const tw = camera.toWorld.bind(camera);
     const { vpWidth, vpHeight } = camera.getViewPort();
-    ctx.clear(true);
+    //ctx.clear(true);
 
     gameObjectBufferList.update();
     helperGrid.build();
@@ -516,7 +518,7 @@ export function renderGrid() {
 
     const helperGridBuffer = helperGrid.getBuffer();
 
-    ctx.imageSmoothingEnabled = false;
+    /*ctx.imageSmoothingEnabled = false;
     //ctx.globalCompositeOperation = "source-over";
     ctx.drawImage(sceneBufferCanvas, -camCoords.x, -camCoords.y, tw(vpWidth), tw(vpHeight), 0, 0, vpWidth, vpHeight);
     ctx.drawImage(
@@ -531,8 +533,18 @@ export function renderGrid() {
         vpHeight
     );
     ctx.drawImage(helperGridBuffer, 0, 0, vpWidth, vpHeight)
-    createMapBorder();
+    createMapBorder();*/
     itemSelection.create();
+
+    const baseSceneBuffer = new PIXI.BaseTexture.from(sceneBufferCanvas);
+    const baseHelperGridBuffer = new PIXI.BaseTexture.from(helperGridBuffer);
+    //document.body.appendChild(sceneBufferCanvas);
+    pixiDrawing
+        .on(container)
+        .drawImage(baseSceneBuffer, -camCoords.x, -camCoords.y, tw(vpWidth), tw(vpHeight), 0, 0, vpWidth, vpHeight)
+        .done();
+    pixiDrawing.on(container).drawImage(baseHelperGridBuffer, 0, 0, vpWidth, vpHeight).done();
+    app.stage.addChild(container);
 }
 
 export function fillAllCells(cellsToRender) {
