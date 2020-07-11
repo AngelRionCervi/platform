@@ -53,9 +53,6 @@ export default class PixiDrawing {
         rotPivotX = undefined,
         rotPivotY = undefined
     ) {
-        if (!this.container) {
-            throw new Error("No container specified.");
-        }
         if (srcX === undefined) {
             srcX = 0;
         }
@@ -93,12 +90,15 @@ export default class PixiDrawing {
         if (rotPivotY === undefined) {
             rotPivotY = 0;
         }
+        /*
         if (srcX + srcWidth > baseTex.width) {
             srcWidth -= srcX + srcWidth - baseTex.width;
         }
         if (srcY + srcHeight > baseTex.height) {
             srcHeight -= srcY + srcHeight - baseTex.height;
-        }
+        }*/
+
+        //this.container = new PIXI.Container();
 
         const trim = new PIXI.Rectangle(srcX, srcY, srcWidth, srcHeight);
         const texture = new PIXI.Texture(baseTex, trim);
@@ -212,7 +212,9 @@ export default class PixiDrawing {
     }
 
     done() {
+        this.container.removeChildren();
         this.container.addChild(this.sprite);
+        return this.container;
     }
 
     getSprite() {

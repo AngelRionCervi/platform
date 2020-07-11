@@ -1,6 +1,9 @@
 import gridProps from "../editor/GridProps.js";
 import camera from "../Camera/Camera.js";
 import * as _H from "../../lib/helpers.js";
+import { getCanvas, getContext, app, helperGridContainer, sceneContainer } from "../general/canvasRef.js";
+import PixiDrawing from "../../lib/PixiDrawing.js";
+const pixiDrawing = new PixiDrawing(app);
 
 class CanvasBuffer {
     constructor() {
@@ -52,6 +55,8 @@ class CanvasBuffer {
             } else {
                 this.getBufferCtx().drawImage(asset.getSprite(), coord.x, coord.y, asset.trueWidth, asset.trueHeight);
             }
+            const sceneTexture = new PIXI.BaseTexture.from(this.getBuffer());
+            pixiDrawing.on(sceneContainer).drawImage(sceneTexture).done();
         } else if (type === "gameObject") {
             //cell.setBlockType("wall").setGameObject(object);
         }

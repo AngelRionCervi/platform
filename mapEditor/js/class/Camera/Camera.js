@@ -17,12 +17,18 @@ class Camera {
         this.zoom = 1;
         this.zoomIndex = 0;
         this.zoomStep = 0.8;
-        this.maxZoom = this.zoomStep * 5;
-        this.minZoom = this.zoomStep * 0.2;
+        this.maxZoom = 2;
+        this.minZoom = 0.5;
+        this.still = false;
+        this.zoomPos = null;
     }
 
     getCoords() {
         return { x: this.x, y: this.y };
+    }
+
+    getZoomPos() {
+        return this.zoomPos;
     }
 
     getViewPort() {
@@ -47,25 +53,54 @@ class Camera {
         return Math.floor(number * this.zoom);
     }
 
-    setScale({ dir }) {
+    setScale({ dir, curPos }) {
+        this.setStill(false);
+        this.zoomPos = curPos;
+
+
         if (dir > 0) {
-            this.scaleInc = 1 * this.zoomStep;
+            this.scaleInc = -0.25;
         } else {
-            this.scaleInc = 1 / this.zoomStep;
+            this.scaleInc = 0.25;
         }
 
-        const zoomCheck1 = Math.max(roundTo(this.zoom * this.scaleInc, 10), this.minZoom);
+        /*
+        const zoomCheck1 = Math.max(this.zoom, this.minZoom);
         const zoomCheck2 = Math.min(zoomCheck1, this.maxZoom);
+        console.log(this.zoom, zoomCheck1, zoomCheck2);
 
         if (zoomCheck2 > this.zoom) {
             this.zoomIndex++;
         } else if (zoomCheck2 < this.zoom) {
             this.zoomIndex--;
-        }
+        }*/
+        
 
-        this.zoom = zoomCheck2;
+        const { gw, gh } = gridProps.getDim();
+        
+
+        const zoomWeight = {
+            x: (curPos.x - this.toScreen(this.x)) / this.toScreen(this.viewPortWidth),
+            y: (curPos.y - this.toScreen(this.y)) / this.toScreen(this.viewPortHeight),
+        };
+
+        setTimeout(() => {
+            const zoomWeight2 = {
+                x: (curPos.x - this.toScreen(this.x)) / this.toScreen(this.viewPortWidth),
+                y: (curPos.y - this.toScreen(this.y)) / this.toScreen(this.viewPortHeight),
+            };
+            this.x = zoomWeight2.x * this.viewPortWidth * this.scaleInc;
+            this.y = zoomWeight2.y * this.viewPortHeight * this.scaleInc;
+            console.log(2, zoomWeight2, this.scaleInc);
+            renderGrid();
+        }, 0)
+        //this.x -= zoomWeight.x * this.viewPortWidth * this.scaleInc;
+        //this.y -= zoomWeight.y * this.viewPortHeight * this.scaleInc;
+        //console.log(zoomWeight);
+        this.zoom += this.scaleInc;
+        //this.pan(newPos)
         //gridDiv.style.backgroundImage = `url(${gridCells[`cell_${this.zoomIndex}`]})`;
-        gridDiv.style.backgroundPosition = `${this.x * this.zoom}px ${this.y * this.zoom}px`;
+        //gridDiv.style.backgroundPosition = `${this.x * this.zoom}px ${this.y * this.zoom}px`;
         return this;
     }
 
@@ -121,13 +156,13 @@ class Camera {
                         cell.setBlockAddedH(addedH);
                     }*/
                     //if (!cellToInteract[cx] || !cellToInteract[cx][cy]) continue;
-                   // console.log(cx, cy)
+                    // console.log(cx, cy)
                     cellToInteract[cx][cy] = cell;
                 }
             }
-            cellToInteract[cx] = cellToInteract[cx].filter(n => n)
+            cellToInteract[cx] = cellToInteract[cx].filter((n) => n);
         }
-        gridProps.setRenderedCells(cellToInteract.filter(n => n));
+        gridProps.setRenderedCells(cellToInteract.filter((n) => n));
     }
 
     newPanPoint(curPos) {
@@ -137,6 +172,7 @@ class Camera {
     }
 
     pan(curPos) {
+        this.setStill(false);
         this.x = Math.round(-this.toWorld(this.panOrigin.x - curPos.x));
         this.y = Math.round(-this.toWorld(this.panOrigin.y - curPos.y));
 
@@ -162,7 +198,7 @@ class Camera {
 
             this.newPanPoint(curPos);
         }*/
-        gridDiv.style.backgroundPosition = `${this.x * this.zoom}px ${this.y * this.zoom}px`;
+        //gridDiv.style.backgroundPosition = `${this.x * this.zoom}px ${this.y * this.zoom}px`;
         renderGrid();
     }
 
@@ -184,6 +220,10 @@ class Camera {
 
     moveTop(distance) {
         this.y += distance;
+    }
+
+    setStill(bool) {
+        this.still = bool;
     }
 }
 
