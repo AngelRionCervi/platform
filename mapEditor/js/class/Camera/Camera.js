@@ -20,7 +20,7 @@ class Camera {
         this.maxZoom = 2;
         this.minZoom = 0.5;
         this.still = false;
-        this.zoomPos = null;
+        this.zoomPos = { x: 0, y: 0 };
     }
 
     getCoords() {
@@ -55,13 +55,11 @@ class Camera {
 
     setScale({ dir, curPos }) {
         this.setStill(false);
-        this.zoomPos = curPos;
-
 
         if (dir > 0) {
-            this.scaleInc = -0.25;
+            this.scaleInc = -0.12;
         } else {
-            this.scaleInc = 0.25;
+            this.scaleInc = 0.12;
         }
 
         /*
@@ -74,30 +72,62 @@ class Camera {
         } else if (zoomCheck2 < this.zoom) {
             this.zoomIndex--;
         }*/
-        
 
         const { gw, gh } = gridProps.getDim();
-        
+
+        this.zoom += this.scaleInc;
 
         const zoomWeight = {
-            x: (curPos.x - this.toScreen(this.x)) / this.toScreen(this.viewPortWidth),
-            y: (curPos.y - this.toScreen(this.y)) / this.toScreen(this.viewPortHeight),
+            x: (curPos.x - this.toScreen(this.x)) / (gw * this.zoom),
+            y: (curPos.y - this.toScreen(this.y)) / (gh * this.zoom),
         };
 
+        const zoomWeight2 = {
+            x: (curPos.x - this.toScreen(this.x)),
+            y: (curPos.y - this.toScreen(this.y)),
+        };
+
+        const zw = {
+            x: this.toWorld(curPos.x) - this.x,
+            y: this.toWorld(curPos.y) - this.y,
+        };
+
+        //this.x = this.toWorld(curPos.x - this.toScreen(gw * 0.5));
+        //this.y = this.toWorld(curPos.y - this.toScreen(gh * 0.5));
+        //this.x = -gw/2;
+        //this.y = -gh/2;
+        
+        const xd = curPos.x - this.zoomPos.x;
+        const yd = curPos.y - this.zoomPos.y;
+        const rpxX = curPos.x - this.toScreen(curPos.x);
+        const rpxY = curPos.y - this.toScreen(curPos.y);
+
+        console.log(this.toScreen(curPos.x));
+
+        this.x = this.toWorld(curPos.x - this.toScreen(curPos.x));
+        this.y = this.toWorld(curPos.y - this.toScreen(curPos.y));
+        
+
+        this.zoomPos = curPos;
+
+        //console.log(this.toWorld(curPos.x - this.toScreen(curPos.x)), this.toWorld(curPos.x - this.toScreen(curPos.x)));
+
+        /*
         setTimeout(() => {
-            const zoomWeight2 = {
-                x: (curPos.x - this.toScreen(this.x)) / this.toScreen(this.viewPortWidth),
-                y: (curPos.y - this.toScreen(this.y)) / this.toScreen(this.viewPortHeight),
-            };
-            this.x = zoomWeight2.x * this.viewPortWidth * this.scaleInc;
-            this.y = zoomWeight2.y * this.viewPortHeight * this.scaleInc;
-            console.log(2, zoomWeight2, this.scaleInc);
             renderGrid();
-        }, 0)
-        //this.x -= zoomWeight.x * this.viewPortWidth * this.scaleInc;
-        //this.y -= zoomWeight.y * this.viewPortHeight * this.scaleInc;
-        //console.log(zoomWeight);
-        this.zoom += this.scaleInc;
+        }, 0)*/
+        //if (this.zoom < this.maxZoom && this.zoom > this.minZoom) {
+        //console.log(this.toScreen(zoomWeight.x * gw * this.scaleInc));
+        //this.x -= this.toScreen(zoomWeight.x * gw) * this.scaleInc;
+        //this.y -= this.toScreen(zoomWeight.y * gh) * this.scaleInc;
+        //this.x -= Math.floor(curPos.x * this.scaleInc);
+        //this.y -= Math.floor(curPos.y * this.scaleInc);
+        //}
+
+        /*
+        if (this.zoom > this.maxZoom) this.zoom = this.maxZoom;
+        if (this.zoom < this.minZoom) this.zoom = this.minZoom;*/
+
         //this.pan(newPos)
         //gridDiv.style.backgroundImage = `url(${gridCells[`cell_${this.zoomIndex}`]})`;
         //gridDiv.style.backgroundPosition = `${this.x * this.zoom}px ${this.y * this.zoom}px`;
@@ -175,6 +205,7 @@ class Camera {
         this.setStill(false);
         this.x = Math.round(-this.toWorld(this.panOrigin.x - curPos.x));
         this.y = Math.round(-this.toWorld(this.panOrigin.y - curPos.y));
+        console.log(this.x);
 
         /* //can't pan bayond the map
         if (
