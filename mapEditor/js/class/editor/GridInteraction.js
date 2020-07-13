@@ -117,5 +117,11 @@ export class GridInteraction {
             evt.preventDefault();
             return false;
         });
+
+        document.addEventListener("mousemove", (e) => {
+            e.preventDefault();
+            this.emitter.emit("debug_camera", mouse.getCursorPos(e));
+        });
     }
 }
+

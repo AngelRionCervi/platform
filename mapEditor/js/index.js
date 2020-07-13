@@ -1,6 +1,7 @@
 const canvas = document.getElementById("mapEditorCanvas");
 const ctx = canvas.getContext("2d");
 
+
 import editor from "./class/editor/Editor.js";
 import tools from "./class/tools/Tools.js";
 import { ContextMenu } from "./class/general/ContextMenu.js";
@@ -19,7 +20,6 @@ import { GameObjectList } from "./class/gameObjects/GameObjectList.js";
 import { GameObjectListInteraction } from "./class/gameObjects/GameObjectListInteraction.js";
 import { gameObjectBufferList } from "./class/general/CanvasBuffer.js";
 import itemSelection from "./class/general/itemSelection.js";
-
 
 const gridInteraction = new GridInteraction();
 const grid = new Grid();
@@ -105,6 +105,10 @@ gridInteraction.emitter.on("grid_left_mouse_up", ({ detail }) => {
     grid.stopDragging();
 });
 
+gridInteraction.emitter.on("debug_camera", ({ detail }) => {
+    camera.debugPos(detail);
+});
+
 gridInteraction.emitter.on("dl_map", () => {
     const rndmName = "map_" + Date.now() + Math.random();
     mapDownloader.downloadMap(map, rndmName);
@@ -154,9 +158,9 @@ gameObjectListInteraction.emitter.on("game_object_context_toggle", ({ detail }) 
 });
 
 editor.emitter.on("gridResize", ({ detail }) => {
-    console.log(detail)
+    console.log(detail);
     grid.resizeGrid(detail);
-})
+});
 
 fetch("http://localhost:5000/getAssets")
     .then((res) => {
@@ -195,7 +199,6 @@ function handle_Grid_Left_Click_Drawing(coord, moving) {
                 sceneObjectList.removeSceneObject.bind(sceneObjectList)
             );
         }
-        
     } else if (gameObjectList.isAnObjectSelected() && !moving) {
         if (gameObjectInst) {
             if (itemSelection.isSelected(gameObjectInst.id) && !_keyboard.act("lShift")) {
@@ -205,7 +208,7 @@ function handle_Grid_Left_Click_Drawing(coord, moving) {
             }
             renderGrid();
             return;
-        } 
+        }
         if (!_keyboard.act("lShift")) {
             itemSelection.unselectAll();
         }

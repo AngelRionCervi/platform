@@ -20,7 +20,9 @@ class Camera {
         this.maxZoom = 2;
         this.minZoom = 0.5;
         this.still = false;
-        this.zoomPos = { x: 0, y: 0 };
+        this.prevZoom = { x: 0, y: 0 };
+        this.planShift = { x: 0, y: 0 };
+        this.zoomOffset = null;
     }
 
     getCoords() {
@@ -28,7 +30,7 @@ class Camera {
     }
 
     getZoomPos() {
-        return this.zoomPos;
+        return this.prevZoom;
     }
 
     getViewPort() {
@@ -61,7 +63,6 @@ class Camera {
         } else {
             this.scaleInc = 0.12;
         }
-
         /*
         const zoomCheck1 = Math.max(this.zoom, this.minZoom);
         const zoomCheck2 = Math.min(zoomCheck1, this.maxZoom);
@@ -83,8 +84,8 @@ class Camera {
         };
 
         const zoomWeight2 = {
-            x: (curPos.x - this.toScreen(this.x)),
-            y: (curPos.y - this.toScreen(this.y)),
+            x: curPos.x - this.toScreen(this.x),
+            y: curPos.y - this.toScreen(this.y),
         };
 
         const zw = {
@@ -96,19 +97,24 @@ class Camera {
         //this.y = this.toWorld(curPos.y - this.toScreen(gh * 0.5));
         //this.x = -gw/2;
         //this.y = -gh/2;
+
+        const xd = this.toWorld(curPos.x - this.prevZoom.x);
+        const yd = this.toWorld(curPos.y - this.prevZoom.y);
+
+        const worldPos = { x: this.toWorld(curPos.x) - this.x, y: this.toWorld(curPos.y) - this.y };
+
+        const weight = { x: worldPos.x / gw, y: worldPos.y / gh };
+
+        const x1 = this.toWorld(curPos.x) - curPos.x;
+        const y1 = this.toWorld(curPos.y) - curPos.y;
+        const x2 = this.x - (weight.x * gw * this.scaleInc);
+        const y2 = this.y - (weight.y * gh * this.scaleInc);
+        console.log(x1, x2)
+        this.x = x1;
+        this.y = y1;
         
-        const xd = curPos.x - this.zoomPos.x;
-        const yd = curPos.y - this.zoomPos.y;
-        const rpxX = curPos.x - this.toScreen(curPos.x);
-        const rpxY = curPos.y - this.toScreen(curPos.y);
 
-        console.log(this.toScreen(curPos.x));
-
-        this.x = this.toWorld(curPos.x - this.toScreen(curPos.x));
-        this.y = this.toWorld(curPos.y - this.toScreen(curPos.y));
-        
-
-        this.zoomPos = curPos;
+        this.prevZoom = curPos;
 
         //console.log(this.toWorld(curPos.x - this.toScreen(curPos.x)), this.toWorld(curPos.x - this.toScreen(curPos.x)));
 
@@ -132,6 +138,28 @@ class Camera {
         //gridDiv.style.backgroundImage = `url(${gridCells[`cell_${this.zoomIndex}`]})`;
         //gridDiv.style.backgroundPosition = `${this.x * this.zoom}px ${this.y * this.zoom}px`;
         return this;
+    }
+
+    getViewX(x) {
+        return x - this.x;
+    }
+
+    debugPos(curPos) {
+        const xd = this.toWorld(curPos.x - this.prevZoom.x);
+        const yd = this.toWorld(curPos.y - this.prevZoom.y);
+        const rpxX = curPos.x - this.toScreen(curPos.x);
+        const rpxY = curPos.y - this.toScreen(curPos.y);
+
+        const { gw, gh } = gridProps.getDim();
+
+        const x1 = this.toWorld(curPos.x) - curPos.x;
+        const y1 = this.toWorld(curPos.y) - curPos.y;
+
+        const worldPos = { x: this.toWorld(curPos.x) - this.x, y: this.toWorld(curPos.y) - this.y };
+        const weight = { x: worldPos.x / gw, y: worldPos.y / gh };
+
+        const altX = this.x - weight.x * gw * 0.05;
+       // console.log(xd);
     }
 
     getScale() {
@@ -205,7 +233,6 @@ class Camera {
         this.setStill(false);
         this.x = Math.round(-this.toWorld(this.panOrigin.x - curPos.x));
         this.y = Math.round(-this.toWorld(this.panOrigin.y - curPos.y));
-        console.log(this.x);
 
         /* //can't pan bayond the map
         if (
