@@ -110,8 +110,8 @@ class Camera {
         const x2 = this.x - (weight.x * gw * this.scaleInc);
         const y2 = this.y - (weight.y * gh * this.scaleInc);
         console.log(x1, x2)
-        this.x = x1;
-        this.y = y1;
+        //this.x = x1;
+        //this.y = y1;
         
 
         this.prevZoom = curPos;

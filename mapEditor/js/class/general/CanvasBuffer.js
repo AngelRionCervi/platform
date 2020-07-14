@@ -41,6 +41,21 @@ class CanvasBuffer {
         if (type === "sceneObject") {
             if (slice) {
                 const blockSize = gridProps.getBlockSize();
+
+                const xSlice = Math.floor(slice.sx - slice.sx * (asset.trueWidth / asset.width - 1));
+                const ySlice = Math.floor(slice.sy - slice.sy * (asset.trueHeight / asset.height - 1));
+
+                const trim = new PIXI.Rectangle(xSlice, ySlice, blockSize, blockSize);
+                const texture = new PIXI.Texture(asset.texture.baseTexture, trim);
+                const sprite = new PIXI.Sprite(texture);
+
+                sprite.position.set(slice.x, slice.y);
+                sprite.width = blockSize;
+                sprite.height = blockSize;
+                sceneContainer.addChild(sprite);
+
+                //console.log(asset.texture.baseTexture)
+                /*
                 this.getBufferCtx().drawImage(
                     asset.getSprite(),
                     slice.sx - slice.sx * (asset.trueWidth / asset.width - 1),
@@ -51,12 +66,16 @@ class CanvasBuffer {
                     slice.y,
                     blockSize,
                     blockSize
-                );
+                );*/
             } else {
-                this.getBufferCtx().drawImage(asset.getSprite(), coord.x, coord.y, asset.trueWidth, asset.trueHeight);
+                const sprite = new PIXI.Sprite(asset.texture);
+                sprite.position.set(coord.x, coord.y);
+                sprite.width = asset.trueWidth;
+                sprite.height = asset.trueHeight;
+                sceneContainer.addChild(sprite);
             }
-            const sceneTexture = new PIXI.BaseTexture.from(this.getBuffer());
-            pixiDrawing.on(sceneContainer).drawImage(sceneTexture).done();
+            //const sceneTexture = new PIXI.BaseTexture.from(this.getBuffer());
+            //pixiDrawing.on(sceneContainer).drawImage(sceneTexture).done();
         } else if (type === "gameObject") {
             //cell.setBlockType("wall").setGameObject(object);
         }
