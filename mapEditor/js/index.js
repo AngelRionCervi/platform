@@ -182,6 +182,10 @@ document.addEventListener("click", (e) => {
 function handle_Grid_Left_Click_Drawing(coord, moving) {
     const gameObjectInst = gameObjectBufferList.getBufferByCoord(coord);
 
+    if (tools.getSelected() === "collision") {
+        grid.setCollisionBox(coord); 
+    }
+
     if (palette.isAnAssetSelected()) {
         const asset = _assets.getByID(palette.getCurrentAssetID());
         if (tools.getSelected() === "bucket") {
@@ -191,14 +195,14 @@ function handle_Grid_Left_Click_Drawing(coord, moving) {
                 sceneObjectList.addSceneObject.bind(sceneObjectList),
                 sceneObjectList.removeSceneObject.bind(sceneObjectList)
             );
-        } else {
+        } else if (tools.getSelected() === "brush") {
             grid.setSceneObject(
                 coord,
                 asset,
                 sceneObjectList.addSceneObject.bind(sceneObjectList),
                 sceneObjectList.removeSceneObject.bind(sceneObjectList)
             );
-        }
+        } 
     } else if (gameObjectList.isAnObjectSelected() && !moving) {
         if (gameObjectInst) {
             if (itemSelection.isSelected(gameObjectInst.id) && !_keyboard.act("lShift")) {

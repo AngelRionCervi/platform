@@ -22,8 +22,21 @@ export class Cell {
         this.sliceRealWidth = 0;
         this.sliceRealHeight = 0;
         this.layerList = [];
+        this.collisionEnabled = false;
         this.tx = () => Math.floor((this.x + this.xOffset) * camera.getZoom());
         this.ty = () => Math.floor((this.y + this.yOffset) * camera.getZoom());
+    }
+
+    enableCollision() {
+        this.collisionEnabled = true;
+    }
+
+    disableCollision() {
+        this.collisionEnabled = false;
+    }
+
+    isCollisionEnabled() {
+        return this.collisionEnabled;
     }
 
     getID() {

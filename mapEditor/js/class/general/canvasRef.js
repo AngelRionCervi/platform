@@ -17,8 +17,10 @@ export const helperGridContainer = new PIXI.Container();
 sceneContainer.name = "helperGrid";
 export const entityContainer = new PIXI.Container();
 sceneContainer.name = "entities";
+export const collisionContainer = new PIXI.Container();
+collisionContainer.name = "collisions";
 
-app.stage.addChild(sceneContainer, entityContainer, helperGridContainer);
+app.stage.addChild(sceneContainer, entityContainer, collisionContainer, helperGridContainer);
 
 
 export function getCanvas() {

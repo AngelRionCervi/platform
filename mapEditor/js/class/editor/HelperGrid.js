@@ -7,8 +7,8 @@ import PixiDrawing from "../../lib/PixiDrawing.js";
 const { vpWidth, vpHeight } = camera.getViewPort();
 const ts = camera.toScreen.bind(camera);
 
-const sprite = new PIXI.Sprite();
-helperGridContainer.addChild(sprite);
+const gridSprite = new PIXI.Sprite();
+helperGridContainer.addChild(gridSprite);
 
 // canvas implementation is faster ??
 export default class HelperGrid {
@@ -45,8 +45,8 @@ export default class HelperGrid {
 
         const base = new PIXI.BaseTexture.from(this.buffer);
         const texture = new PIXI.Texture(base);
-        sprite.texture = texture;
-        sprite.texture.update();
+        gridSprite.texture = texture;
+        gridSprite.texture.update();
     }
 
     getBuffer() {

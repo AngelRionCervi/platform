@@ -1,8 +1,9 @@
 import gridProps from "../editor/GridProps.js";
 import camera from "../Camera/Camera.js";
 import * as _H from "../../lib/helpers.js";
-import { getCanvas, getContext, app, helperGridContainer, sceneContainer } from "../general/canvasRef.js";
+import { getCanvas, getContext, app, helperGridContainer, sceneContainer, collisionContainer } from "../general/canvasRef.js";
 import PixiDrawing from "../../lib/PixiDrawing.js";
+
 const pixiDrawing = new PixiDrawing(app);
 
 class CanvasBuffer {
@@ -79,6 +80,9 @@ class CanvasBuffer {
         } else if (type === "gameObject") {
             //cell.setBlockType("wall").setGameObject(object);
         }
+    }
+    updateCollisionBoxes(coord) {
+
     }
     clearTile(coord, blockSize) {
         this.setFillStyle("white");

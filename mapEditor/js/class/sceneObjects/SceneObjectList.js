@@ -11,7 +11,7 @@ export class SceneObjectList {
     addSceneObject(coord, asset, slice) {
         const sceneObject = new SceneObject(coord, asset, slice);
         this.sceneObjects.push(sceneObject);
-        return sceneObject
+        return sceneObject;
     }
 
     removeSceneObject(id) {
@@ -21,9 +21,8 @@ export class SceneObjectList {
         if (index !== -1) {
             this.sceneObjects.splice(index, 1);
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     getAllIDs() {

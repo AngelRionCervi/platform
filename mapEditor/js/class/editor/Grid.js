@@ -8,9 +8,11 @@ import camera from "../Camera/Camera.js";
 import { sceneBuffer, gameObjectBufferList, changeBufferSize } from "../general/CanvasBuffer.js";
 import itemSelection from "../general/itemSelection.js";
 import HelperGrid from "./HelperGrid.js";
+import CollisionBox from "./CollisionBox.js";
 import PixiDrawing from "../../lib/PixiDrawing.js";
 
 const helperGrid = new HelperGrid();
+const collisionBox = new CollisionBox();
 const gridNormal = new GridNormalization();
 const pixiDrawing = new PixiDrawing(app);
 
@@ -176,6 +178,19 @@ export class Grid {
 
         gameObjectBufferList.add(prop, { x: floorCursor.x, y: floorCursor.y });
         return this;
+    }
+
+    setCollisionBox(curPos) {
+        
+        const cell = this.getCellByCursor(curPos);
+
+        if (!cell.isCollisionEnabled()) {
+            const floorCoord = this.floorMouse(curPos);
+            collisionBox.addBox(floorCoord);
+            cell.enableCollision();
+            collisionBox.set(cell.getCoords());
+        }
+        
     }
 
     floodFill(cursorPos, asset, addSceneObjectToList, removeSceneObjectOfList) {
@@ -540,9 +555,13 @@ export function renderGrid() {
     createMapBorder();*/
 
     gameObjectBufferList.update();
-    if (!camera.still) helperGrid.build();
+    if (!camera.still) {
+        collisionBox.rebuild();
+        helperGrid.build();
+    } 
 
     itemSelection.create();
+    
 
     //const baseSceneBuffer = new PIXI.BaseTexture.from(sceneBufferCanvas);
     //const baseHelperGridBuffer = new PIXI.BaseTexture.from(helperGridBuffer);

@@ -12,6 +12,7 @@ class Tools {
         this.toolsModel = [
             { name: "brush", icon: "B", onSelect: () => this.toggleTool("brush") },
             { name: "bucket", icon: "Q", onSelect: () => this.toggleTool("bucket") },
+            { name: "collision", icon: "C", onSelect: () => this.toggleTool("collision") },
         ];
         this.selected = null;
         this.toolCells = this.build();
