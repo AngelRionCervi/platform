@@ -561,7 +561,7 @@ export function renderGrid() {
     } 
 
     itemSelection.create();
-    
+ 
 
     //const baseSceneBuffer = new PIXI.BaseTexture.from(sceneBufferCanvas);
     //const baseHelperGridBuffer = new PIXI.BaseTexture.from(helperGridBuffer);
