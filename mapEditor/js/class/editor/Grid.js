@@ -57,9 +57,9 @@ export class Grid {
 
     floorMouse(coords) {
         const blockSize = gridProps.getBlockSize();
-        const zoom = camera.getZoom();
-        const x = _H.roundToPrevMult(Math.round(coords.x / zoom - camera.x), blockSize);
-        const y = _H.roundToPrevMult(Math.round(coords.y / zoom - camera.y), blockSize);
+        const tw = camera.toWorld.bind(camera);
+        const x = _H.roundToPrevMult(tw(coords.x - camera.x, "noRound"), blockSize);
+        const y = _H.roundToPrevMult(tw(coords.y - camera.y, "noRound"), blockSize);
         return { x, y };
     }
 
@@ -571,7 +571,7 @@ export function renderGrid() {
     //helperGridContainer.scale.set(zoom);
     //helperGridContainer.position.set(ts(camCoords.x), ts(camCoords.y))
     sceneContainer.scale.set(zoom);
-    sceneContainer.position.set(ts(camCoords.x), ts(camCoords.y));
+    sceneContainer.position.set(camCoords.x, camCoords.y);
 
     //pixiDrawing.on(helperGridContainer).drawImage(helperGridBuffer, 0, 0, vpWidth, vpHeight).done();
     //app.stage.addChild(helperGridContainer);
