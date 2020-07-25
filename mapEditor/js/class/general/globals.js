@@ -9,5 +9,5 @@ export const _G = {
     selectionBorderWidth: 1,
     selectionDashLength: 4,
     gridDashes: [2, 4],
-    iconColor: "red",
+    iconColor: "rgba(255, 0, 0, 0.4)",
 }

@@ -186,11 +186,12 @@ export class Grid {
 
         if (!cell.isCollisionEnabled()) {
             const floorCoord = this.floorMouse(curPos);
-            collisionBox.addBox(floorCoord);
-            cell.enableCollision();
-            collisionBox.set(cell.getCoords());
+            const box = collisionBox.addBox(floorCoord, cell.getID());
+            if (box) {
+                cell.enableCollision();
+                collisionBox.render(box);
+            }
         }
-        
     }
 
     floodFill(cursorPos, asset, addSceneObjectToList, removeSceneObjectOfList) {
@@ -523,7 +524,7 @@ export function renderGrid() {
     const tw = camera.toWorld.bind(camera);
     const ts = camera.toScreen.bind(camera);
     const zoom = camera.getZoom();
-    const { vpWidth, vpHeight } = camera.getViewPort();
+    //const { vpWidth, vpHeight } = camera.getViewPort();
     //ctx.clear(true);
     //app.stage.removeChildren();
 

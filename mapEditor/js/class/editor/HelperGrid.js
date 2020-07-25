@@ -29,7 +29,6 @@ export default class HelperGrid {
 
         this.ctx.clear(true);
         this.ctx.setLineDash(_G.gridDashes);
-        console.log("xs", camCoord.x + xs[0])
 
         for (let u = 0, len = xs.length; u < len; u++) {
             this.ctx.beginPath();

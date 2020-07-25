@@ -18,6 +18,7 @@ export default class CollisionBox {
         this.buffer.height = vpHeight;
         this.iconColor = _G.iconColor;
         this.boxes = [];
+        this.texture = this.createIconTexture(ts(gridProps.getBlockSize()));
     }
 
     createIconTexture(size) {
@@ -30,27 +31,25 @@ export default class CollisionBox {
         return new PIXI.Texture.from(iconBuffer);
     }
 
-    set(coord, texture = null) {
+    render(box) {
         const camCoord = camera.getCoords();
-        if (!texture) {
-            texture = this.createIconTexture(ts(gridProps.getBlockSize()));
-        } 
-        const sprite = new PIXI.Sprite(texture);
-        sprite.position.set(ts(camCoord.x + coord.x), ts(camCoord.y + coord.y));
+        const sprite = new PIXI.Sprite(this.texture);
+        sprite.position.set(camCoord.x + ts(box.x) - 1, camCoord.y + ts(box.y) - 1);
+        sprite.width = ts(gridProps.getBlockSize()) + 2;
+        sprite.height = ts(gridProps.getBlockSize()) + 2;
         collisionContainer.addChild(sprite);
     }
 
     rebuild() {
         collisionContainer.removeChildren();
-        const texture = this.createIconTexture(ts(gridProps.getBlockSize()));
         this.boxes.forEach((box) => {
-            this.set({ x: box.x, y: box.y }, texture);
+            this.render(box);
         });
     }
 
-    addBox(coord) {
-        if (!this.boxes.find((box) => box.x === coord.x && box.y === coord.y)) {
-            const box = { x: coord.x, y: coord.y };
+    addBox(coord, cellId) {
+        if (!this.boxes.find((box) => box.cellId === cellId)) {
+            const box = { x: coord.x, y: coord.y, cellId };
             this.boxes.push(box);
             return box;
         }
@@ -62,7 +61,7 @@ export default class CollisionBox {
         if (boxIndex !== -1) {
             this.boxes.splice(boxIndex, 1);
             return true;
-        } 
+        }
         return false;
     }
 

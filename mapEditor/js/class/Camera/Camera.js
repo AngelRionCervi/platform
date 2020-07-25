@@ -17,7 +17,7 @@ class Camera {
         this.zoom = 1;
         this.zoomIndex = 0;
         this.zoomStep = 0.8;
-        this.maxZoom = 2;
+        this.maxZoom = 10;
         this.minZoom = 0.08;
         this.still = false;
         this.prevZoom = { x: 0, y: 0 };
@@ -27,6 +27,14 @@ class Camera {
 
     getCoords() {
         return { x: this.x, y: this.y };
+    }
+
+    get worldX() {
+        return Math.floor(this.x / this.zoom);
+    }
+
+    get worldY() {
+        return Math.floor(this.y / this.zoom);
     }
 
     getZoomPos() {
@@ -129,7 +137,7 @@ class Camera {
         const tw = this.toWorld.bind(this);
         const ts = this.toScreen.bind(this);
         const trueBS = ts(bs);
-
+        //console.log(tw(this.x))
         let lastCX;
         for (let x = tw(this.x) > 0 ? tw(this.x) : -bs; x < Math.round(tw(this.viewPortWidth) + bs); x += bs) {
             const n = Math.round((x - tw(this.x)) / bs);
@@ -137,16 +145,17 @@ class Camera {
             const cx = n > 0 ? n - 1 : 0;
             if (lastCX !== cx) {
                 lastCX = cx;
-                /*
-                gridCoords[cx].map((cell) => {
-                    cell.setOffsetX(this.x);
+                
+                gridCoords[cx].forEach((cell) => {
+                    cell.setOffsetX(tw(this.x));
                 });
+                
                 if (cx > 0) {
                     const addedW = Math.abs(gridCoords[cx][0].tx() - gridCoords[cx - 1][0].tx()) - trueBS;
                     gridCoords[cx].map((cell) => {
                         cell.setBlockAddedW(addedW);
                     });
-                }*/
+                }
                 cellToInteract[cx] = [];
                 for (let y = tw(this.y) > 0 ? tw(this.y) : -bs; y < Math.round(tw(this.viewPortHeight) + bs); y += bs) {
                     const m = Math.round((y - tw(this.y)) / bs);
@@ -154,12 +163,12 @@ class Camera {
 
                     const cy = m > 0 ? m : 0;
                     const cell = gridCoords[cx][cy];
-                    /*
-                    cell.setOffsetY(this.y);
+                    
+                    cell.setOffsetY(tw(this.y));
                     if (cy > 0) {
                         const addedH = Math.abs(cell.ty() - gridCoords[cx][cy - 1].ty()) - trueBS;
                         cell.setBlockAddedH(addedH);
-                    }*/
+                    }
                     //if (!cellToInteract[cx] || !cellToInteract[cx][cy]) continue;
                     // console.log(cx, cy)
                     cellToInteract[cx][cy] = cell;

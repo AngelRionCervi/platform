@@ -23,8 +23,10 @@ export class Cell {
         this.sliceRealHeight = 0;
         this.layerList = [];
         this.collisionEnabled = false;
-        this.tx = () => Math.floor((this.x + this.xOffset) * camera.getZoom());
-        this.ty = () => Math.floor((this.y + this.yOffset) * camera.getZoom());
+        this.tx = () => camera.toScreen(this.x) + camera.x;
+        this.ty = () => camera.toScreen(this.y) + camera.y;
+        //this.tx = () => Math.floor((this.x + this.xOffset) * camera.getZoom());
+        //this.ty = () => Math.floor((this.y + this.yOffset) * camera.getZoom());
     }
 
     enableCollision() {
