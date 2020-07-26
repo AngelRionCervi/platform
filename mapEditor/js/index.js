@@ -19,7 +19,7 @@ import { SceneObjectListInteraction } from "./class/sceneObjects/SceneObjectList
 import { GameObjectList } from "./class/gameObjects/GameObjectList.js";
 import { GameObjectListInteraction } from "./class/gameObjects/GameObjectListInteraction.js";
 import { gameObjectBufferList } from "./class/general/CanvasBuffer.js";
-import itemSelection from "./class/general/itemSelection.js";
+import entitySelection from "./class/general/entitySelection.js";
 
 const gridInteraction = new GridInteraction();
 const grid = new Grid();
@@ -181,9 +181,11 @@ document.addEventListener("click", (e) => {
 
 function handle_Grid_Left_Click_Drawing(coord, moving) {
     const gameObjectInst = gameObjectBufferList.getBufferByCoord(coord);
+    console.log("INST", gameObjectInst)
 
     if (tools.getSelected() === "collision") {
         grid.setCollisionBox(coord); 
+        return;
     }
 
     if (palette.isAnAssetSelected()) {
@@ -204,56 +206,48 @@ function handle_Grid_Left_Click_Drawing(coord, moving) {
             );
         } 
     } else if (gameObjectList.isAnObjectSelected() && !moving) {
+        if (!_keyboard.act("lShift")) {
+            entitySelection.unselectAll();
+        }
         if (gameObjectInst) {
-            if (itemSelection.isSelected(gameObjectInst.id) && !_keyboard.act("lShift")) {
-                itemSelection.unselect(gameObjectInst.id);
-            } else {
-                itemSelection.add(gameObjectInst);
+            if (!entitySelection.isSelected(gameObjectInst.id)) {
+                entitySelection.add(gameObjectInst);
             }
             renderGrid();
             return;
         }
-        if (!_keyboard.act("lShift")) {
-            itemSelection.unselectAll();
-        }
-
+        
         const objectID = gameObjectList.getCurrentObjectID();
         grid.setGameObject(coord, objectID, gameObjectList.addGameObjectToScene.bind(gameObjectList));
     } else if (gameObjectInst && moving && !grid.isDragging()) {
-        console.log("STARTED dragging");
-        grid.startDragging(coord, itemSelection.getSelectedIDs());
+        grid.startDragging(coord, entitySelection.getSelectedIDs());
     } else if (grid.isDragging()) {
-        console.log("dragging");
-        grid.drag(coord, itemSelection.getSelectedIDs());
+        grid.drag(coord, entitySelection.getSelectedIDs());
     }
 
     renderGrid();
 }
 
 function handle_Grid_Right_Click_Drawing(coord, moving) {
-    const cell = grid.getCellByCursor(coord);
-    const cellContent = cell.getContent();
+    //const cell = grid.getCellByCursor(coord);
+    //const cellContent = cell.getContent();
 
     const gameObjectInst = gameObjectBufferList.getBufferByCoord(coord);
 
     if (gameObjectInst && !moving) {
-        if (!itemSelection.isSelected(gameObjectInst.id)) {
-            if (!_keyboard.act("lShift")) {
-                itemSelection.unselectAll();
-            }
-            itemSelection.add(gameObjectInst);
+        if (entitySelection.isSelected(gameObjectInst.id)) {
+            /*if (!_keyboard.act("lShift")) {
+                entitySelection.unselectAll();
+            }*/
+            entitySelection.unselect(gameObjectInst.id);
         }
     } else {
+        entitySelection.unselectAll();
         //sceneObjectList.removeSceneObject(cellContent.prop.getID());
-        grid.removeCellByCoord(coord, "scene");
+        //grid.removeCellByCoord(coord, "scene");
     }
 
     renderGrid();
 }
 
-const mainLoop = () =>
-    setInterval(() => {
-        itemSelection.animate();
-    }, 1000 / 10);
 
-mainLoop();

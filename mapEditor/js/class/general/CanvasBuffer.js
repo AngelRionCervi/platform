@@ -1,10 +1,7 @@
 import gridProps from "../editor/GridProps.js";
 import camera from "../Camera/Camera.js";
 import * as _H from "../../lib/helpers.js";
-import { getCanvas, getContext, app, helperGridContainer, sceneContainer, collisionContainer } from "../general/canvasRef.js";
-import PixiDrawing from "../../lib/PixiDrawing.js";
-
-const pixiDrawing = new PixiDrawing(app);
+import { sceneContainer, entityContainer } from "../general/canvasRef.js";
 
 class CanvasBuffer {
     constructor() {
@@ -54,20 +51,6 @@ class CanvasBuffer {
                 sprite.width = blockSize;
                 sprite.height = blockSize;
                 sceneContainer.addChild(sprite);
-
-                //console.log(asset.texture.baseTexture)
-                /*
-                this.getBufferCtx().drawImage(
-                    asset.getSprite(),
-                    slice.sx - slice.sx * (asset.trueWidth / asset.width - 1),
-                    slice.sy - slice.sy * (asset.trueHeight / asset.height - 1),
-                    blockSize,
-                    blockSize,
-                    slice.x,
-                    slice.y,
-                    blockSize,
-                    blockSize
-                );*/
             } else {
                 const sprite = new PIXI.Sprite(asset.texture);
                 sprite.position.set(coord.x, coord.y);
@@ -75,14 +58,7 @@ class CanvasBuffer {
                 sprite.height = asset.trueHeight;
                 sceneContainer.addChild(sprite);
             }
-            //const sceneTexture = new PIXI.BaseTexture.from(this.getBuffer());
-            //pixiDrawing.on(sceneContainer).drawImage(sceneTexture).done();
-        } else if (type === "gameObject") {
-            //cell.setBlockType("wall").setGameObject(object);
         }
-    }
-    updateCollisionBoxes(coord) {
-
     }
     clearTile(coord, blockSize) {
         this.setFillStyle("white");
@@ -113,13 +89,20 @@ class GameObjectBufferList {
     }
 
     add(gObj, coord) {
+        console.log(gObj);
         const bufferObj = new CanvasBuffer();
         const asset = gObj.getAsset();
         const showObjID = gObj.getUniqID();
         bufferObj.setBuffer(asset);
         const id = _H.uniqid("b");
-        this.list.push({ id, showObjID, bufferObj, coord, asset, index: this.list.length });
-        bufferObj.getBufferCtx().drawImage(asset.getSprite(), 0, 0);
+        
+        //bufferObj.getBufferCtx().drawImage(asset.getSprite(), 0, 0);
+        const sprite = new PIXI.Sprite(asset.texture);
+        sprite.position.set(coord.x, coord.y);
+        sprite.width = asset.trueWidth;
+        sprite.height = asset.trueHeight;
+        entityContainer.addChild(sprite);
+        this.list.push({ id, sprite, showObjID, bufferObj, coord, asset, index: this.list.length });
         return id;
     }
 
@@ -141,13 +124,13 @@ class GameObjectBufferList {
         let buffer = null;
         for (let u = 0; u < this.list.length; u++) {
             const bufferCoord = this.list[u].coord;
-            const assetW = this.list[u].asset.getWidth();
-            const assetH = this.list[u].asset.getHeight();
+            const assetW = this.list[u].asset.trueWidth;
+            const assetH = this.list[u].asset.trueHeight;
             if (
-                wCoord.x >= bufferCoord.x + camCoord.x &&
-                wCoord.x <= bufferCoord.x + camCoord.x + assetW &&
-                wCoord.y >= bufferCoord.y + camCoord.y &&
-                wCoord.y <= bufferCoord.y + camCoord.y + assetH
+                wCoord.x >= bufferCoord.x + tw(camCoord.x) &&
+                wCoord.x <= bufferCoord.x + tw(camCoord.x) + assetW &&
+                wCoord.y >= bufferCoord.y + tw(camCoord.y) &&
+                wCoord.y <= bufferCoord.y + tw(camCoord.y) + assetH
             ) {
                 if (!buffer || buffer.index < this.list[u].index) {
                     buffer = this.list[u];

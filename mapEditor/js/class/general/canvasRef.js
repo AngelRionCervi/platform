@@ -16,12 +16,13 @@ sceneContainer.name = "scene";
 export const helperGridContainer = new PIXI.Container();
 helperGridContainer.name = "helperGrid";
 export const entityContainer = new PIXI.Container();
-sceneContainer.name = "entities";
+entityContainer.name = "entities";
 export const collisionContainer = new PIXI.Container();
 collisionContainer.name = "collisions";
+export const selectionContainer = new PIXI.Container();
+selectionContainer.name = "selections";
 
-app.stage.addChild(sceneContainer, entityContainer, collisionContainer, helperGridContainer);
-
+app.stage.addChild(sceneContainer, entityContainer, collisionContainer, selectionContainer, helperGridContainer);
 
 export function getCanvas() {
     return document.getElementById("mapEditorCanvas");
@@ -32,5 +33,5 @@ export function getContext() {
 }
 
 export function getGridDiv() {
-    return document.getElementById('canvas_grid');
+    return document.getElementById("canvas_grid");
 }

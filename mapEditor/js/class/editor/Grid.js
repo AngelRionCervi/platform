@@ -2,11 +2,20 @@ import { Cell } from "./Cell.js";
 import { GridNormalization } from "./GridNormalization.js";
 import * as _H from "../../lib/helpers.js";
 import { _G } from "../general/globals.js";
-import { getCanvas, getContext, app, sceneContainer, collisionContainer, helperGridContainer } from "../general/canvasRef.js";
+import {
+    getCanvas,
+    getContext,
+    app,
+    sceneContainer,
+    collisionContainer,
+    helperGridContainer,
+    entityContainer,
+    selectionContainer
+} from "../general/canvasRef.js";
 import gridProps from "./GridProps.js";
 import camera from "../Camera/Camera.js";
 import { sceneBuffer, gameObjectBufferList, changeBufferSize } from "../general/CanvasBuffer.js";
-import itemSelection from "../general/itemSelection.js";
+import entitySelection from "../general/entitySelection.js";
 import HelperGrid from "./HelperGrid.js";
 import CollisionBox from "./CollisionBox.js";
 import PixiDrawing from "../../lib/PixiDrawing.js";
@@ -19,7 +28,7 @@ const pixiDrawing = new PixiDrawing(app);
 const canvas = getCanvas();
 const ctx = getContext();
 
-_H.spy(camera, "setScale", [/*() => helperGrid.build()*/, () => renderGrid("zoomed")]); // spy for the methods calls of either "increaseZoom" or "decreaseZoom" in camera and exec cb
+_H.spy(camera, "setScale", [, /*() => helperGrid.build()*/ () => renderGrid("zoomed")]); // spy for the methods calls of either "increaseZoom" or "decreaseZoom" in camera and exec cb
 
 export class Grid {
     constructor() {
@@ -63,6 +72,13 @@ export class Grid {
         return { x, y };
     }
 
+    floorMouseNoBlock(coords) {
+        const tw = camera.toWorld.bind(camera);
+        const x = tw(coords.x - camera.x);
+        const y = tw(coords.y - camera.y);
+        return { x, y };
+    }
+
     getCellByCursor(cursorPos, coords = null) {
         const { x, y } = this.floorMouse(cursorPos);
         if (coords) {
@@ -79,6 +95,7 @@ export class Grid {
         const tw = camera.toWorld.bind(camera);
         const ts = camera.toScreen.bind(camera);
         const camCoords = camera.getCoords();
+        const zoom = camera.getZoom();
 
         const adjWidth = _H.roundToNearestMult(asset.width, blockSize);
         const adjHeight = _H.roundToNearestMult(asset.height, blockSize);
@@ -91,6 +108,7 @@ export class Grid {
         const restY = _H.posOr0(-(gridProps.getHeight() - maxY));
 
         const floorCursor = this.floorMouse(cursorPos);
+        const cell = this.getCellByCursor(cursorPos);
 
         return {
             blockSize,
@@ -105,6 +123,8 @@ export class Grid {
             floorCursor,
             sampleWidth,
             sampleHeight,
+            cell,
+            zoom,
         };
     }
 
@@ -150,38 +170,12 @@ export class Grid {
         const prop = addGameObjectToList(cursorPos, objectID);
         if (!prop) return;
 
-        const {
-            blockSize,
-            gridTiles,
-            tw,
-            ts,
-            camCoords,
-            maxX,
-            restX,
-            maxY,
-            restY,
-            floorCursor,
-        } = this.getAddObjectLoopProps(cursorPos, prop.asset);
-
-        /*const concernedCells = [];
-        
-        for (let x = cursorPos.x; x < ts(maxX - restX + camCoords.x); x += ts(blockSize)) {
-            for (let y = cursorPos.y; y < ts(maxY - restY + camCoords.y); y += ts(blockSize)) {
-                const floored = this.floorMouse({ x, y });
-                const cell = gridTiles[floored.x / blockSize][floored.y / blockSize];
-                concernedCells.push(cell.getID());
-                const slice = { x: tw(x - cursorPos.x), y: tw(y - cursorPos.y) };
-                sceneBuffer.updateBuffer(cell, prop, slice, "gameObject");
-            }
-        }
-        prop.setCells(concernedCells);*/
-
-        gameObjectBufferList.add(prop, { x: floorCursor.x, y: floorCursor.y });
+        const coord = this.floorMouseNoBlock(cursorPos);
+        gameObjectBufferList.add(prop, coord);
         return this;
     }
 
     setCollisionBox(curPos) {
-        
         const cell = this.getCellByCursor(curPos);
 
         if (!cell.isCollisionEnabled()) {
@@ -525,20 +519,17 @@ export function renderGrid(zoomed = false) {
     const camCoords = camera.getCoords();
 
     gameObjectBufferList.update();
-    if (!camera.still) {
-        
-    } 
-    if (zoomed) {
-        //collisionBox.rebuild();
-        
-    }
     helperGrid.build();
-    itemSelection.create();
- 
+    entitySelection.create();
+
     sceneContainer.scale.set(zoom);
     sceneContainer.position.set(camCoords.x, camCoords.y);
+    entityContainer.scale.set(zoom);
+    entityContainer.position.set(camCoords.x, camCoords.y);
     collisionContainer.scale.set(zoom);
     collisionContainer.position.set(camCoords.x, camCoords.y);
+    selectionContainer.scale.set(zoom);
+    selectionContainer.position.set(camCoords.x, camCoords.y)
 
     camera.setStill(true);
 }
@@ -579,12 +570,12 @@ function debugRenderedCells(cells) {
     newGrid.forEach((col, colIndex, grid) => {
         if (colIndex > 0) {
             col.map((cell) => {
-                cell.addedBlockW = Math.abs(grid[colIndex][0].tx() - grid[colIndex - 1][0].tx()) - trueBS;
+                cell.addedBlockW = Math.abs(grid[colIndex][0].tx - grid[colIndex - 1][0].tx) - trueBS;
             });
         }
         col.forEach((cell, cellY, colArr) => {
             if (cellY > 0) {
-                cell.addedBlockH = Math.abs(colArr[cellY].ty() - colArr[cellY - 1].ty()) - trueBS;
+                cell.addedBlockH = Math.abs(colArr[cellY].ty - colArr[cellY - 1].ty) - trueBS;
             }
         });
     });

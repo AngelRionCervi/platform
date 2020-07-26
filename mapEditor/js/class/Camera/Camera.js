@@ -136,7 +136,7 @@ class Camera {
         const tw = this.toWorld.bind(this);
         const ts = this.toScreen.bind(this);
         const trueBS = ts(bs);
-        //console.log(tw(this.x))
+
         let lastCX;
         for (let x = tw(this.x) > 0 ? tw(this.x) : -bs; x < Math.round(tw(this.viewPortWidth) + bs); x += bs) {
             const n = Math.round((x - tw(this.x)) / bs);
@@ -146,7 +146,7 @@ class Camera {
                 lastCX = cx;
 
                 if (cx > 0) {
-                    const addedW = Math.abs(gridCoords[cx][0].tx() - gridCoords[cx - 1][0].tx()) - trueBS;
+                    const addedW = Math.abs(gridCoords[cx][0].tx - gridCoords[cx - 1][0].tx) - trueBS;
                     gridCoords[cx - 1].forEach((cell, i, a) => {
                         cell.setBlockAddedW(addedW);
                     });
@@ -160,7 +160,7 @@ class Camera {
                     const cell = gridCoords[cx][cy];
 
                     if (cy > 0) {
-                        const addedH = Math.abs(cell.ty() - gridCoords[cx][cy - 1].ty()) - trueBS;
+                        const addedH = Math.abs(cell.ty - gridCoords[cx][cy - 1].ty) - trueBS;
                         gridCoords[cx][cy - 1].setBlockAddedH(addedH);
                     }
                     //if (!cellToInteract[cx] || !cellToInteract[cx][cy]) continue;
