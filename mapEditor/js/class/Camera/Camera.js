@@ -91,7 +91,6 @@ class Camera {
          */
         this.x = -(this.toScreen(x - this.x, "noRound") / oldZoom - x);
         this.y = -(this.toScreen(y - this.y, "noRound") / oldZoom - y);
-        console.log(this.zoom);
         return this;
     }
 
@@ -145,14 +144,10 @@ class Camera {
             const cx = n > 0 ? n - 1 : 0;
             if (lastCX !== cx) {
                 lastCX = cx;
-                
-                gridCoords[cx].forEach((cell) => {
-                    cell.setOffsetX(tw(this.x));
-                });
-                
+
                 if (cx > 0) {
                     const addedW = Math.abs(gridCoords[cx][0].tx() - gridCoords[cx - 1][0].tx()) - trueBS;
-                    gridCoords[cx].map((cell) => {
+                    gridCoords[cx - 1].forEach((cell, i, a) => {
                         cell.setBlockAddedW(addedW);
                     });
                 }
@@ -163,11 +158,10 @@ class Camera {
 
                     const cy = m > 0 ? m : 0;
                     const cell = gridCoords[cx][cy];
-                    
-                    cell.setOffsetY(tw(this.y));
+
                     if (cy > 0) {
                         const addedH = Math.abs(cell.ty() - gridCoords[cx][cy - 1].ty()) - trueBS;
-                        cell.setBlockAddedH(addedH);
+                        gridCoords[cx][cy - 1].setBlockAddedH(addedH);
                     }
                     //if (!cellToInteract[cx] || !cellToInteract[cx][cy]) continue;
                     // console.log(cx, cy)

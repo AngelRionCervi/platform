@@ -2,7 +2,7 @@ import { Cell } from "./Cell.js";
 import { GridNormalization } from "./GridNormalization.js";
 import * as _H from "../../lib/helpers.js";
 import { _G } from "../general/globals.js";
-import { getCanvas, getContext, app, helperGridContainer, sceneContainer } from "../general/canvasRef.js";
+import { getCanvas, getContext, app, sceneContainer, collisionContainer, helperGridContainer } from "../general/canvasRef.js";
 import gridProps from "./GridProps.js";
 import camera from "../Camera/Camera.js";
 import { sceneBuffer, gameObjectBufferList, changeBufferSize } from "../general/CanvasBuffer.js";
@@ -19,7 +19,7 @@ const pixiDrawing = new PixiDrawing(app);
 const canvas = getCanvas();
 const ctx = getContext();
 
-_H.spy(camera, "setScale", [/*() => helperGrid.build()*/, () => renderGrid()]); // spy for the methods calls of either "increaseZoom" or "decreaseZoom" in camera and exec cb
+_H.spy(camera, "setScale", [/*() => helperGrid.build()*/, () => renderGrid("zoomed")]); // spy for the methods calls of either "increaseZoom" or "decreaseZoom" in camera and exec cb
 
 export class Grid {
     constructor() {
@@ -186,7 +186,7 @@ export class Grid {
 
         if (!cell.isCollisionEnabled()) {
             const floorCoord = this.floorMouse(curPos);
-            const box = collisionBox.addBox(floorCoord, cell.getID());
+            const box = collisionBox.addBox(floorCoord, cell);
             if (box) {
                 cell.enableCollision();
                 collisionBox.render(box);
@@ -519,64 +519,27 @@ function createMapBorder() {
     }
 }
 
-export function renderGrid() {
+export function renderGrid(zoomed = false) {
     camera.setCellsToInteract(gridProps.getTiles());
-    const tw = camera.toWorld.bind(camera);
-    const ts = camera.toScreen.bind(camera);
     const zoom = camera.getZoom();
-    //const { vpWidth, vpHeight } = camera.getViewPort();
-    //ctx.clear(true);
-    //app.stage.removeChildren();
-
-    
-
-    const sceneBufferCanvas = sceneBuffer.getBuffer();
-    const gameObjectBufferCanvas = gameObjectBufferList.getMainBuffer();
     const camCoords = camera.getCoords();
-
-    //const helperGridBuffer = helperGrid.getBuffer();
-
-    //const sceneB = new PIXI.BaseTexture.from(sceneBufferCanvas);
-
-    /*ctx.imageSmoothingEnabled = false;
-    //ctx.globalCompositeOperation = "source-over";
-    ctx.drawImage(sceneBufferCanvas, -camCoords.x, -camCoords.y, tw(vpWidth), tw(vpHeight), 0, 0, vpWidth, vpHeight);
-    ctx.drawImage(
-        gameObjectBufferCanvas,
-        -camCoords.x,
-        -camCoords.y,
-        tw(vpWidth),
-        tw(vpHeight),
-        0,
-        0,
-        vpWidth,
-        vpHeight
-    );
-    ctx.drawImage(helperGridBuffer, 0, 0, vpWidth, vpHeight)
-    createMapBorder();*/
 
     gameObjectBufferList.update();
     if (!camera.still) {
-        collisionBox.rebuild();
-        helperGrid.build();
+        
     } 
-
+    if (zoomed) {
+        //collisionBox.rebuild();
+        
+    }
+    helperGrid.build();
     itemSelection.create();
  
-
-    //const baseSceneBuffer = new PIXI.BaseTexture.from(sceneBufferCanvas);
-    //const baseHelperGridBuffer = new PIXI.BaseTexture.from(helperGridBuffer);
-    //document.body.appendChild(sceneBufferCanvas);
-
-    //pixiDrawing.on(sceneContainer).drawImage(sceneB, camCoords.x, camCoords.y).done();
-    //helperGridContainer.scale.set(zoom);
-    //helperGridContainer.position.set(ts(camCoords.x), ts(camCoords.y))
     sceneContainer.scale.set(zoom);
     sceneContainer.position.set(camCoords.x, camCoords.y);
+    collisionContainer.scale.set(zoom);
+    collisionContainer.position.set(camCoords.x, camCoords.y);
 
-    //pixiDrawing.on(helperGridContainer).drawImage(helperGridBuffer, 0, 0, vpWidth, vpHeight).done();
-    //app.stage.addChild(helperGridContainer);
-    //console.log(app.stage);
     camera.setStill(true);
 }
 

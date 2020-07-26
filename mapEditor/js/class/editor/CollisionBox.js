@@ -1,24 +1,17 @@
 import gridProps from "./GridProps.js";
 import camera from "../Camera/Camera.js";
 import { _G } from "../general/globals.js";
-import { app, collisionContainer } from "../general/canvasRef.js";
+import { collisionContainer } from "../general/canvasRef.js";
 
 const { vpWidth, vpHeight } = camera.getViewPort();
 const ts = camera.toScreen.bind(camera);
 const tw = camera.toWorld.bind(camera);
 
-//const collisionsSprite = new PIXI.Sprite();
-//collisionContainer.addChild(collisionsSprite);
-
 export default class CollisionBox {
     constructor() {
-        this.buffer = document.createElement("canvas");
-        this.ctx = this.buffer.getContext("2d");
-        this.buffer.width = vpWidth;
-        this.buffer.height = vpHeight;
         this.iconColor = _G.iconColor;
         this.boxes = [];
-        this.texture = this.createIconTexture(ts(gridProps.getBlockSize()));
+        this.texture = this.createIconTexture(gridProps.getBlockSize());
     }
 
     createIconTexture(size) {
@@ -32,11 +25,12 @@ export default class CollisionBox {
     }
 
     render(box) {
-        const camCoord = camera.getCoords();
+        const coord = box.cell.getCoords();
         const sprite = new PIXI.Sprite(this.texture);
-        sprite.position.set(camCoord.x + ts(box.x) - 1, camCoord.y + ts(box.y) - 1);
-        sprite.width = ts(gridProps.getBlockSize()) + 2;
-        sprite.height = ts(gridProps.getBlockSize()) + 2;
+        const trueBS = gridProps.getBlockSize();
+        sprite.position.set(coord.x, coord.y);
+        sprite.width = trueBS;
+        sprite.height = trueBS;
         collisionContainer.addChild(sprite);
     }
 
@@ -47,9 +41,10 @@ export default class CollisionBox {
         });
     }
 
-    addBox(coord, cellId) {
-        if (!this.boxes.find((box) => box.cellId === cellId)) {
-            const box = { x: coord.x, y: coord.y, cellId };
+    addBox(coord, cell) {
+        console.log(coord)
+        if (!this.boxes.find((box) => box.x === coord.x && box.y === coord.y)) {
+            const box = { x: coord.x, y: coord.y, cell };
             this.boxes.push(box);
             return box;
         }
