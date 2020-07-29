@@ -1,12 +1,11 @@
 import gridProps from "./GridProps.js";
 import camera from "../Camera/Camera.js";
 import { _G } from "../general/globals.js";
-import { app, helperGridContainer } from "../general/canvasRef.js";
-import PixiDrawing from "../../lib/PixiDrawing.js";
+import { helperGridContainer } from "../general/canvasRef.js";
+import * as _H from "../../lib/helpers.js";
 
 const { vpWidth, vpHeight } = camera.getViewPort();
 const ts = camera.toScreen.bind(camera);
-const tw = camera.toWorld.bind(camera);
 
 const gridSprite = new PIXI.Sprite();
 helperGridContainer.addChild(gridSprite);
@@ -29,29 +28,29 @@ export default class HelperGrid {
 
         this.ctx.clear(true);
         this.ctx.setLineDash(_G.gridDashes);
+        this.ctx.strokeStyle = _G.gridColor;
 
         for (let u = 0, len = xs.length; u < len; u++) {
             this.ctx.beginPath();
-            this.ctx.moveTo(0.5 + camCoord.x + ts(xs[u]), camCoord.y);
-            this.ctx.lineTo(0.5 + camCoord.x + ts(xs[u]), camCoord.y + ts(gh));
+            this.ctx.moveTo(camCoord.x + ts(xs[u]) + 0.5, camCoord.y);
+            this.ctx.lineTo(camCoord.x + ts(xs[u]) + 0.5, camCoord.y + ts(gh));
             this.ctx.stroke();
         }
 
         for (let u = 0, len = ys.length; u < len; u++) {
             this.ctx.beginPath();
-            this.ctx.moveTo(camCoord.x, 0.5 + camCoord.y + ts(ys[u]));
-            this.ctx.lineTo(camCoord.x + ts(gw), 0.5 + camCoord.y + ts(ys[u]));
+            this.ctx.moveTo(camCoord.x, camCoord.y + ts(ys[u]) + 0.5);
+            this.ctx.lineTo(camCoord.x + ts(gw), camCoord.y + ts(ys[u]) + 0.5);
             this.ctx.stroke();
         }
 
-        const base = new PIXI.BaseTexture.from(this.buffer);
-        const texture = new PIXI.Texture(base);
+        const texture = new PIXI.Texture.from(this.buffer);
         gridSprite.texture = texture;
         gridSprite.texture.update();
     }
 
     getBuffer() {
-        return this.buffer;
+        return buffer;
     }
 }
 /*
@@ -88,20 +87,12 @@ export default class HelperGrid {
             line.moveTo(0.5 + ts(xs[u]), 0);
             line.drawDashLine(0.5 + ts(xs[u]), ts(gh), 2, 3);
             line.closePath();
-            //this.ctx.beginPath();
-            //this.ctx.moveTo(0.5 + ts(camCoord.x + xs[u]), ts(camCoord.y));
-            //this.ctx.lineTo(0.5 + ts(camCoord.x + xs[u]), ts(camCoord.y + gh));
-            //this.ctx.stroke();
         }
 
         for (let u = 0, len = ys.length; u < len; u++) {
             line.moveTo(0, 0.5 + ts(ys[u]));
             line.drawDashLine(ts(gw), 0.5 + ts(ys[u]), 2, 3);
             line.closePath();
-            //this.ctx.beginPath();
-            //this.ctx.moveTo(ts(camCoord.x), 0.5 + ts(camCoord.y + ys[u]));
-            //this.ctx.lineTo(ts(camCoord.x + gw), 0.5 + ts(camCoord.y + ys[u]));
-            //this.ctx.stroke();
         }
         
         const texture = app.renderer.generateTexture(line);

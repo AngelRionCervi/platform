@@ -10,7 +10,8 @@ import {
     collisionContainer,
     helperGridContainer,
     entityContainer,
-    selectionContainer
+    selectionContainer,
+    setCanvasSize,
 } from "../general/canvasRef.js";
 import gridProps from "./GridProps.js";
 import camera from "../Camera/Camera.js";
@@ -23,7 +24,6 @@ import PixiDrawing from "../../lib/PixiDrawing.js";
 const helperGrid = new HelperGrid();
 const collisionBox = new CollisionBox();
 const gridNormal = new GridNormalization();
-const pixiDrawing = new PixiDrawing(app);
 
 const canvas = getCanvas();
 const ctx = getContext();
@@ -40,6 +40,7 @@ export class Grid {
     }
 
     init() {
+        setCanvasSize(_G.viewPortWidth, _G.viewPortHeight);
         const blockSize = gridProps.getBlockSize();
         const width = gridProps.getWidth();
         const height = gridProps.getHeight();
@@ -57,8 +58,6 @@ export class Grid {
             }
         }
         gridProps.setTiles(tileCollection);
-        canvas.width = _G.viewPortWidth;
-        canvas.height = _G.viewPortHeight;
         sceneBuffer.setBuffer();
         camera.setCellsToInteract(gridProps.getTiles());
         helperGrid.build();
@@ -312,7 +311,7 @@ export class Grid {
             gridProps.moveAllRight(1).newColLeft(newCol);
             camera.moveRight(blockSize);
         }
-        changeBufferSize(side, "add");
+        //changeBufferSize(side, "add");
         renderGrid();
     }
 
@@ -345,7 +344,7 @@ export class Grid {
             gridProps.moveAllDown(1).newRowTop(newRow);
             camera.moveBottom(blockSize);
         }
-        changeBufferSize(side, "add");
+        //changeBufferSize(side, "add");
         renderGrid();
     }
 
@@ -519,7 +518,10 @@ export function renderGrid(zoomed = false) {
     const camCoords = camera.getCoords();
 
     gameObjectBufferList.update();
-    helperGrid.build();
+    if (zoomed || !camera.still) { // so it doesnt trigger when we draw
+        helperGrid.build();
+    }
+    
     entitySelection.create();
 
     sceneContainer.scale.set(zoom);

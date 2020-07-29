@@ -1,4 +1,5 @@
 const renderer = document.getElementById("mapEditorCanvas");
+const gridDiv = document.getElementById("canvas_grid");
 
 PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 
@@ -33,5 +34,12 @@ export function getContext() {
 }
 
 export function getGridDiv() {
-    return document.getElementById("canvas_grid");
+    return gridDiv;
+}
+
+export function setCanvasSize(w, h) {
+    gridDiv.style.width = w + "px";
+    gridDiv.style.height = h + "px";
+    renderer.width = w;
+    renderer.height = h;
 }

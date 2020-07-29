@@ -96,7 +96,6 @@ class GameObjectBufferList {
         bufferObj.setBuffer(asset);
         const id = _H.uniqid("b");
         
-        //bufferObj.getBufferCtx().drawImage(asset.getSprite(), 0, 0);
         const sprite = new PIXI.Sprite(asset.texture);
         sprite.position.set(coord.x, coord.y);
         sprite.width = asset.trueWidth;

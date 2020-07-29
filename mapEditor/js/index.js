@@ -181,7 +181,6 @@ document.addEventListener("click", (e) => {
 
 function handle_Grid_Left_Click_Drawing(coord, moving) {
     const gameObjectInst = gameObjectBufferList.getBufferByCoord(coord);
-    console.log("INST", gameObjectInst)
 
     if (tools.getSelected() === "collision") {
         grid.setCollisionBox(coord); 

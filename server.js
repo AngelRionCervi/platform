@@ -31,6 +31,7 @@ app.set('port', 5000);
 app.use("/backend/user_projects", express.static(__dirname + "/backend/user_projects"));
 app.use("/public", express.static(__dirname + "/public"));
 app.use("/mapEditor", express.static(__dirname + "/mapEditor"));
+app.use("/editorWorkers", express.static(__dirname + "/mapEditor/js/workers"));
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '/public/index.html'));

@@ -123,7 +123,7 @@ export function spy(obj, methods, callback) {
 export async function loadImages(imageSrcs) {
     return await Promise.all(
         imageSrcs.map(async (src) => {
-            return await new Promise((resolve) => {
+            return new Promise((resolve) => {
                 const buffer = document.createElement("canvas");
                 const image = new Image();
                 image.src = src;

@@ -1,10 +1,6 @@
 import { _G } from "../general/globals.js";
 import { renderGrid } from "../editor/Grid.js";
 import gridProps from "../editor/GridProps.js";
-import { roundTo, loadImages } from "../../lib/helpers.js";
-import gridCells from "../../lib/gridCells.js";
-
-const gridDiv = document.getElementById("canvas_grid");
 
 class Camera {
     constructor() {
@@ -89,8 +85,8 @@ class Camera {
          * (y + this.y')/this.zoom = (y + this.y)/zoom
          * =>
          */
-        this.x = -(this.toScreen(x - this.x, "noRound") / oldZoom - x);
-        this.y = -(this.toScreen(y - this.y, "noRound") / oldZoom - y);
+        this.x = Math.round(-(this.toScreen(x - this.x, "noRound") / oldZoom - x));
+        this.y = Math.round(-(this.toScreen(y - this.y, "noRound") / oldZoom - y));
         return this;
     }
 
@@ -144,13 +140,13 @@ class Camera {
             const cx = n > 0 ? n - 1 : 0;
             if (lastCX !== cx) {
                 lastCX = cx;
-
+/*
                 if (cx > 0) {
                     const addedW = Math.abs(gridCoords[cx][0].tx - gridCoords[cx - 1][0].tx) - trueBS;
                     gridCoords[cx - 1].forEach((cell, i, a) => {
                         cell.setBlockAddedW(addedW);
                     });
-                }
+                }*/
                 cellToInteract[cx] = [];
                 for (let y = tw(this.y) > 0 ? tw(this.y) : -bs; y < Math.round(tw(this.viewPortHeight) + bs); y += bs) {
                     const m = Math.round((y - tw(this.y)) / bs);
@@ -158,11 +154,11 @@ class Camera {
 
                     const cy = m > 0 ? m : 0;
                     const cell = gridCoords[cx][cy];
-
+                    /*
                     if (cy > 0) {
                         const addedH = Math.abs(cell.ty - gridCoords[cx][cy - 1].ty) - trueBS;
                         gridCoords[cx][cy - 1].setBlockAddedH(addedH);
-                    }
+                    }*/
                     //if (!cellToInteract[cx] || !cellToInteract[cx][cy]) continue;
                     // console.log(cx, cy)
                     cellToInteract[cx][cy] = cell;

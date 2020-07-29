@@ -118,10 +118,7 @@ body {
     position: absolute;
     top: 1px;
     left: 1px;
-    width: 1200px;
-    height: 650px;
     background-position: 0px 0px;
-    /*background-image: url('../images/grid/cell_0.png');*/
 }
 
 .tool-cell {
