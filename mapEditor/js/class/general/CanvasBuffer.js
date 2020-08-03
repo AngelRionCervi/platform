@@ -1,12 +1,13 @@
-import gridProps from "../editor/GridProps.js";
-import camera from "../Camera/Camera.js";
+import gridProps from "../editor/grid/GridProps.js";
+import camera from "../camera/Camera.js";
 import * as _H from "../../lib/helpers.js";
 import { sceneContainer, entityContainer } from "../general/canvasRef.js";
 
 class CanvasBuffer {
     constructor() {
-        this.buffer = document.createElement("canvas");
+        //this.buffer = document.createElement("canvas");
     }
+    /*
     setBuffer(asset = null) {
         if (asset) {
             this.buffer.width = asset.getWidth();
@@ -34,32 +35,31 @@ class CanvasBuffer {
         } else if (type === "gameObject") {
             //cell.setBlockType("wall").setGameObject(object);
         }
-    }
-    updateBuffer2(coord, asset, slice = null, type) {
-        if (type === "sceneObject") {
-            if (slice) {
-                const blockSize = gridProps.getBlockSize();
+    }*/
+    update(coord, asset, slice = null) {
+        if (slice) {
+            const blockSize = gridProps.getBlockSize();
 
-                const xSlice = Math.floor(slice.sx - slice.sx * (asset.trueWidth / asset.width - 1));
-                const ySlice = Math.floor(slice.sy - slice.sy * (asset.trueHeight / asset.height - 1));
+            const xSlice = Math.floor(slice.sx - slice.sx * (asset.trueWidth / asset.width - 1));
+            const ySlice = Math.floor(slice.sy - slice.sy * (asset.trueHeight / asset.height - 1));
 
-                const trim = new PIXI.Rectangle(xSlice, ySlice, blockSize, blockSize);
-                const texture = new PIXI.Texture(asset.texture.baseTexture, trim);
-                const sprite = new PIXI.Sprite(texture);
+            const trim = new PIXI.Rectangle(xSlice, ySlice, blockSize, blockSize);
+            const texture = new PIXI.Texture(asset.texture.baseTexture, trim);
+            const sprite = new PIXI.Sprite(texture);
 
-                sprite.position.set(slice.x, slice.y);
-                sprite.width = blockSize;
-                sprite.height = blockSize;
-                sceneContainer.addChild(sprite);
-            } else {
-                const sprite = new PIXI.Sprite(asset.texture);
-                sprite.position.set(coord.x, coord.y);
-                sprite.width = asset.trueWidth;
-                sprite.height = asset.trueHeight;
-                sceneContainer.addChild(sprite);
-            }
+            sprite.position.set(slice.x, slice.y);
+            sprite.width = blockSize;
+            sprite.height = blockSize;
+            sceneContainer.addChild(sprite);
+        } else {
+            const sprite = new PIXI.Sprite(asset.texture);
+            sprite.position.set(coord.x, coord.y);
+            sprite.width = asset.trueWidth;
+            sprite.height = asset.trueHeight;
+            sceneContainer.addChild(sprite);
         }
     }
+    /*
     clearTile(coord, blockSize) {
         this.setFillStyle("white");
         this.getBufferCtx().fillRect(coord.x, coord.y, blockSize, blockSize);
@@ -72,7 +72,7 @@ class CanvasBuffer {
     }
     getBufferCtx() {
         return this.getBuffer().getContext("2d");
-    }
+    }*/
 }
 
 export const sceneBuffer = new CanvasBuffer();
@@ -80,40 +80,25 @@ export const sceneBuffer = new CanvasBuffer();
 class GameObjectBufferList {
     constructor() {
         this.list = [];
-        this.mainBuffer = document.createElement("canvas");
-        setTimeout(() => {
-            // next callstack
-            this.mainBuffer.width = gridProps.getWidth();
-            this.mainBuffer.height = gridProps.getHeight();
-        }, 0);
     }
 
     add(gObj, coord) {
-        console.log(gObj);
-        const bufferObj = new CanvasBuffer();
-        const asset = gObj.getAsset();
+        const defaultAsset = gObj.getDefaultAsset();
         const showObjID = gObj.getUniqID();
-        bufferObj.setBuffer(asset);
+
         const id = _H.uniqid("b");
-        
-        const sprite = new PIXI.Sprite(asset.texture);
+
+        const sprite = new PIXI.AnimatedSprite(gObj.frames.map((el) => el.texture));
         sprite.position.set(coord.x, coord.y);
-        sprite.width = asset.trueWidth;
-        sprite.height = asset.trueHeight;
+        sprite.width = defaultAsset.trueWidth;
+        sprite.height = defaultAsset.trueHeight;
         entityContainer.addChild(sprite);
-        this.list.push({ id, sprite, showObjID, bufferObj, coord, asset, index: this.list.length });
+        this.list.push({ id, sprite, showObjID, coord, defaultAsset, index: this.list.length });
         return id;
     }
 
     remove(id) {
         this.list.splice(this.list.map((el) => el.id).indexOf(id), 1);
-    }
-
-    update() {
-        this.getMainBufferCtx().clear(true);
-        this.list.forEach((buffer) => {
-            this.getMainBufferCtx().drawImage(buffer.bufferObj.getBuffer(), buffer.coord.x, buffer.coord.y);
-        });
     }
 
     getBufferByCoord(coord) {
@@ -123,8 +108,8 @@ class GameObjectBufferList {
         let buffer = null;
         for (let u = 0; u < this.list.length; u++) {
             const bufferCoord = this.list[u].coord;
-            const assetW = this.list[u].asset.trueWidth;
-            const assetH = this.list[u].asset.trueHeight;
+            const assetW = this.list[u].defaultAsset.trueWidth;
+            const assetH = this.list[u].defaultAsset.trueHeight;
             if (
                 wCoord.x >= bufferCoord.x + tw(camCoord.x) &&
                 wCoord.x <= bufferCoord.x + tw(camCoord.x) + assetW &&
@@ -137,18 +122,6 @@ class GameObjectBufferList {
             }
         }
         return buffer;
-    }
-
-    getMainBuffer() {
-        return this.mainBuffer;
-    }
-
-    getMainBufferCtx() {
-        return this.getMainBuffer().getContext("2d");
-    }
-
-    getBuffer() {
-        return this.mainBuffer;
     }
 
     setCoord(id, coord) {

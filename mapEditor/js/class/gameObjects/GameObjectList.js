@@ -1,10 +1,11 @@
 import { GameObject } from "/mapEditor/js/class/gameObjects/GameObject.js";
 import { ShowGameObject } from "/mapEditor/js/class/gameObjects/ShowGameObject.js";
 import { DomBuilder } from "../../lib/DomBuilder.js";
-import { _G } from "../general/globals.js";
 import * as helper from "../../lib/helpers.js";
-import camera from "../Camera/Camera.js";
+import camera from "../camera/Camera.js";
+import gridProps from "../editor/grid/GridProps.js";
 import layout from "../editor/EditorLayout.js";
+import GameObjectConfig from "./GameObjectConfig.js";
 const dob = new DomBuilder();
 
 export class GameObjectList {
@@ -38,10 +39,10 @@ export class GameObjectList {
 
         let gameObjectShow = null;
         if (!curShowGameObject) {
-            gameObjectShow = new ShowGameObject(id, choseObj.getAsset(), coord);
+            gameObjectShow = new ShowGameObject(id, choseObj.getDefaultAsset(), coord);
         } else if (curShowGameObject && curGameObject.getID() !== id) {
             this.removeShowGameObject(curShowGameObject.getUniqID());
-            gameObjectShow = new ShowGameObject(id, choseObj.getAsset(), coord);
+            gameObjectShow = new ShowGameObject(id, choseObj.getDefaultAsset(), coord);
         } else {
             return false;
         }
@@ -92,7 +93,7 @@ export class GameObjectList {
         }
         const nameNode = dob.createNode("div", "game-object-name", null, name).done();
         const imageNode = dob.createNode("img", "game-object-img").done();
-        imageNode.src = object.getAsset().getSpritePath();
+        imageNode.src = object.getDefaultAsset().getSpritePath();
         const leftListener = {
             type: "click",
             callback: this.interaction.handleGameObjectClick.bind(this.interaction),
@@ -163,12 +164,16 @@ export class GameObjectList {
 
     getByCoord(coords) {
         const zoom = camera.getZoom();
-        const x = helper.roundToPrevMult(Math.round(coords.x / zoom - camera.x), _G.blockSize);
-        const y = helper.roundToPrevMult(Math.round(coords.y / zoom - camera.y), _G.blockSize);
+        const x = helper.roundToPrevMult(Math.round(coords.x / zoom - camera.x), gridProps.getBlockSize());
+        const y = helper.roundToPrevMult(Math.round(coords.y / zoom - camera.y), gridProps.getBlockSize());
         return this.curDisplayed.find((el) => x === el.coord.x && y === el.coord.y);
     }
 
     getCurDisplayed() {
         return this.curDisplayed;
+    }
+
+    createConfigWindow(gameObject) {
+        const config = GameObjectConfig(gameObject);
     }
 }

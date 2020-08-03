@@ -1,6 +1,6 @@
-import { Emitter } from "../../lib/Emitter.js";
-import { Mouse } from "../mouseHandling/Mouse.js";
-import { getGridDiv } from "../general/canvasRef.js";
+import { Emitter } from "../../../lib/Emitter.js";
+import { Mouse } from "../../mouseHandling/Mouse.js";
+import { getGridDiv } from "../../general/canvasRef.js";
 const grid = getGridDiv();
 const mouse = new Mouse();
 

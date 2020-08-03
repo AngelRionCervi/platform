@@ -4,7 +4,8 @@ import * as helper from "../../lib/helpers.js";
 
 export class ShowGameObject {
     constructor(goID, asset, coord) {
-        this.asset = asset;
+        this.defaultAsset = asset;
+        this.frames = [asset];
         this.coord = {
             x: helper.roundToPrevMult(coord.x, _G.blockSize),
             y: helper.roundToPrevMult(coord.y, _G.blockSize),
@@ -26,7 +27,7 @@ export class ShowGameObject {
         return this.uniqid;
     }
 
-    getAsset() {
-        return this.asset;
+    getDefaultAsset() {
+        return this.defaultAsset;
     }
 }

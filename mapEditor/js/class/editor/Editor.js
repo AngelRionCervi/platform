@@ -1,4 +1,4 @@
-import gridProps from "./GridProps.js";
+import gridProps from "./grid/GridProps.js";
 import { Emitter } from "../../lib/Emitter.js";
 import { DomBuilder } from "../../lib/DomBuilder.js";
 import layout from "./EditorLayout.js";

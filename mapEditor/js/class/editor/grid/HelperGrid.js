@@ -1,8 +1,8 @@
 import gridProps from "./GridProps.js";
-import camera from "../Camera/Camera.js";
-import { _G } from "../general/globals.js";
-import { helperGridContainer } from "../general/canvasRef.js";
-import * as _H from "../../lib/helpers.js";
+import camera from "../../camera/Camera.js";
+import { _G } from "../../general/globals.js";
+import { helperGridContainer } from "../../general/canvasRef.js";
+import * as _H from "../../../lib/helpers.js";
 
 const { vpWidth, vpHeight } = camera.getViewPort();
 const ts = camera.toScreen.bind(camera);
@@ -11,7 +11,7 @@ const gridSprite = new PIXI.Sprite();
 helperGridContainer.addChild(gridSprite);
 
 // canvas implementation is faster ??
-export default class HelperGrid {
+class HelperGrid {
     constructor() {
         this.buffer = document.createElement("canvas");
         this.ctx = this.buffer.getContext("2d");
@@ -53,6 +53,8 @@ export default class HelperGrid {
         return buffer;
     }
 }
+
+export default HelperGrid;
 /*
 
 const pixiDrawing = new PixiDrawing(app);

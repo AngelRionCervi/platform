@@ -2,19 +2,21 @@ import * as _H from "../../lib/helpers.js";
 
 export class GameObject {
     constructor(asset) {
-        this.asset = asset;
-        this.id = "o_" + _H.uniqid() + '_' + this.asset.getID();
+        this.defaultAsset = asset;
+        this.frames = [asset];
+        this.name = asset.name;
+        this.id = "o_" + _H.uniqid() + '_' + this.defaultAsset.getID();
     }
 
     getFileName() {
-        return this.asset.getFileName();
+        return this.defaultAsset.getFileName();
     }
 
     getID() {
         return this.id;
     }
 
-    getAsset() {
-        return this.asset;
+    getDefaultAsset() {
+        return this.defaultAsset;
     }
 }

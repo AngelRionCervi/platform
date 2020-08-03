@@ -1,5 +1,5 @@
 import * as _H from "../../lib/helpers.js";
-import gridProps from "../editor/GridProps.js";
+import gridProps from "../editor/grid/GridProps.js";
 
 export class Asset {
     constructor() {
@@ -13,10 +13,9 @@ export class Asset {
     }
 
     async build(info) {
-        const { sprite, width, height, pixiSprite, texture } = await this.loadImage(info.path);
+        const { sprite, width, height, texture } = await this.loadImage(info.path);
         const blockSize = gridProps.getBlockSize();
         this.sprite = sprite;
-        this.pixiSprite = pixiSprite;
         this.texture = texture;
         this.width = width;
         this.height = height;
@@ -39,8 +38,7 @@ export class Asset {
                 buffer.height = image.naturalHeight;
                 buffer.getContext("2d").drawImage(image, 0, 0);
                 const texture = PIXI.Texture.from(image);
-                const sprite = new PIXI.Sprite(texture);
-                resolve({ sprite: buffer, texture: texture, pixiSprite: sprite, width: buffer.width, height: buffer.height });
+                resolve({ sprite: buffer, texture: texture, width: buffer.width, height: buffer.height });
             });
         });
     }

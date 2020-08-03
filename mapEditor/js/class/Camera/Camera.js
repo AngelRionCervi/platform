@@ -1,6 +1,6 @@
 import { _G } from "../general/globals.js";
-import { renderGrid } from "../editor/Grid.js";
-import gridProps from "../editor/GridProps.js";
+import { renderGrid } from "../editor/grid/Grid.js";
+import gridProps from "../editor/grid/GridProps.js";
 
 class Camera {
     constructor() {

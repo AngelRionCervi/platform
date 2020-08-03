@@ -47,6 +47,13 @@ export class ContextMenu {
                                     callback: "removeGameObject",
                                     inner: "Remove game object",
                                 },
+                                option_2_el: {
+                                    name: "game_object_remove",
+                                    tag: "li",
+                                    class: "gameObject-context-menu-li context-menu-li",
+                                    callback: "gameObjectConfig",
+                                    inner: "settings",
+                                },
                             },
                         },
                     },
@@ -125,5 +132,9 @@ export class ContextMenu {
 
     removeGameObject(object) {
         this.emitter.emit("remove_game_object", object);
+    }
+
+    gameObjectConfig(object) {
+        this.emitter.emit("game_object_config", object);
     }
 }

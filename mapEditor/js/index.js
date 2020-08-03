@@ -7,9 +7,9 @@ import tools from "./class/tools/Tools.js";
 import { ContextMenu } from "./class/general/ContextMenu.js";
 import { Keyboard } from "./class/keyboardHandling/Keyboard.js";
 import { Project } from "./class/project/userProject.js";
-import { GridInteraction } from "./class/editor/GridInteraction.js";
-import { Grid, renderGrid } from "./class/editor/Grid.js";
-import camera from "./class/Camera/Camera.js";
+import { GridInteraction } from "./class/editor/grid/GridInteraction.js";
+import { Grid, renderGrid } from "./class/editor/grid/Grid.js";
+import camera from "./class/camera/Camera.js";
 import { Assets } from "./class/project/Assets.js";
 import { MapDownloader } from "./class/download/MapDownloader.js";
 import { Palette } from "./class/palette/Palette.js";
@@ -145,6 +145,10 @@ contextMenu.emitter.on("new_game_object", ({ detail }) => {
 
 contextMenu.emitter.on("remove_game_object", ({ detail }) => {
     gameObjectList.removeObject(detail.getID());
+});
+
+contextMenu.emitter.on("game_object_config", ({ detail: gameObject }) => {
+    gameObjectList.createConfigWindow(gameObject);
 });
 
 gameObjectListInteraction.emitter.on("game_object_click", ({ detail }) => {

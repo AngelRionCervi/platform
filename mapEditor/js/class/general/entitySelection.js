@@ -1,6 +1,4 @@
 import { _G } from "../general/globals.js";
-import gridProps from "../editor/GridProps.js";
-import camera from "../Camera/Camera.js";
 import { selectionContainer } from "../general/canvasRef.js";
 
 class EntitySelection {
@@ -13,14 +11,13 @@ class EntitySelection {
 
     getTextures(gameObjectInst) {
         const textures = [];
-        const ts = camera.toScreen.bind(camera);
         const borderWidth = _G.selectionBorderWidth;
         const dashLen = _G.selectionDashLength;
 
         for (let u = 0; u < dashLen * 3; u++) {
             const buffer = document.createElement("canvas");
-            buffer.width = gameObjectInst.asset.trueWidth + borderWidth * 2;
-            buffer.height = gameObjectInst.asset.trueHeight + borderWidth * 2;
+            buffer.width = gameObjectInst.defaultAsset.trueWidth + borderWidth * 2;
+            buffer.height = gameObjectInst.defaultAsset.trueHeight + borderWidth * 2;
             const bufferCtx = buffer.getContext("2d");
 
             bufferCtx.strokeStyle = "white";
@@ -52,10 +49,9 @@ class EntitySelection {
             sprite: selectionSprite,
             instance: gameObjectInst,
             coord: gameObjectInst.coord,
-            width: gameObjectInst.bufferObj.buffer.width,
-            height: gameObjectInst.bufferObj.buffer.height,
-            goInstID: gameObjectInst.id,
-            rendered: false,
+            width: gameObjectInst.defaultAsset.trueWidth,
+            height: gameObjectInst.defaultAsset.trueHeight,
+            goInstID: gameObjectInst.id
         });
     }
 

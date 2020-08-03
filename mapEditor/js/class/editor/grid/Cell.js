@@ -1,6 +1,6 @@
 import gridProps from "./GridProps.js";
-import camera from "../Camera/Camera.js";
-import { sceneBuffer } from "../general/CanvasBuffer.js";
+import camera from "../../camera/Camera.js";
+import { sceneBuffer } from "../../general/CanvasBuffer.js";
 
 export class Cell {
     constructor(id, x, y, absX, absY, blockType, prop) {

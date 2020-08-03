@@ -1,11 +1,6 @@
-import gridProps from "./GridProps.js";
-import camera from "../Camera/Camera.js";
-import { _G } from "../general/globals.js";
-import { collisionContainer } from "../general/canvasRef.js";
-
-const { vpWidth, vpHeight } = camera.getViewPort();
-const ts = camera.toScreen.bind(camera);
-const tw = camera.toWorld.bind(camera);
+import gridProps from "../grid/GridProps.js";
+import { _G } from "../../general/globals.js";
+import { collisionContainer } from "../../general/canvasRef.js";
 
 export default class CollisionBox {
     constructor() {
@@ -42,7 +37,6 @@ export default class CollisionBox {
     }
 
     addBox(coord, cell) {
-        console.log(coord)
         if (!this.boxes.find((box) => box.x === coord.x && box.y === coord.y)) {
             const box = { x: coord.x, y: coord.y, cell };
             this.boxes.push(box);
